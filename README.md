@@ -3,3 +3,4 @@ Vyamir is a high-performance atmospheric data visualization system engineered fo
 
 ## Technical Infrastructure
 ### Geospatial Analytics Engine
+*   **Granular Localization**:
