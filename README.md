@@ -5,4 +5,4 @@
 Vyamir is built upon a modular, highly decoupled stack designed for sub-second data propagation and cinematic rendering.
 
 ### Geospatial Intelligence Engine
-- **Atomic Coordinate Resolution**:
+- **Atomic Coordinate Resolution**: Utilizes precise latitude/longitude vectors to pull hyper-local meteorological telemetry from global satellite clusters.
