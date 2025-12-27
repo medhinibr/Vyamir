@@ -4,5 +4,5 @@
 ## System Architecture & Engineering
 Vyamir is built upon a modular, highly decoupled stack designed for sub-second data propagation and cinematic rendering.
 
-### 🌐 Geospatial Intelligence Engine
-
+### Geospatial Intelligence Engine
+- **Atomic Coordinate Resolution**:
