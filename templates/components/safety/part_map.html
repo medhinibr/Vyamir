@@ -1,0 +1,24 @@
+<div class="map-wrapper glass-panel">
+    <div class="map-header"
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 5px;">
+        <div style="font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+            <i class="bi bi-map-fill" style="color: var(--accent-color);"></i> Radar & Satellite
+        </div>
+        <div class="map-actions" style="display: flex; gap: 10px;">
+            <div id="map-exit-btn" onclick="toggleMapExpand()"
+                style="display: none; cursor: pointer; padding: 5px 15px; background: rgba(255,255,255,0.1); border-radius: 20px; font-size: 0.9rem; align-items: center; gap: 5px; border: 1px solid rgba(255,255,255,0.2);">
+                <i class="bi bi-x-lg"></i> Exit Fullscreen
+            </div>
+            <div id="map-expand-btn" onclick="toggleMapExpand()"
+                style="cursor: pointer; opacity: 0.8; transition: 0.2s;"
+                onmouseover="this.style.opacity=1; this.style.transform='scale(1.1)'"
+                onmouseout="this.style.opacity=0.8; this.style.transform='scale(1)'">
+                <i class="bi bi-fullscreen expand-icon" style="font-size: 1.2rem;"></i>
+            </div>
+        </div>
+    </div>
+    <div id="map"></div>
+    <div class="map-tools">
+        <div class="layer-chip active">Live Radar</div>
+    </div>
+</div>

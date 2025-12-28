@@ -1,0 +1,172 @@
+.details-grid-container {
+    padding: 10px 0;
+}
+
+.glass-inner {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 140px;
+    transition: transform 0.2s;
+}
+
+.glass-inner:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.detail-header {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 2rem;
+    font-weight: 500;
+}
+
+.detail-desc {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 5px;
+}
+
+/* Specific Component Styles */
+.progress-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336);
+    border-radius: 3px;
+}
+
+/* Compass */
+.detail-chart-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.compass-circle {
+    width: 50px;
+    height: 50px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.compass-arrow {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    transform-origin: center;
+}
+
+.compass-label {
+    position: absolute;
+    top: -5px;
+    font-size: 0.6rem;
+    background: var(--bg-color);
+    padding: 0 2px;
+}
+
+/* Moon Visual Component */
+.moon-phase-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 5px 0;
+}
+
+.moon-visual {
+    width: 50px;
+    height: 50px;
+    background: #0f141a;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-image: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.05) 0%, transparent 100%);
+}
+
+.moon-visual::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #d1d5db;
+    /* Light part of the moon */
+    border-radius: 50%;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.moon-visual.new::before {
+    transform: translateX(100%);
+}
+
+.moon-visual.waxing-crescent::before {
+    transform: translateX(75%) scaleX(0.5);
+}
+
+.moon-visual.first-quarter::before {
+    transform: translateX(50%);
+}
+
+.moon-visual.waxing-gibbous::before {
+    transform: translateX(25%) scaleX(1.1);
+}
+
+.moon-visual.full::before {
+    transform: translateX(0);
+}
+
+.moon-visual.waning-gibbous::before {
+    transform: translateX(-25%) scaleX(1.1);
+}
+
+.moon-visual.last-quarter::before {
+    transform: translateX(-50%);
+}
+
+.moon-visual.waning-crescent::before {
+    transform: translateX(-75%) scaleX(0.5);
+}
+
+.moon-visual::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(circle at 70% 20%, rgba(0, 0, 0, 0.1) 2px, transparent 3px),
+        radial-gradient(circle at 40% 60%, rgba(0, 0, 0, 0.15) 3px, transparent 4px),
+        radial-gradient(circle at 20% 40%, rgba(0, 0, 0, 0.1) 1.5px, transparent 2.5px);
+    opacity: 0.5;
+    pointer-events: none;
+}

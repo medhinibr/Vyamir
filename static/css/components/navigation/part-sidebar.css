@@ -1,0 +1,87 @@
+/* Sidebar Styles */
+.sidebar {
+    position: fixed;
+    left: 15px;
+    top: 80px;
+    /* Elevated to top of interface */
+    width: 75px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 15px;
+    z-index: 1000;
+    background: rgba(13, 17, 23, 0.45);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+    gap: 5px;
+}
+
+.sidebar-item i {
+    font-size: 1.5rem;
+}
+
+.sidebar-item:hover,
+.sidebar-item.active {
+    color: white;
+    transform: scale(1.1);
+}
+
+.sidebar-item.active i {
+    color: var(--accent-color);
+}
+
+/* Adjust Container to make room for sidebar - More dynamic for 100% fit */
+.container {
+    padding-left: 110px;
+    /* Increased to avoid crashing with sidebar items */
+    padding-right: 20px;
+}
+
+@media (max-width: 1024px) {
+    .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        top: auto;
+        transform: none;
+        width: 100%;
+        height: auto;
+        min-height: 70px;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 5px 0 calc(5px + env(safe-area-inset-bottom, 0px));
+        border-radius: 0;
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(13, 17, 23, 0.85);
+        backdrop-filter: blur(25px);
+        -webkit-backdrop-filter: blur(25px);
+        z-index: 2000;
+    }
+
+    .sidebar-item {
+        flex: 1;
+        padding: 10px 0;
+    }
+
+    .sidebar-item span {
+        display: none;
+    }
+
+    .sidebar-brand {
+        display: none;
+    }
+}

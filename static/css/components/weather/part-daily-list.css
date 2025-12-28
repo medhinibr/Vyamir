@@ -1,0 +1,98 @@
+/* Vertical Daily Forecast List (MSN Style) */
+.daily-list-vertical {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.daily-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.daily-row:last-child {
+    border-bottom: none;
+}
+
+.daily-day {
+    width: 60px;
+    font-weight: 600;
+}
+
+.daily-icon-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1;
+}
+
+.daily-pop {
+    color: #58a6ff;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 60px;
+}
+
+.daily-pop i {
+    margin-right: 4px;
+}
+
+.daily-temp-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100px;
+    justify-content: flex-end;
+}
+
+.temp-bar {
+    height: 4px;
+    width: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+.temp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #58a6ff, #f2cc60);
+    opacity: 0.7;
+}
+
+@media (max-width: 600px) {
+    .daily-row {
+        gap: 10px;
+        padding: 15px 0;
+    }
+
+    .daily-day {
+        width: 50px;
+        font-size: 0.9rem;
+    }
+
+    .daily-icon-group span {
+        display: none;
+        /* Hide description text on very small screens */
+    }
+
+    .daily-temp-group {
+        width: 80px;
+        gap: 8px;
+    }
+
+    .temp-bar {
+        display: none;
+        /* Hide the bar on small screens to save space */
+    }
+}
+
+body.light-mode .daily-row {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}

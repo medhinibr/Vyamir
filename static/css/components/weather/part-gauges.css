@@ -1,0 +1,86 @@
+/* Details Grid with Gauges */
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.gauge-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.gauge-card:hover {
+    transform: translateY(-2px);
+    background: var(--card-hover);
+}
+
+.gauge-title {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+    margin-bottom: 10px;
+}
+
+/* Semi Circle Gauge CSS */
+.gauge-visual {
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    margin-bottom: 10px;
+}
+
+.gauge-visual.bar-chart-look {
+    align-items: flex-end;
+    justify-content: space-around;
+    height: 60px;
+}
+
+.gauge-bar {
+    width: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    height: 100%;
+    position: relative;
+}
+
+.gauge-bar-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--gold);
+    border-radius: 4px;
+    transition: height 1s;
+}
+
+.gauge-arc {
+    width: 120px;
+    height: 60px;
+    background: #30363d;
+    border-top-left-radius: 100px;
+    border-top-right-radius: 100px;
+    position: relative;
+    overflow: hidden;
+}
+
+.gauge-fill {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--accent-gradient);
+    transform-origin: center top;
+    transition: transform 1s ease-out;
+    transform: rotate(0deg);
+}

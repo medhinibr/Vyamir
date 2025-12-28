@@ -1,0 +1,45 @@
+<!-- Hero Section inside Glass Panel -->
+<div class="hero-card glass-panel"
+    style="flex-direction: column; align-items: flex-start; gap: 20px; padding-bottom: 30px;">
+
+    <!-- Content: Temp & Condition -->
+    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-top: 10px;">
+        <div>
+            <div class="location-title" style="font-size: 2.5rem; font-weight: 500;">--</div>
+            <div class="condition-text" style="font-size: 1.4rem; font-weight: 300; opacity: 0.9;">Loading...</div>
+        </div>
+        <div class="temp-large">--°</div>
+    </div>
+
+    <!-- Detailed Grid  -->
+    <div
+        style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; width: 100%; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+        <div style="text-align: center;">
+            <i class="bi bi-wind" style="font-size: 1.5rem; color: var(--accent-color);"></i>
+            <div style="font-size: 0.8rem; color: #ccc; margin-top: 5px;">Wind</div>
+            <div id="hero-wind" style="font-weight: 600;">--</div>
+        </div>
+        <div style="text-align: center;">
+            <i class="bi bi-droplet" style="font-size: 1.5rem; color: var(--accent-color);"></i>
+            <div style="font-size: 0.8rem; color: #ccc; margin-top: 5px;">Humidity</div>
+            <div id="hero-humidity" style="font-weight: 600;">--</div>
+        </div>
+        <div style="text-align: center;">
+            <i class="bi bi-eye" style="font-size: 1.5rem; color: var(--accent-color);"></i>
+            <div style="font-size: 0.8rem; color: #ccc; margin-top: 5px;">Visibility</div>
+            <div id="hero-visibility" style="font-weight: 600;">--</div>
+        </div>
+        <div style="text-align: center;">
+            <i class="bi bi-speedometer2" style="font-size: 1.5rem; color: var(--accent-color);"></i>
+            <div style="font-size: 0.8rem; color: #ccc; margin-top: 5px;">Pressure</div>
+            <div id="hero-pressure" style="font-weight: 600;">--</div>
+        </div>
+    </div>
+
+    <!-- History / Insight -->
+    <div class="insight-pill"
+        style="background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; margin-top: 10px;">
+        <i class="bi bi-clock-history" style="color: var(--gold); margin-right: 5px;"></i>
+        <span id="history-text">Fetching historical data...</span>
+    </div>
+</div>

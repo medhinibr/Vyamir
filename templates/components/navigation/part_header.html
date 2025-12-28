@@ -1,0 +1,26 @@
+<div class="header-bar">
+    <div class="logo-area" style="display: flex; align-items: center; gap: 12px; cursor: pointer;"
+        onclick="scrollToHero()">
+        <img src="/static/img/logo.png" alt="Vyamir" style="width: 42px; height: 42px; object-fit: contain;">
+        <div style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; color: #fff;">
+            Vyamir</div>
+    </div>
+
+    <div class="search-section" style="flex: 1; display: flex; justify-content: center;">
+        <div class="header-search-container">
+            <i class="bi bi-geo-alt search-icon"></i>
+            <input type="text" id="header-search-input" name="dashboard-search" class="search-input"
+                placeholder="Search city or region..." value="{{ city if city else '' }}">
+            <button class="search-btn">Search</button>
+        </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <div id="skypoints-badge" class="skypoints-badge" style="display: none;" onclick="toggleVault()">
+            <i class="bi bi-coin" style="color: #ffd700;"></i>
+            <span id="header-points-value">0</span>
+        </div>
+
+
+    </div>
+</div>
