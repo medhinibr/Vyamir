@@ -2,6 +2,10 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 from backend import openmeteo
 import os
 import math
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -91,7 +95,7 @@ def get_weather():
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 587
 MAIL_USERNAME = 'vyamir.app@gmail.com' 
-MAIL_PASSWORD = 'vxkw fpmp xdda tcot' 
+MAIL_PASSWORD = ' api_key' 
 
 import smtplib
 from email.mime.text import MIMEText
