@@ -852,7 +852,7 @@ function createHazardItem(icon, color, title, desc) {
 }
 
 // Pexels API Integration for Dynamic Weather Videos
-const PEXELS_API_KEY = 'ZDG0snkPkdebCtaTQ1hoMDcun5hilNgD0Ypu0NNsK4DH6cL4u37IVlG2';
+const PEXELS_API_KEY = ' api_key';
 
 async function fetchPexelsWeatherVideos(condition) {
     let query = 'starry night'; // Default fallback
