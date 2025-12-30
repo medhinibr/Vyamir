@@ -95,7 +95,16 @@ window.performWelcomeSearch = function () {
 
     if (query) {
         if (btn) btn.innerHTML = '<div class="spinner-border spinner-border-sm text-white"></div>';
-        performSearch(query);
+
+        // CONTEXTUAL ENHANCEMENT: If the user searches for ambiguous local towns like 'Koppa' or 'Sringeri',
+        // we append 'Karnataka India' to bias the geocoding towards the intended atmospheric region.
+        let optimizedQuery = query;
+        const localTowns = ['koppa', 'sringeri', 'ujire', 'belthangady', 'mudigere'];
+        if (localTowns.some(town => query.toLowerCase().includes(town)) && !query.toLowerCase().includes('india')) {
+            optimizedQuery += ", Karnataka India";
+        }
+
+        performSearch(optimizedQuery);
     }
 };
 
@@ -310,8 +319,15 @@ function initSearch() {
     if (btn) {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            const query = input.value;
-            if (query) performSearch(query);
+            const query = input.value.trim();
+            if (query) {
+                let optimizedQuery = query;
+                const localTowns = ['koppa', 'sringeri', 'ujire', 'belthangady', 'mudigere'];
+                if (localTowns.some(town => query.toLowerCase().includes(town)) && !query.toLowerCase().includes('india')) {
+                    optimizedQuery += ", Karnataka India";
+                }
+                performSearch(optimizedQuery);
+            }
         });
     }
 
@@ -320,8 +336,15 @@ function initSearch() {
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                const query = input.value;
-                if (query) performSearch(query);
+                const query = input.value.trim();
+                if (query) {
+                    let optimizedQuery = query;
+                    const localTowns = ['koppa', 'sringeri', 'ujire', 'belthangady', 'mudigere'];
+                    if (localTowns.some(town => query.toLowerCase().includes(town)) && !query.toLowerCase().includes('india')) {
+                        optimizedQuery += ", Karnataka India";
+                    }
+                    performSearch(optimizedQuery);
+                }
             }
         });
     }
@@ -432,6 +455,7 @@ async function handleSearchSelection(city, lat, lon, isInitial = false) {
         // 1. WEATHER TASK: Priority #1 (Direct Client-Side Fetch to bypass IP limits)
         const fetchWeatherTask = (async () => {
             try {
+                // Expanding daily vectors to include Sunrise, Sunset, and UV Index Max for a complete dashboard profile
                 const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,visibility,wind_speed_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto`;
                 const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,european_aqi,uv_index,alder_pollen,birch_pollen,grass_pollen,ragweed_pollen,olive_pollen&timezone=auto`;
 
