@@ -67,10 +67,11 @@ def get_forecast_data(lat, lon):
     try:
         url = (
             f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
-            "&hourly=temperature_2m,relativehumidity_2m,apparent_temperature,precipitation_probability,precipitation,"
-            "weathercode,pressure_msl,surface_pressure,visibility,windspeed_10m,uv_index"
-            "&daily=weathercode,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max"
-            "&current_weather=true&timezone=auto"
+            "&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,"
+            "weather_code,pressure_msl,surface_pressure,visibility,wind_speed_10m,uv_index"
+            "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max"
+            "&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,surface_pressure,wind_speed_10m"
+            "&timezone=auto"
         )
         response = requests.get(url, timeout=5)
         data = response.json()

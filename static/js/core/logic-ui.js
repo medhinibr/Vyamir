@@ -535,8 +535,8 @@ async function handleSearchSelection(city, lat, lon, isInitial = false) {
         } catch (e) { console.error("Background update failed", e); }
 
     } catch (e) {
-        console.error(e);
-        if (!isInitial) alert("Weather Load Error: " + e.message);
+        console.error("Vyamir Engine: Atmospheric Sync Failed.", e);
+        if (!isInitial) showToast("Meteorological Link Error: " + e.message, "error");
         else showWelcomeScreen(); // FAILSAFE: Back to landing if restore fails
     } finally {
         document.body.style.cursor = 'default';

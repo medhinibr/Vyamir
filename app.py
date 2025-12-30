@@ -69,19 +69,60 @@ def get_weather():
             if not forecast:
                 return jsonify({'error': 'Failed to fetch forecast'}), 500
             
+            # Log the full response for diagnostics in Render
+            if 'error' in forecast:
+                print(f"Open-Meteo API Error: {forecast}")
+                return jsonify({'error': f"Atmospheric Link Error: {forecast.get('reason', 'Unknown API Error')}"}), 502
+
             # Secure way to get current weather data (handling both legacy and new Open-Meteo formats)
-            current_weather = forecast.get('current', forecast.get('current_weather', {}))
+            current_raw = forecast.get('current', forecast.get('current_weather', {}))
             
-            if not current_weather:
-                return jsonify({'error': 'Meteorological stream interrupted: Current data unavailable'}), 500
+            if not current_raw:
+                print(f"Critical Error: 'current' block missing in response. Response: {forecast}")
+                return jsonify({'error': 'Meteorological stream interrupted: Current data unavailable in API response.'}), 500
             
-            # Map temperature correctly (new format uses 'temperature_2m', legacy uses 'temperature')
-            current_temp = current_weather.get('temperature_2m', current_weather.get('temperature'))
+            # Normalize Current Data for the frontend (Expected keys: weathercode, temperature, windspeed)
+            current_weather = {
+                'time': current_raw.get('time'),
+                'temperature': current_raw.get('temperature_2m', current_raw.get('temperature')),
+                'weathercode': current_raw.get('weather_code', current_raw.get('weathercode')),
+                'windspeed': current_raw.get('wind_speed_10m', current_raw.get('windspeed')),
+                'winddirection': current_raw.get('wind_direction_10m', current_raw.get('winddirection')),
+                'is_day': current_raw.get('is_day'),
+                'pressure': current_raw.get('surface_pressure', current_raw.get('pressure'))
+            }
+            
+            # Normalize Hourly Keys for frontend consistency
+            hourly_raw = forecast.get('hourly', {})
+            hourly = {
+                'time': hourly_raw.get('time'),
+                'temperature_2m': hourly_raw.get('temperature_2m'),
+                'relativehumidity_2m': hourly_raw.get('relative_humidity_2m', hourly_raw.get('relativehumidity_2m')),
+                'apparent_temperature': hourly_raw.get('apparent_temperature'),
+                'precipitation_probability': hourly_raw.get('precipitation_probability'),
+                'precipitation': hourly_raw.get('precipitation'),
+                'weathercode': hourly_raw.get('weather_code', hourly_raw.get('weathercode')),
+                'visibility': hourly_raw.get('visibility'),
+                'surface_pressure': hourly_raw.get('surface_pressure'),
+                'windspeed_10m': hourly_raw.get('wind_speed_10m', hourly_raw.get('windspeed_10m')),
+                'uv_index': hourly_raw.get('uv_index')
+            }
+
+            # Normalize Daily Keys
+            daily_raw = forecast.get('daily', {})
+            daily = {
+                'time': daily_raw.get('time'),
+                'weathercode': daily_raw.get('weather_code', daily_raw.get('weathercode')),
+                'temperature_2m_max': daily_raw.get('temperature_2m_max'),
+                'temperature_2m_min': daily_raw.get('temperature_2m_min'),
+                'sunrise': daily_raw.get('sunrise'),
+                'sunset': daily_raw.get('sunset')
+            }
             
             # Historical trend needs current temp
-            future_history = executor.submit(openmeteo.get_historical_trend, lat, lon, current_temp)
+            future_history = executor.submit(openmeteo.get_historical_trend, lat, lon, current_weather['temperature'])
             
-            # Collect results
+            # Collect other results
             history_text = future_history.result()
             aqi_data = future_aqi.result()
             news = future_news.result()
@@ -89,8 +130,8 @@ def get_weather():
         return jsonify({
             'city': city_name,
             'current': current_weather,
-            'hourly': forecast['hourly'],
-            'daily': forecast['daily'],
+            'hourly': hourly,
+            'daily': daily,
             'history': history_text,
             'air_quality': aqi_data['hourly'] if aqi_data else None,
             'news': news
