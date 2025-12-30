@@ -1,11 +1,9 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from backend import openmeteo
+from dotenv import load_dotenv
 import os
 import math
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+load_dotenv() # Load environmental variables immediately
 
 app = Flask(__name__)
 
@@ -17,23 +15,28 @@ app = Flask(__name__)
 @app.route('/cookie-policy')
 @app.route('/privacy-settings')
 def index():
-    return render_template('index.html')
-
-@app.route('/ads.txt')
-def serve_ads():
-    return send_from_directory('static', 'ads.txt')
+    # Fetch environment vectors for frontend injection
+    config = {
+        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
+        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
+    }
+    return render_template('index.html', config=config)
 
 @app.route('/robots.txt')
-def serve_robots():
-    return send_from_directory('static', 'robots.txt')
+def robots():
+    return send_from_directory('public', 'robots.txt')
 
 @app.route('/sitemap.xml')
-def serve_sitemap():
-    return send_from_directory('static', 'sitemap.xml')
+def sitemap():
+    return send_from_directory('public', 'sitemap.xml')
+
+@app.route('/ads.txt')
+def ads_txt():
+    return send_from_directory('public', 'ads.txt')
 
 @app.route('/logo.png')
 def logo_png():
-    return send_from_directory('static/img', 'logo.png')
+    return send_from_directory('public', 'logo.png')
 
 @app.route('/api/search')
 def search():
@@ -94,8 +97,11 @@ def get_weather():
 # Email Configuration (Requires App Password for Security)
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 587
-MAIL_USERNAME = 'vyamir.app@gmail.com' 
-MAIL_PASSWORD = ' api_key' 
+MAIL_USERNAME = 'vyamir.app@gmail.com'
+MAIL_PASSWORD = os.getenv('GMAIL_APP_PASSWORD')
+
+if not MAIL_PASSWORD:
+    print('Warning: GMAIL_APP_PASSWORD not found in environment.')
 
 import smtplib
 from email.mime.text import MIMEText
@@ -109,9 +115,10 @@ def send_email():
     user_email = data.get('email')
     message_body = data.get('message')
 
+    username = MAIL_USERNAME.strip()
     msg = MIMEMultipart()
-    msg['From'] = f'"Vyamir Support: {user_name}" <{MAIL_USERNAME}>'
-    msg['To'] = MAIL_USERNAME
+    msg['From'] = f'"Vyamir Support: {user_name}" <{username}>'
+    msg['To'] = username
     msg['Reply-To'] = user_email
     msg['Subject'] = f"[Vyamir Dispatch] New Ticket from {user_name}"
     msg['Message-ID'] = make_msgid()
@@ -156,8 +163,9 @@ def send_email():
             print("Email skipped: Password not configured in app.py")
             return jsonify({"status": "skipped", "message": "Email config missing"}), 200
 
-        print(f"Attempting SMTP connection to {SMTP_SERVER}...")
+        print(f"Attempting SMTP connection to {SMTP_SERVER}:{SMTP_PORT}...")
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.set_debuglevel(1) # Enable verbose SMTP logging in terminal
         server.starttls()
         
         print(f"Logging in as {username}...")
@@ -172,6 +180,7 @@ def send_email():
             server.quit()
             return jsonify({"status": "success", "message": "Email sent"})
         except smtplib.SMTPAuthenticationError as auth_err:
+            print(f"SMTP Authentication Error: {auth_err}")
             print("\n" + "="*60)
             print("GOOGLE SECURITY ERROR: Standard passwords are BLOCKED.")
             print("You MUST generate an 'App Password' for Vyamir.")
@@ -182,8 +191,11 @@ def send_email():
             print("="*60 + "\n")
             return jsonify({
                 "status": "error", 
-                "message": "Google Blocked Login. Check Terminal for Help Link."
+                "message": f"Google Blocked Login: {str(auth_err)}"
             }), 500
+        except Exception as smtp_err:
+            print(f"SMTP Send Error: {smtp_err}")
+            return jsonify({"status": "error", "message": f"SMTP Dispatch Failed: {str(smtp_err)}"}), 500
 
 
     except Exception as e:
@@ -194,3 +206,4 @@ def send_email():
 
 if __name__ == "__main__":
     app.run(port=int(os.environ.get("PORT", 8080)), host='0.0.0.0', debug=True)
+

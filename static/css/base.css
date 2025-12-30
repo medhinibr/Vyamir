@@ -1435,38 +1435,50 @@ body.is-landing footer {
 
 .legal-header {
     width: 100%;
-    padding: 15px 5%;
+    padding: 30px 5% 15px 5%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(13, 17, 23, 0.95);
-    border-bottom: 1px solid rgba(88, 166, 255, 0.15);
+    background: rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(88, 166, 255, 0.1);
     position: sticky;
     top: 0;
     z-index: 10;
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(15px);
 }
 
 .legal-back-btn {
-    color: var(--accent-color);
+    color: white;
     text-decoration: none;
-    font-weight: 600;
-    display: flex;
+    font-weight: 500;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    transition: 0.3s;
-    font-size: 1rem;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.9rem;
     cursor: pointer;
-    border: 1px solid rgba(88, 166, 255, 0.2);
-    padding: 8px 16px;
-    border-radius: 20px;
-    background: rgba(88, 166, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 22px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    letter-spacing: 0.5px;
+}
+
+.legal-back-btn i {
+    font-size: 1.1rem;
+    line-height: 0;
+    /* Perfect vertical alignment for the arrow */
+    margin-top: -1px;
 }
 
 .legal-back-btn:hover {
-    background: rgba(88, 166, 255, 0.15);
-    transform: translateX(-3px);
-    color: white;
+    border-color: #58a6ff;
+    color: #58a6ff;
+    background: rgba(88, 166, 255, 0.08);
+    box-shadow: 0 0 20px rgba(88, 166, 255, 0.15);
 }
 
 .legal-content-wrapper {

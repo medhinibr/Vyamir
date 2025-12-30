@@ -852,7 +852,8 @@ function createHazardItem(icon, color, title, desc) {
 }
 
 // Pexels API Integration for Dynamic Weather Videos
-const PEXELS_API_KEY = ' api_key';
+const PEXELS_API_KEY = window.VYAMIR_CONFIG ? window.VYAMIR_CONFIG.PEXELS_API_KEY : '';
+
 
 async function fetchPexelsWeatherVideos(condition) {
     let query = 'starry night'; // Default fallback
@@ -1136,6 +1137,18 @@ function renderRoute(path) {
         // HOME VIEW
         if (legalContainer) legalContainer.style.display = 'none';
 
+        // Persist Privacy Popup if returning without consent
+        if (!localStorage.getItem('vyamir_cookie_consent')) {
+            const popup = document.getElementById('cookie-popup');
+            if (popup) {
+                popup.style.display = 'block';
+                setTimeout(() => {
+                    popup.style.opacity = '1';
+                    popup.classList.add('active');
+                }, 100);
+            }
+        }
+
         // Show Footer for Dashboard only
         if (footer) footer.style.display = 'block';
 
@@ -1328,7 +1341,6 @@ window.sendContactForm = async function () {
 
 
 
-
 // Updated Content Dictionary with Contact Form and Detailed Text
 const content = {
     privacy: {
@@ -1388,7 +1400,7 @@ const content = {
         `
     },
     about: {
-        title: "Atmospheric Intelligence, Redefined.",
+        title: "ABOUT",
         text: `
             <p style="font-size: 1.2rem; line-height: 1.6; color: white; margin-bottom: 25px;">Vyamir is a next-generation weather visualization platform designed to bridge the gap between complex meteorological data and cinematic experience. Founded on the principle of 'High-Fidelity Atmospheric Intelligence,' we transform raw satellite vectors into a living, interactive digital sky.</p>
 
@@ -1403,8 +1415,13 @@ const content = {
                 <li style="margin-bottom: 10px;"><strong style="color: white;">Decentralized Identity:</strong> A privacy-first SkyID system secured by Firebase.</li>
             </ul>
 
-            <h2 style="color: var(--accent-color); margin-top: 30px;">Operational Status</h2>
-            <p style="background: rgba(88, 166, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(88, 166, 255, 0.2); display: inline-block;">🟢 V1.0.0-Gold | Serving 200,000+ Global Regions.</p>
+            <h2 style="color: var(--accent-color); margin-top: 30px;">System Integrity</h2>
+            <div class="operational-band" style="margin-top: 20px; text-align: left; justify-content: flex-start;">
+                <div class="operational-status" style="background: rgba(88, 166, 255, 0.05); border: 1px solid rgba(88, 166, 255, 0.15);">
+                    <span class="status-pulse"></span>
+                    VYAMIR NEURAL-SYNC | 100% OPERATIONAL
+                </div>
+            </div>
         `
     },
     contact: {

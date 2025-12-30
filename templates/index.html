@@ -20,6 +20,13 @@
     <meta property="og:title" content="Vyamir | Your Skies, Redefined">
     <meta property="og:site_name" content="Vyamir">
 
+    <script id="vyamir-config" type="application/json">
+        {{ config | tojson | safe }}
+    </script>
+    <script>
+        window.VYAMIR_CONFIG = JSON.parse(document.getElementById('vyamir-config').textContent);
+    </script>
+
     <!-- Firebase Integration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -28,7 +35,7 @@
         import { getFirestore } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "api_key",
+            apiKey: window.VYAMIR_CONFIG.FIREBASE_API_KEY,
             authDomain: "vyamir-0156.firebaseapp.com",
             projectId: "vyamir-0156",
             storageBucket: "vyamir-0156.firebasestorage.app",
@@ -143,9 +150,9 @@
                                 <div id="section-current">{% include 'components/weather/part_hero.html' %}</div>
                                 <div id="section-hourly">{% include 'components/weather/part_chart.html' %}</div>
                                 <div id="section-7day">{% include 'components/weather/part_daily_forecast.html' %}</div>
+                                <div id="section-maps">{% include 'components/safety/part_map.html' %}</div>
                                 <div id="section-hazards">{% include 'components/safety/part_hazards.html' %}</div>
                                 <div id="section-video">{% include 'components/media/part_videos.html' %}</div>
-                                <div id="section-maps">{% include 'components/safety/part_map.html' %}</div>
                             </div>
 
                             <!-- Right Column -->
@@ -467,7 +474,7 @@
 
                     <!-- Legal Pages Container -->
                     <div id="legal-pages-container" class="legal-container" style="display: none;">
-                        <div class="legal-header" style="flex-wrap: wrap; gap: 15px; justify-content: flex-start;">
+                        <div class="legal-header">
                             <a href="/" class="legal-back-btn" onclick="handleRoute(event, '/')">
                                 <i class="bi bi-arrow-left"></i> Back to Weather
                             </a>
