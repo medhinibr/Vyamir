@@ -63,28 +63,49 @@
 /* RESPONSIVE HEADER */
 @media (max-width: 768px) {
     .header-bar {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 20px;
-        padding: 10px 0;
+        flex-direction: row;
+        /* Keep row for Vyamir + Points */
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 5px 0;
     }
 
     .logo-area {
-        justify-content: center;
+        gap: 8px !important;
+    }
+
+    .logo-area img {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .logo-area div {
+        font-size: 1.15rem !important;
+    }
+
+    .search-section {
+        order: 3;
+        /* Search on its own line */
+        width: 100%;
+        margin-top: 5px;
     }
 
     .header-search-container {
         width: 100%;
         max-width: none;
+        padding: 6px 14px;
+        height: 48px;
     }
 
     .search-input {
-        font-size: 16px;
-        /* Prevent iPhone zoom on focus */
+        font-size: 15px;
     }
 
-    .header-bar>div:last-child {
-        justify-content: center;
+    .skypoints-badge {
+        padding: 4px 10px !important;
+        font-size: 0.8rem !important;
     }
 }
 

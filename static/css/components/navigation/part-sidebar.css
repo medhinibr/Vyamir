@@ -49,39 +49,3 @@
     /* Increased to avoid crashing with sidebar items */
     padding-right: 20px;
 }
-
-@media (max-width: 1024px) {
-    .sidebar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        top: auto;
-        transform: none;
-        width: 100%;
-        height: auto;
-        min-height: 70px;
-        flex-direction: row;
-        justify-content: space-around;
-        padding: 5px 0 calc(5px + env(safe-area-inset-bottom, 0px));
-        border-radius: 0;
-        border: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        background: rgba(13, 17, 23, 0.85);
-        backdrop-filter: blur(25px);
-        -webkit-backdrop-filter: blur(25px);
-        z-index: 2000;
-    }
-
-    .sidebar-item {
-        flex: 1;
-        padding: 10px 0;
-    }
-
-    .sidebar-item span {
-        display: none;
-    }
-
-    .sidebar-brand {
-        display: none;
-    }
-}

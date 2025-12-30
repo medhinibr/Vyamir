@@ -288,23 +288,50 @@ window.toggleMapExpand = function () {
 
 
 function initSidebar() {
-    const items = document.querySelectorAll('.sidebar-item');
-    // Map items to section IDs based on index or text
-    const sections = ['section-current', 'section-hourly', 'section-10day', 'section-maps', 'section-details', 'section-hazards', 'section-video', 'section-news'];
+    const items = document.querySelectorAll('.sidebar-item, .mobile-nav-item');
 
-    items.forEach((item, index) => {
+    items.forEach(item => {
         item.addEventListener('click', () => {
-            // Remove active class from all
-            items.forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-
-            // Scroll to section
-            const sectionId = sections[index];
+            const sectionId = item.getAttribute('data-section');
             if (sectionId) {
+                // Sync active classes across all navigation channels (Sidebar & Mobile)
+                document.querySelectorAll('.sidebar-item, .mobile-nav-item').forEach(i => {
+                    if (i.getAttribute('data-section') === sectionId) i.classList.add('active');
+                    else i.classList.remove('active');
+                });
+
                 const el = document.getElementById(sectionId);
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (el) {
+                    const offset = window.innerWidth <= 768 ? 10 : 0; // Minor offset for mobile
+                    const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+                    window.scrollTo({ top, behavior: 'smooth' });
+                }
             }
         });
+    });
+
+    // OBSERVER ENGINE: Update active state on scroll
+    window.addEventListener('scroll', () => {
+        const sections = ['section-current', 'section-hourly', 'section-7day', 'section-maps', 'section-details', 'section-hazards', 'section-video', 'section-news'];
+        let currentSection = "";
+
+        sections.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                const rect = el.getBoundingClientRect();
+                // Section is active if it's near the top of the viewport
+                if (rect.top <= 200 && rect.bottom >= 200) {
+                    currentSection = id;
+                }
+            }
+        });
+
+        if (currentSection) {
+            document.querySelectorAll('.sidebar-item, .mobile-nav-item').forEach(i => {
+                if (i.getAttribute('data-section') === currentSection) i.classList.add('active');
+                else i.classList.remove('active');
+            });
+        }
     });
 }
 
