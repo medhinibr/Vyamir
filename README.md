@@ -1,41 +1,55 @@
-# Vyamir | Your Skies, Redefined.
+# Vyamir | Next-Generation Atmospheric Intelligence 🪐🥣✨
 
-Vyamir is a next-generation high-fidelity atmospheric intelligence platform. Designed to bridge the gap between complex meteorological data and cinematic experience, it transforms raw satellite vectors into a living, interactive digital sky.
+Vyamir is a high-fidelity, professional-grade weather intelligence platform built for high situational awareness. It bridges the gap between raw meteorological telemetry and cinematic user experience, transforming complex environmental vectors into a seamless, interactive dashboard.
 
-## 🌌 Core Features
-
-- **Zenith UI & HUD**: A professional, glassmorphic dashboard optimized for situational awareness.
-- **Cinematic Visualizations**: Dynamic, condition-mapped HD video loops powered by the Pexels engine.
-- **SkyID Vault**: A decentralized identity system utilizing Firebase for secure preference and SkyPoints synchronization.
-- **Precision Telemetry**: Hyper-local data streams with 0.2°C accuracy via the Open-Meteo cluster.
-- **Interactive Constellation Canvas**: A reactive landing experience that visualizes the connectivity of the Vyamir network.
-
-## 🛠️ Technical Stack
-
-### Backend Infrastructure
-- **Python / Flask**: High-performance WSGI core for API orchestration.
-- **Gunicorn**: Production-grade HTTP server for cloud industrialization.
-- **Python-Dotenv**: Secure environmental variable synchronization.
-
-### Frontend Architecture
-- **ESNext JavaScript**: Vanilla logic for atomic UI updates and SPA routing.
-- **CSS3 (Custom)**: A proprietary design system featuring glassmorphism and motion dynamics.
-- **Semantic HTML5**: Optimized for accessibility and SEO.
-
-### Atmospheric Data & APIs
-- **Open-Meteo**: Real-time meteorological and air quality telemetry.
-- **RainViewer**: Dynamic Doppler radar and satellite map layers.
-- **Nominatim (OpenStreetMap)**: Global geographic coordinate resolution.
-- **Pexels API**: Atmospheric HD video assets.
-
-### Identity & Security
-- **Firebase Auth**: Privacy-first anonymous authentication.
-- **Cloud Firestore**: ACID-compliant database for SkyPoints and user preferences.
+**Deployment Node:** [vyamir.onrender.com](https://vyamir.onrender.com/)
 
 ---
 
-## 🛰️ Technical Setup
-For instructions on local initialization, environment configuration, and contribution protocols, please refer to the **[Development Guide](./DEV_GUIDE.md)**.
+## 🌌 High-Fidelity Features
+
+- **Zenith Glass HUD**: A premium, state-of-the-art interface utilizing advanced glassmorphism and motion dynamics for maximum clarity.
+- **Hybrid Telemetry Engine**: Optimized client-side ingestion of Open-Meteo data to bypass server-side rate limits and ensure sub-second orbital synchronization.
+- **Cinematic Atmosphere**: Dynamic, condition-aware HD video loops powered by the Pexels engine, providing immediate visual context.
+- **SkyID Ecosystem**: Secure, privacy-first identity management utilizing Firebase and Cloud Firestore for persistent user state.
+- **Meteorological Dispatch**: Integrated SMTP engine for direct weather reporting and secure communication.
+
+---
+
+## 🛠️ Technical Architecture
+
+### Core Stack
+- **Backend**: Python / Flask (WSGI Architecture)
+- **Frontend**: ESNext JavaScript (Vanilla Architecture) & CSS3 Design System
+- **Database**: Firebase Auth & Cloud Firestore (NoSQL)
+- **Deployment**: Render Cloud Infrastructure
+
+### Data Vectors & APIs
+- **Open-Meteo**: Primary meteorological and air quality telemetry.
+- **RainViewer API**: Real-time Doppler radar and satellite mapping.
+- **Nominatim (OSM)**: Global geographic coordinate and reverse resolution.
+- **Pexels API**: Atmospheric media asset ingestion.
+
+
+
+## 🛰️ Quick Setup & Initialization
+
+Vyamir requires a secured environment for full deployment.
+
+1. **Environment Variables**: Populate a `.env` file with the following vectors:
+   ```env
+   FIREBASE_API_KEY=your_key
+   PEXELS_API_KEY=your_key
+   GMAIL_APP_PASSWORD=your_password
+   ```
+
+2. **Backend Sync**:
+   ```bash
+   pip install -r requirements.txt
+   python app.py
+   ```
+
+For detailed contribution protocols and local development calibration, please refer to the **[Development Guide](./DEV_GUIDE.md)**.
 
 ---
 *Vyamir Systems © 2025. Atmospheric Intelligence, Redefined.*
