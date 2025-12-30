@@ -1,4 +1,4 @@
-# Vyamir | Next-Generation Atmospheric Intelligence 🪐🥣✨
+# Vyamir | Next-Generation Atmospheric Intelligence
 
 Vyamir is a high-fidelity, professional-grade weather intelligence platform built for high situational awareness. It bridges the gap between raw meteorological telemetry and cinematic user experience, transforming complex environmental vectors into a seamless, interactive dashboard.
 
@@ -6,7 +6,7 @@ Vyamir is a high-fidelity, professional-grade weather intelligence platform buil
 
 ---
 
-## 🌌 High-Fidelity Features
+## High-Fidelity Features
 
 - **Zenith Glass HUD**: A premium, state-of-the-art interface utilizing advanced glassmorphism and motion dynamics for maximum clarity.
 - **Hybrid Telemetry Engine**: Optimized client-side ingestion of Open-Meteo data to bypass server-side rate limits and ensure sub-second orbital synchronization.
@@ -16,7 +16,7 @@ Vyamir is a high-fidelity, professional-grade weather intelligence platform buil
 
 ---
 
-## 🛠️ Technical Architecture
+##  Technical Architecture
 
 ### Core Stack
 - **Backend**: Python / Flask (WSGI Architecture)
@@ -32,7 +32,7 @@ Vyamir is a high-fidelity, professional-grade weather intelligence platform buil
 
 
 
-## 🛰️ Quick Setup & Initialization
+##  Quick Setup & Initialization
 
 Vyamir requires a secured environment for full deployment.
 
