@@ -66,6 +66,8 @@ def get_weather():
 
             # Wait for forecast as it's needed for historical trend
             forecast = future_forecast.result()
+            print(f"Open-Meteo Response: {forecast}", flush=True)
+
             if not forecast:
                 return jsonify({'error': 'Failed to fetch forecast'}), 500
             
@@ -81,12 +83,14 @@ def get_weather():
                 print(f"Critical Error: 'current' block missing in response. Response: {forecast}")
                 return jsonify({'error': 'Meteorological stream interrupted: Current data unavailable in API response.'}), 500
             
-            # Normalize Current Data for the frontend (Expected keys: weathercode, temperature, windspeed)
+            # Normalize Current Data for the frontend
             current_weather = {
                 'time': current_raw.get('time'),
                 'temperature': current_raw.get('temperature_2m', current_raw.get('temperature')),
+                'humidity': current_raw.get('relative_humidity_2m', current_raw.get('relative_humidity')),
                 'weathercode': current_raw.get('weather_code', current_raw.get('weathercode')),
                 'windspeed': current_raw.get('wind_speed_10m', current_raw.get('windspeed')),
+                'windSpeed': current_raw.get('wind_speed_10m', current_raw.get('windspeed')),
                 'winddirection': current_raw.get('wind_direction_10m', current_raw.get('winddirection')),
                 'is_day': current_raw.get('is_day'),
                 'pressure': current_raw.get('surface_pressure', current_raw.get('pressure'))
