@@ -434,6 +434,10 @@ async function handleSearchSelection(city, lat, lon, isInitial = false) {
             try {
                 const res = await fetch(url);
                 const data = await res.json();
+
+                // Vyamir Diagnostic Sync: Log data for industrial transparency
+                console.log("Vyamir Engine: Meteorological data stream synchronized.", data);
+
                 if (data.error) throw new Error(data.error);
 
                 window.weatherData = data;
@@ -444,10 +448,16 @@ async function handleSearchSelection(city, lat, lon, isInitial = false) {
                 try { updateNews(data); } catch (e) { console.error("News update failed", e); }
                 try { updateHazards(data); } catch (e) { console.error("Hazards update failed", e); }
                 try { if (window.initChart) window.initChart(data); } catch (e) { console.error("Chart init failed", e); }
-                try { updateBackground(data.current.weathercode, data.current.is_day); } catch (e) { console.error("Background update failed", e); }
+
+                // Handle current mapping safely for background
+                const current = data.current || data.current_weather || {};
+                const weatherCode = current.weathercode;
+                const isDay = current.is_day;
+                try { updateBackground(weatherCode, isDay); } catch (e) { console.error("Background update failed", e); }
 
                 return data;
             } catch (err) {
+                console.error("Vyamir Engine: Weather Load Error:", err);
                 throw err;
             }
         })();
@@ -542,23 +552,30 @@ async function handleSearchSelection(city, lat, lon, isInitial = false) {
 
 function updateHero(data) {
     const city = data.city || "Unknown Location";
+    const current = data.current || data.current_weather || {};
+
+    // Schema Mapping: Support both current_weather and current API formats
+    const temperature = current.temperature_2m !== undefined ? current.temperature_2m : current.temperature;
+    const weatherCode = current.weathercode;
+    const wind = current.wind_speed_10m !== undefined ? current.wind_speed_10m : current.windspeed;
+    const pressure = current.pressure_msl || current.surface_pressure || current.pressure;
+
     document.querySelector('.location-title').textContent = city;
-    document.querySelector('.temp-large').textContent = Math.round(data.current.temperature) + '°';
-    document.querySelector('.condition-text').textContent = getWeatherDescription(data.current.weathercode);
+    document.querySelector('.temp-large').textContent = Math.round(temperature) + '°';
+    document.querySelector('.condition-text').textContent = getWeatherDescription(weatherCode);
 
     // POPULATE HERO SUB-DETAILS: Synchronized with city temporal clock
-    const cityTime = new Date(data.current.time);
+    const cityTime = new Date(current.time);
     const nowHour = cityTime.getHours();
 
-    const wind = data.current.windspeed;
     const humidity = data.hourly.relativehumidity_2m ? data.hourly.relativehumidity_2m[nowHour] : '--';
     const visibility = data.hourly.visibility ? (data.hourly.visibility[nowHour] / 1000).toFixed(1) : '--';
-    const pressure = data.current.pressure || (data.hourly.surface_pressure ? data.hourly.surface_pressure[nowHour] : '--');
+    const finalPressure = pressure || (data.hourly.surface_pressure ? data.hourly.surface_pressure[nowHour] : '--');
 
     setText('hero-wind', wind + ' km/h');
     setText('hero-humidity', humidity + '%');
     setText('hero-visibility', visibility + ' km');
-    setText('hero-pressure', Math.round(pressure) + ' hPa');
+    setText('hero-pressure', Math.round(finalPressure) + ' hPa');
     setText('history-text', data.history || 'Historical data unavailable.');
 
     // Dynamic Accuracy Note
@@ -609,17 +626,21 @@ function updateHero(data) {
 }
 
 function updateDetails(data) {
-    const current = data.current;
+    const current = data.current || data.current_weather || {};
     const hourly = data.hourly;
+
+    const temperature = current.temperature_2m !== undefined ? current.temperature_2m : current.temperature;
+    const windSpeed = current.wind_speed_10m !== undefined ? current.wind_speed_10m : current.windspeed;
+    const windDir = current.wind_direction !== undefined ? current.wind_direction : current.winddirection;
 
     // 1. Feels Like
     // ATMOSPHERIC TEMPORAL SYNC: Synchronize with city local time, not browser local time
-    const cityTime = new Date(data.current.time);
+    const cityTime = new Date(current.time);
     const nowHour = cityTime.getHours();
 
-    const feelsLike = hourly.apparent_temperature ? hourly.apparent_temperature[nowHour] : current.temperature;
+    const feelsLike = hourly.apparent_temperature ? hourly.apparent_temperature[nowHour] : temperature;
     setText('detail-feels-like', Math.round(feelsLike) + '°');
-    setText('detail-feels-desc', feelsLike < current.temperature ? "Cooler due to wind" : "Similar to actual");
+    setText('detail-feels-desc', feelsLike < temperature ? "Cooler due to wind" : "Similar to actual");
 
     // 2. Precipitation
     const precipProb = hourly.precipitation_probability ? hourly.precipitation_probability[nowHour] : 0;
@@ -628,15 +649,13 @@ function updateDetails(data) {
     setText('detail-precip-desc', precipProb + '% chance in next hour');
 
     // 3. Humidity
-    const humidity = hourly.relativehumidity_2m ? hourly.relativehumidity_2m[nowHour] : current.humidity; // fallbacks
+    const humidity = hourly.relativehumidity_2m ? hourly.relativehumidity_2m[nowHour] : (current.humidity || 0); // fallbacks
     setText('detail-humidity', humidity + '%');
     // Dew Point approx: T - ((100 - RH)/5)
-    const dewPoint = Math.round(current.temperature - ((100 - humidity) / 5));
+    const dewPoint = Math.round(temperature - ((100 - humidity) / 5));
     setText('detail-humidity-desc', `The dew point is ${dewPoint}°`);
 
     // 4. Wind
-    const windSpeed = current.windspeed;
-    const windDir = current.winddirection;
     setText('detail-wind', windSpeed);
     const arrow = document.getElementById('wind-arrow');
     if (arrow) arrow.style.transform = `rotate(${windDir}deg)`;
@@ -758,13 +777,15 @@ function updateHazards(data) {
     const container = document.getElementById('hazards-list');
     if (!container) return;
 
+    const current = data.current || data.current_weather || {};
+
     // ATMOSPHERIC TEMPORAL SYNC
-    const cityTime = new Date(data.current.time);
+    const cityTime = new Date(current.time);
     const nowHour = cityTime.getHours();
 
-    const currentCode = data.current.weathercode;
-    const temp = data.current.temperature;
-    const wind = data.current.windspeed;
+    const currentCode = current.weathercode;
+    const temp = current.temperature_2m !== undefined ? current.temperature_2m : current.temperature;
+    const wind = current.wind_speed_10m !== undefined ? current.wind_speed_10m : current.windspeed;
     const uv = data.hourly.uv_index ? data.hourly.uv_index[nowHour] : 0;
     const aqi = data.air_quality ? data.air_quality.european_aqi[nowHour] : 0;
     const city = data.city || "this region";

@@ -69,10 +69,17 @@ def get_weather():
             if not forecast:
                 return jsonify({'error': 'Failed to fetch forecast'}), 500
             
-            current_weather = forecast['current_weather']
+            # Secure way to get current weather data (handling both legacy and new Open-Meteo formats)
+            current_weather = forecast.get('current', forecast.get('current_weather', {}))
             
-            # Historical trend needs current temp, so we run it after forecast starts or completes
-            future_history = executor.submit(openmeteo.get_historical_trend, lat, lon, current_weather['temperature'])
+            if not current_weather:
+                return jsonify({'error': 'Meteorological stream interrupted: Current data unavailable'}), 500
+            
+            # Map temperature correctly (new format uses 'temperature_2m', legacy uses 'temperature')
+            current_temp = current_weather.get('temperature_2m', current_weather.get('temperature'))
+            
+            # Historical trend needs current temp
+            future_history = executor.submit(openmeteo.get_historical_trend, lat, lon, current_temp)
             
             # Collect results
             history_text = future_history.result()
