@@ -2,9 +2,8 @@
 
 Vyamir is a high-fidelity, professional-grade weather intelligence platform built for high situational awareness. It bridges the gap between raw meteorological telemetry and cinematic user experience, transforming complex environmental vectors into a seamless, interactive dashboard.
 
-**Deployment Node:** [vyamir.onrender.com](https://vyamir.onrender.com/)
+**Deployment Node:**  [vyamir.onrender.com](https://vyamir.onrender.com/)
 
----
 
 ## High-Fidelity Features
 
@@ -14,7 +13,7 @@ Vyamir is a high-fidelity, professional-grade weather intelligence platform buil
 - **SkyID Ecosystem**: Secure, privacy-first identity management utilizing Firebase and Cloud Firestore for persistent user state.
 - **Meteorological Dispatch**: Integrated SMTP engine for direct weather reporting and secure communication.
 
----
+
 
 ##  Technical Architecture
 
@@ -51,5 +50,5 @@ Vyamir requires a secured environment for full deployment.
 
 For detailed contribution protocols and local development calibration, please refer to the **[Development Guide](./DEV_GUIDE.md)**.
 
----
+
 *Vyamir Systems © 2025. Atmospheric Intelligence, Redefined.*
