@@ -429,33 +429,77 @@ async function handleSearchSelection(city, lat, lon, isInitial = false) {
 
         // ASYNC DECOUPLING: Parallel fetching starts here
 
-        // 1. WEATHER TASK: Priority #1
+        // 1. WEATHER TASK: Priority #1 (Direct Client-Side Fetch to bypass IP limits)
         const fetchWeatherTask = (async () => {
             try {
-                const res = await fetch(url);
-                const data = await res.json();
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,visibility,wind_speed_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto`;
+                const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,european_aqi,uv_index,alder_pollen,birch_pollen,grass_pollen,ragweed_pollen,olive_pollen&timezone=auto`;
+
+                const [wRes, aRes, metaRes] = await Promise.all([
+                    fetch(weatherUrl),
+                    fetch(aqiUrl),
+                    fetch(`/api/get_weather?lat=${lat}&lon=${lon}&city=${encodeURIComponent(displayCity)}&metadata_only=true`)
+                ]);
+
+                const wData = await wRes.json();
+                const aData = await aRes.json();
+                const metaData = await metaRes.json();
 
                 // Vyamir Diagnostic Sync: Log data for industrial transparency
-                console.log("Vyamir Engine: Meteorological data stream synchronized.", data);
+                console.log("Vyamir Engine: Meteorological data stream synchronized from client-IP.", wData);
 
-                if (data.error) throw new Error(data.error);
+                // Normalization Layer (Mirroring backend schema with full key compatibility)
+                const normalizedData = {
+                    city: displayCity,
+                    current: {
+                        ...wData.current,
+                        time: wData.current.time,
+                        temperature: wData.current.temperature_2m,
+                        temperature_2m: wData.current.temperature_2m,
+                        humidity: wData.current.relative_humidity_2m,
+                        relative_humidity_2m: wData.current.relative_humidity_2m,
+                        weathercode: wData.current.weather_code,
+                        weather_code: wData.current.weather_code,
+                        windspeed: wData.current.wind_speed_10m,
+                        windSpeed: wData.current.wind_speed_10m,
+                        wind_speed_10m: wData.current.wind_speed_10m,
+                        winddirection: wData.current.wind_direction_10m,
+                        wind_direction_10m: wData.current.wind_direction_10m,
+                        is_day: wData.current.is_day,
+                        pressure: wData.current.surface_pressure,
+                        surface_pressure: wData.current.surface_pressure
+                    },
+                    hourly: {
+                        ...wData.hourly,
+                        weathercode: wData.hourly.weather_code,
+                        weather_code: wData.hourly.weather_code,
+                        relativehumidity_2m: wData.hourly.relative_humidity_2m,
+                        relative_humidity_2m: wData.hourly.relative_humidity_2m,
+                        windspeed_10m: wData.hourly.wind_speed_10m,
+                        wind_speed_10m: wData.hourly.wind_speed_10m
+                    },
+                    daily: {
+                        ...wData.daily,
+                        weathercode: wData.daily.weather_code,
+                        weather_code: wData.daily.weather_code
+                    },
+                    air_quality: aData.hourly,
+                    news: metaData.news,
+                    history: metaData.history
+                };
 
-                window.weatherData = data;
+                window.weatherData = normalizedData;
 
-                // Sync UI immediately when weather returns
-                try { updateHero(data); } catch (e) { console.error("Hero update failed", e); }
-                try { updateDetails(data); } catch (e) { console.error("Details update failed", e); }
-                try { updateNews(data); } catch (e) { console.error("News update failed", e); }
-                try { updateHazards(data); } catch (e) { console.error("Hazards update failed", e); }
-                try { if (window.initChart) window.initChart(data); } catch (e) { console.error("Chart init failed", e); }
+                // Sync UI immediately
+                try { updateHero(normalizedData); } catch (e) { console.error("Hero update failed", e); }
+                try { updateDetails(normalizedData); } catch (e) { console.error("Details update failed", e); }
+                try { updateNews(normalizedData); } catch (e) { console.error("News update failed", e); }
+                try { updateHazards(normalizedData); } catch (e) { console.error("Hazards update failed", e); }
+                try { if (window.initChart) window.initChart(normalizedData); } catch (e) { console.error("Chart init failed", e); }
 
-                // Handle current mapping safely for background
-                const current = data.current || data.current_weather || {};
-                const weatherCode = current.weathercode;
-                const isDay = current.is_day;
-                try { updateBackground(weatherCode, isDay); } catch (e) { console.error("Background update failed", e); }
+                try { updateBackground(normalizedData.current.weathercode, normalizedData.current.is_day); } catch (e) { console.error("Background update failed", e); }
 
-                return data;
+                return normalizedData;
             } catch (err) {
                 console.error("Vyamir Engine: Weather Load Error:", err);
                 throw err;
@@ -502,20 +546,6 @@ async function handleSearchSelection(city, lat, lon, isInitial = false) {
         if (sidebarRef) sidebarRef.style.display = 'flex';
 
         // Removed sequential calls - handled by decoupled tasks above
-        try {
-            if (window.initMap) {
-                window.initMap(lat, lon);
-                if (window.mapInstance) {
-                    window.mapInstance.setView([lat, lon], 10);
-                    window.mapInstance.eachLayer((layer) => {
-                        if (layer instanceof L.Marker) {
-                            layer.setLatLng([lat, lon]);
-                        }
-                    });
-                }
-            }
-        } catch (e) { console.error("Map init failed", e); }
-
         try {
             if (window.initMap) {
                 window.initMap(lat, lon);

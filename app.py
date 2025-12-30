@@ -58,7 +58,20 @@ def get_weather():
         if not lat or not lon:
             return jsonify({'error': 'Missing coordinates'}), 400
 
-        # Execute API calls in parallel to maximize performance
+        metadata_only = request.args.get('metadata_only') == 'true'
+
+        if metadata_only:
+            # OPTIMIZATION: Only fetch News (and potentially other non-rate-limited data)
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                future_news = executor.submit(openmeteo.get_news_feed)
+                news = future_news.result()
+            
+            return jsonify({
+                'news': news,
+                'history': "Historical synchronization deferred to minimize IP load."
+            })
+
+        # Execute API calls in parallel to maximize performance (Legacy Support)
         with ThreadPoolExecutor(max_workers=4) as executor:
             future_forecast = executor.submit(openmeteo.get_forecast_data, lat, lon)
             future_aqi = executor.submit(openmeteo.get_air_quality_data, lat, lon)
