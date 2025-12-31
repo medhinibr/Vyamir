@@ -27,8 +27,8 @@ def robots():
     return send_from_directory('public', 'robots.txt')
 
 @app.route('/sitemap.xml')
-def sitemap():
-    return send_from_directory('public', 'sitemap.xml')
+def static_from_root():
+    return send_from_directory('public', 'sitemap.xml', mimetype='application/xml')
 
 @app.route('/ads.txt')
 def ads_txt():
