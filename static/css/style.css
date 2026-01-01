@@ -1,7 +1,7 @@
-@import 'base.css';
-@import 'components/navigation/part-header.css';
-@import 'components/weather/part-hero.css';
-@import 'components/weather/part-chart.css';
-@import 'components/weather/part-daily-list.css';
-@import 'components/weather/part-gauges.css';
-@import 'components/safety/part-map.css';
+@import'base.css';
+@import'components/navigation/part-header.css';
+@import'components/weather/part-hero.css';
+@import'components/weather/part-chart.css';
+@import'components/weather/part-daily-list.css';
+@import'components/weather/part-gauges.css';
+@import'components/safety/part-map.css';

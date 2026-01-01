@@ -20,6 +20,29 @@
     <meta property="og:title" content="Vyamir | Your Skies, Redefined">
     <meta property="og:site_name" content="Vyamir">
     <meta name="google-site-verification" content="gG9Ovutq5f5SMqTQSIniXCbCipiZWrwu_cGrIGiHXGE" />
+    <link rel="canonical" href="https://vyamir.onrender.com/" />
+
+    <!-- OpenGraph & Social Media Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://vyamir.onrender.com/" />
+    <meta property="og:title" content="Vyamir | Your Skies, Redefined" />
+    <meta property="og:description"
+        content="Real-time atmospheric intelligence and interactive weather visualization." />
+    <meta property="og:image" content="https://vyamir.onrender.com/static/img/logo.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Schema.org JSON-LD (Rich Snippets) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Vyamir",
+      "url": "https://vyamir.onrender.com/",
+      "description": "Atmospheric intelligence and weather visualization platform.",
+      "applicationCategory": "WeatherApplication",
+      "operatingSystem": "All"
+    }
+    </script>
 
     <script id="vyamir-config" type="application/json">
         {{ config | tojson | safe }}
@@ -127,7 +150,7 @@
                         </div>
                         <div
                             style="color: rgba(255,255,255,0.7); font-family: 'Inter', sans-serif; font-size: 0.8rem; letter-spacing: 2px; font-weight: 400; text-transform: uppercase;">
-                            Vyamir is waking up...</div>
+                            Calibrating Weather Forecast & Atmospheric Intelligence...</div>
                     </div>
                     <style>
                         @keyframes spin {
@@ -218,8 +241,9 @@
                                         <h1 class="hero-brand-name">Vyamir</h1>
                                     </div>
 
-                                    <h2 class="welcome-title">Your Skies, Redefined.</h2>
-                                    <p class="welcome-subtitle">Interactive weather exploration with real-time data and
+                                    <h2 class="welcome-title">Atmospheric Weather, Redefined.</h2>
+                                    <p class="welcome-subtitle">Advanced hyper-local forecast exploration with real-time
+                                        data and
                                         immersive visualizations.</p>
 
                                     <div class="welcome-search-box">
@@ -409,10 +433,10 @@
                                 onmouseover="this.style.color='white'">&times;</div>
 
                             <div id="policy-content" style="overflow-y: auto; padding-right: 25px;">
-                                <h1 id="policy-title"
+                                <h2 id="policy-title"
                                     style="color: var(--accent-color); margin-bottom: 35px; font-weight: 700; font-size: 2.2rem; letter-spacing: -1px;">
                                     Legal Notice
-                                </h1>
+                                </h2>
                                 <div id="policy-text"
                                     style="color: rgba(255,255,255,0.85); line-height: 1.8; font-size: 1.1rem; font-weight: 300;">
                                     Loading...
@@ -510,7 +534,7 @@
 
                         <div class="legal-content-wrapper">
                             <div class="legal-card html-content">
-                                <h1 id="legal-page-title" class="legal-title">Title</h1>
+                                <h2 id="legal-page-title" class="legal-title">Title</h2>
                                 <div id="legal-page-content" class="legal-body"></div>
                             </div>
                             <div
