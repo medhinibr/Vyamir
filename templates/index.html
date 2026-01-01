@@ -81,6 +81,16 @@
         // AUTH PERSISTENCE ENGINE: Ensure identities survive across sessions
         (async () => {
             try {
+                // Failsafe: If the app is still stuck after 4 seconds, force-remove the overlay.
+                setTimeout(() => {
+                    const overlay = document.getElementById('session-restoration-overlay');
+                    if (overlay) {
+                        console.warn("Vyamir Engine: Force-clearing loading screen due to timeout.");
+                        overlay.style.opacity = '0';
+                        setTimeout(() => overlay.remove(), 500);
+                    }
+                }, 4000);
+
                 await setPersistence(auth, browserLocalPersistence);
 
                 onAuthStateChanged(auth, (user) => {
