@@ -2255,3 +2255,34 @@ window.updateBackground = function(code, isDay) {
     else if (code > 800) bgClass = 'bg-clouds';
     document.body.classList.add(bgClass);
 };
+
+
+// SATELLITE ENGINE
+window.initSatMap = function(lat, lon) {
+    const mapId = 'sat-map-container';
+    const mapElement = document.getElementById(mapId);
+    if (!mapElement) return;
+    
+    const map = L.map(mapId, { center: [lat, lon], zoom: 6, zoomControl: false, attributionControl: false });
+    
+    // Base: Satellite
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+    
+    // Overlay: Infrared Clouds (RainViewer)
+    L.tileLayer('https://tile.rainviewer.com/img/satellite-infrared/512/{z}/{x}/{y}/2/1_1.png', { opacity: 0.6 }).addTo(map);
+    
+    // Labels
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {subdomains: 'abcd', opacity: 0.8}).addTo(map);
+    
+    // Marker
+    L.marker([lat, lon]).addTo(map);
+    
+    // Interaction Prevention (Passive View)
+    map.dragging.disable();
+    map.touchZoom.disable();
+    map.doubleClickZoom.disable();
+    map.scrollWheelZoom.disable();
+    map.boxZoom.disable();
+    map.keyboard.disable();
+    if (map.tap) map.tap.disable();
+};
