@@ -293,19 +293,7 @@
                             </div>
                         </div>
 
-                        <!-- FOOTER -->
-                        <footer
-                            style="margin-top: 50px; padding: 30px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); font-size: 0.9rem;">
-                            <div style="margin-bottom: 10px;">
-                                <a href="#" style="color: inherit; margin: 0 10px; text-decoration: none;">About Us</a>
-                                |
-                                <a href="#" style="color: inherit; margin: 0 10px; text-decoration: none;">Privacy
-                                    Policy</a> |
-                                <a href="#" style="color: inherit; margin: 0 10px; text-decoration: none;">Contact
-                                    Us</a>
-                            </div>
-                            <div>&copy; 2026 Vyamir Weather Technologies. All rights reserved.</div>
-                        </footer>
+
 
                     </div> <!-- End Container -->
 
@@ -448,16 +436,12 @@
                                 </div>
                             </div>
 
-                            <!-- GLOBAL FOOTER -->
-                            {% include 'components/navigation/part_footer.html' %}
+                            <!-- GLOBAL FOOTER REMOVED FROM HERE -->
                         </section>
                     </div> <!-- End Welcome Container -->
                     </div> <!-- End Container -->
 
-                    <!-- Dashboard Footer -->
-                    <div class="dashboard-footer-anchor">
-                        {% include 'components/navigation/part_footer.html' %}
-                    </div>
+
 
                     {% if weather %}
                     <script>
@@ -675,6 +659,11 @@
                     </div>
 
                     </div> <!-- End Container -->
+
+
+                    <div style="margin-top: auto; width: 100%;">
+                        {% include 'components/navigation/part_footer.html' %}
+                    </div>
 
                     <script src="{{ url_for('static', filename='js/core/logic-ui.js') }}?v=1.0.2"></script>
                     <script src="{{ url_for('static', filename='js/weather/logic-gauges.js') }}?v=1.0.2"></script>
