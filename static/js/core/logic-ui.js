@@ -832,38 +832,14 @@ function updateHero(data) {
         heroContent.prepend(accuracyNote);
     }
     // Daily Forecast List
-    // FORECAST TOGGLE LOGIC
-    window.toggleForecast = function (mode) {
-        const hourly = document.getElementById('section-hourly');
-        const daily = document.getElementById('section-7day');
-        const btnHourly = document.getElementById('btn-hourly');
-        const btnDaily = document.getElementById('btn-daily');
-
-        if (mode === 'hourly') {
-            hourly.style.display = 'block';
-            daily.style.display = 'none';
-            btnHourly.style.background = 'var(--accent-color)';
-            btnHourly.style.color = 'white';
-            btnDaily.style.background = 'transparent';
-            btnDaily.style.color = 'rgba(255,255,255,0.6)';
-        } else {
-            hourly.style.display = 'none';
-            daily.style.display = 'block';
-            btnDaily.style.background = 'var(--accent-color)';
-            btnDaily.style.color = 'white';
-            btnHourly.style.background = 'transparent';
-            btnHourly.style.color = 'rgba(255,255,255,0.6)';
-        }
-    };
-
     // Daily Forecast List
     const listContainer = document.querySelector('.daily-list-vertical');
     if (listContainer) {
-        listContainer.innerHTML = ''; // Cleared redundant header
+        listContainer.innerHTML = '';
 
         // EXTENDED FORECAST: 15 Days
         const maxDays = Math.min(15, data.daily.time.length);
-        const rainProbs = data.daily.precipitation_probability_max || []; // Safeguard
+        const rainProbs = data.daily.precipitation_probability_max || [];
 
         for (let i = 0; i < maxDays; i++) {
             if (!data.daily.time[i]) continue;
