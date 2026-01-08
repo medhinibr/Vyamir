@@ -202,34 +202,29 @@
 
                         {% include 'components/navigation/part_header.html' %}
 
-                        <!-- Grid Container (Hidden by default in CSS) -->
+                        <!-- Grid Container (Focused Dashboard) -->
                         <div class="grid-container">
                             <!-- Left Column -->
                             <div class="left-col">
                                 <div id="section-current">{% include 'components/weather/part_hero.html' %}</div>
                                 <div id="section-hourly">{% include 'components/weather/part_chart.html' %}</div>
                                 <div id="section-7day">{% include 'components/weather/part_daily_forecast.html' %}</div>
-                                <div id="section-maps">{% include 'components/safety/part_map.html' %}</div>
-                                <div id="section-hazards">{% include 'components/safety/part_hazards.html' %}</div>
-                                <div id="section-video">{% include 'components/media/part_videos.html' %}</div>
                             </div>
 
                             <!-- Right Column -->
                             <div class="right-col">
                                 <div id="section-details">{% include 'components/weather/part_details_grid.html' %}
                                 </div>
-                                <div id="section-satellite">{% include 'components/media/part_satellite.html' %}</div>
-                                <div id="section-news">{% include 'components/media/part_news.html' %}</div>
                             </div>
                         </div>
 
 
 
-                        <!-- Welcome State (Creative Sectional Landing Page) -->
+                        <!-- Welcome State -->
                         <div class="welcome-container" onscroll="handleLandingScroll(this)">
                             <canvas id="sky-canvas"></canvas>
 
-                            <!-- STICKY TOP NAVBAR (Branding - Hidden by default) -->
+                            <!-- STICKY TOP NAVBAR -->
                             <nav id="sticky-brand-nav" class="sticky-nav">
                                 <div class="nav-brand-group">
                                     <img src="/static/img/logo.png" alt="Vyamir" class="nav-logo-small"
@@ -241,7 +236,7 @@
                                 </div>
                             </nav>
 
-                            <!-- SECTION 1: HERO SPLASH (100% Focused) -->
+                            <!-- SECTION 1: HERO SPLASH  -->
                             <section class="landing-section section-hero">
                                 <div class="welcome-card glass-panel">
                                     <div class="hero-branding">
@@ -269,7 +264,7 @@
                                 </div>
                             </section>
 
-                            <!-- SECTION 2: ATMOSPHERIC INSIGHTS (Integrated with Footer) -->
+                            <!-- SECTION 2: ATMOSPHERIC INSIGHTS  -->
                             <section class="landing-section section-intelligence">
                                 <div class="intelligence-header">
                                     <h2>Atmospheric Intelligence</h2>
