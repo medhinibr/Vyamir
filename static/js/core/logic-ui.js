@@ -808,25 +808,39 @@ function updateHero(data) {
     const cityTime = new Date(current.time);
     const nowHour = cityTime.getHours();
 
-    // REMOVED: Redundant hero metrics (Wind, Humidity etc.) - Now only in Sidebar
-
     // Update Live Data timestamp
     const updateTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    setText('history-text', `Live Data: ${city}`);
+    setText('history-text', `Live Data: ${city}`); // Replaces Initializing...
+
+    // Dynamic Accuracy Note: Removed as per "Clean clean" request if it feels like clutter, 
+    // but user specifically asked to "Stop the infinite 'Initializing...' loop" which setText above fixes.
+    // I will keep the accuracy note logic but simplified if needed. The previous implementation was fine.
+
+    // AQI BINDING FOR HERO
+    if (data.air_quality && data.air_quality.european_aqi) {
+        const aqi = data.air_quality.european_aqi[nowHour] || '--';
+        setText('hero-aqi-val', aqi);
+
+        // Color coding for AQI
+        const aqiContainer = document.getElementById('hero-aqi');
+        if (aqiContainer && typeof aqi === 'number') {
+            if (aqi < 20) aqiContainer.style.borderColor = '#4caf50'; // Good
+            else if (aqi < 40) aqiContainer.style.borderColor = '#ffeb3b'; // Fair
+            else if (aqi < 60) aqiContainer.style.borderColor = '#ff9800'; // Moderate
+            else aqiContainer.style.borderColor = '#f44336'; // Poor
+        }
+    }
 
     // Dynamic Accuracy Note
     const accuracyNote = document.getElementById('accuracy-note') || document.createElement('div');
     accuracyNote.id = 'accuracy-note';
     if (window.locationSource === 'gps') {
-        accuracyNote.innerHTML = '<i class="bi bi-geo-alt-fill"></i> Precise GPS Location Active';
+        accuracyNote.innerHTML = '<i class="bi bi-geo-alt-fill"></i> GPS Active';
         accuracyNote.className = 'accuracy-badge gps';
-    } else if (window.locationSource === 'manual') {
-        accuracyNote.innerHTML = '<i class="bi bi-exclamation-circle"></i> Manual Search Mode: Enable GPS for pinpoint local mapping';
-        accuracyNote.className = 'accuracy-badge manual';
     } else {
-        accuracyNote.innerHTML = '<i class="bi bi-geo-off"></i> Precise tracking unavailable. Search for a city or enable GPS for live data.';
-        accuracyNote.className = 'accuracy-badge offline';
+        accuracyNote.style.display = 'none'; // Hide if not GPS to keep clean
     }
+
     const heroContent = document.querySelector('.hero-content');
     if (heroContent && !document.getElementById('accuracy-note')) {
         heroContent.prepend(accuracyNote);
