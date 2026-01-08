@@ -2323,143 +2323,143 @@ function initAgriPage() {
     const temp = data.current.temperature_2m;
     const precip = data.current.precipitation;
     const wind = data.current.wind_speed_10m;
-    
-    let advice = Analyzing conditions...;
-    let icon = bi-check-circle;
-    let color = #81c784; // Green
+
+    let advice = "Analyzing conditions...";
+    let icon = "bi-check-circle";
+    let color = "#81c784"; // Green
 
     // Soil Telemetry (New Open-Meteo Vars)
     // Note: data.hourly should have soil vars if fetched correctly. 
     // Since we updated openmeteo.py, the client will receive them in the 'hourly' object under keys like 'soil_temperature_0cm'.
     // We access the current hour index.
     const nowHour = new Date().getHours();
-    
-    let soilMoisture = (data.hourly.soil_moisture_0_to_1cm && data.hourly.soil_moisture_0_to_1cm[nowHour]) 
-                       ? data.hourly.soil_moisture_0_to_1cm[nowHour] : (precip > 0 ? 0.35 : 0.15); // Fallback mock
-    let soilTemp = (data.hourly.soil_temperature_0cm && data.hourly.soil_temperature_0cm[nowHour]) 
-                   ? data.hourly.soil_temperature_0cm[nowHour] : temp; // Fallback to air temp
+
+    let soilMoisture = (data.hourly.soil_moisture_0_to_1cm && data.hourly.soil_moisture_0_to_1cm[nowHour])
+        ? data.hourly.soil_moisture_0_to_1cm[nowHour] : (precip > 0 ? 0.35 : 0.15); // Fallback mock
+    let soilTemp = (data.hourly.soil_temperature_0cm && data.hourly.soil_temperature_0cm[nowHour])
+        ? data.hourly.soil_temperature_0cm[nowHour] : temp; // Fallback to air temp
 
     // Convert moisture fraction to %
     // Open-Meteo gives m/m. Typical range 0.0-0.5. 0.3 is wet.
-    let smPerc = Math.round(soilMoisture * 100); 
+    let smPerc = Math.round(soilMoisture * 100);
     if (smPerc > 100) smPerc = smPerc / 100; // If api changed unit
 
-    document.getElementById('soil-moisture-val').textContent = smPerc + %;
-    document.getElementById('soil-temp-val').textContent = Math.round(soilTemp) + C;
+    document.getElementById('soil-moisture-val').textContent = smPerc + "%";
+    document.getElementById('soil-temp-val').textContent = Math.round(soilTemp) + "°C";
 
     // Logic Tree
     if (precip > 5) {
-        advice = Heavy rainfall detected. Pause sowing activities to avoid seed washout. Ensure drainage channels are clear.;
-        icon = bi-cloud-rain;
-        color = #4fc3f7;
+        advice = "Heavy rainfall detected. Pause sowing activities to avoid seed washout. Ensure drainage channels are clear.";
+        icon = "bi-cloud-rain";
+        color = "#4fc3f7";
     } else if (temp > 35) {
-        advice = High thermal stress. Irrigate crops during evening hours to minimize evaporation loss.;
-        icon = bi-thermometer-sun;
-        color = #ffb74d;
+        advice = "High thermal stress. Irrigate crops during evening hours to minimize evaporation loss.";
+        icon = "bi-thermometer-sun";
+        color = "#ffb74d";
     } else if (humidity > 85 && temp > 25) {
-        advice = High fungal risk due to warm, humid conditions. Monitor for blight and rust.;
-        icon = bi-exclamation-triangle;
-        color = #ff8a65;
+        advice = "High fungal risk due to warm, humid conditions. Monitor for blight and rust.";
+        icon = "bi-exclamation-triangle";
+        color = "#ff8a65";
     } else if (wind > 20) {
-        advice = Strong winds detected. Secure tall crops (maize, sugarcane) and delay spraying operations.;
-        icon = bi-wind;
-        color = #e57373;
+        advice = "Strong winds detected. Secure tall crops (maize, sugarcane) and delay spraying operations.";
+        icon = "bi-wind";
+        color = "#e57373";
     } else {
-        advice = Conditions are optimal for field operations. Soil moisture levels are stable.;
+        advice = "Conditions are optimal for field operations. Soil moisture levels are stable.";
     }
 
     const advisoryEl = document.getElementById('agri-advisory');
     if (advisoryEl) {
-        advisoryEl.innerHTML = \<div style="display:flex; align-items:start; gap:15px;">
-            <i class="bi \ style="font-size:2rem; color:\;"></i>
- <div>
- <div style="font-weight:600; color:\; margin-bottom:5px;">ACTION REQUIRED</div>
- \
- </div>
- </div>\;
- }
+        advisoryEl.innerHTML = `<div style="display:flex; align-items:start; gap:15px;">
+            <i class="bi ${icon}" style="font-size:2rem; color:${color};"></i>
+            <div>
+                <div style="font-weight:600; color:${color}; margin-bottom:5px;">ACTION REQUIRED</div>
+                ${advice}
+            </div>
+        </div>`;
+    }
 
- // Pest Risk
- const pestEl = document.getElementById('pest-risk-display');
- let pestRisk = Low;
- let pestColor = #69f0ae;
- if (humidity > 80 && temp > 28) { pestRisk = High; pestColor = #ff5252; }
- else if (humidity > 60) { pestRisk = Moderate; pestColor = #ffab40; }
+    // Pest Risk
+    const pestEl = document.getElementById('pest-risk-display');
+    let pestRisk = "Low";
+    let pestColor = "#69f0ae";
+    if (humidity > 80 && temp > 28) { pestRisk = "High"; pestColor = "#ff5252"; }
+    else if (humidity > 60) { pestRisk = "Moderate"; pestColor = "#ffab40"; }
 
- if (pestEl) {
- pestEl.innerHTML = \<span style="color:\; font-weight:600; font-size:1.5rem;">\</span> <span style="font-size:0.9rem; opacity:0.7;">based on humidity/temp matrix</span>\;
- }
+    if (pestEl) {
+        pestEl.innerHTML = `<span style="color:${pestColor}; font-weight:600; font-size:1.5rem;">${pestRisk}</span> <span style="font-size:0.9rem; opacity:0.7;">based on humidity/temp matrix</span>`;
+    }
 }
 
 // --- MONSOON TRACKING MODULE ---
 function initMonsoonPage() {
- const mapEl = document.getElementById('monsoon-map');
- if (!mapEl) return;
+    const mapEl = document.getElementById('monsoon-map');
+    if (!mapEl) return;
 
- // Force India View
- const map = L.map('monsoon-map', {
- zoomControl: false,
- attributionControl: false
- }).setView([20.5937, 78.9629], 5); // Center of India
+    // Force India View
+    const map = L.map('monsoon-map', {
+        zoomControl: false,
+        attributionControl: false
+    }).setView([20.5937, 78.9629], 5); // Center of India
 
- L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
- opacity: 1,
- maxZoom: 18
- }).addTo(map);
+    L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
+        opacity: 1,
+        maxZoom: 18
+    }).addTo(map);
 
- // RainViewer Radar Overlay
- L.tileLayer('https://tile.cache.rainviewer.com/v2/radar/nowcast_5m/{z}/{x}/{y}/2/1_1.png', {
- opacity: 0.8,
- zIndex: 10
- }).addTo(map);
- 
- // Add simple marker for current location context if available
- const data = window.weatherData;
- if (data && data.lat) {
- const marker = L.circleMarker([data.lat, data.lon], {
- color: '#58a6ff',
- radius: 6,
- fillOpacity: 1
- }).addTo(map);
- marker.bindPopup(<b>You are here</b><br>).openPopup();
- }
- 
- // Animate map gently
- let angle = 0;
- /* 
- // Optional: Subtle pan animation
- setInterval(() => {
- angle += 0.001;
- const newLat = 20.5937 + Math.sin(angle) * 0.5;
- map.panTo([newLat, 78.9629], {animate: true, duration: 1});
- }, 100); 
- */
- 
- // Handle Resize
- setTimeout(() => map.invalidateSize(), 500);
+    // RainViewer Radar Overlay
+    L.tileLayer('https://tile.cache.rainviewer.com/v2/radar/nowcast_5m/{z}/{x}/{y}/2/1_1.png', {
+        opacity: 0.8,
+        zIndex: 10
+    }).addTo(map);
+
+    // Add simple marker for current location context if available
+    const data = window.weatherData;
+    if (data && data.lat) {
+        const marker = L.circleMarker([data.lat, data.lon], {
+            color: '#58a6ff',
+            radius: 6,
+            fillOpacity: 1
+        }).addTo(map);
+        marker.bindPopup("<b>You are here</b><br>").openPopup();
+    }
+
+    // Animate map gently
+    let angle = 0;
+    /* 
+    // Optional: Subtle pan animation
+    setInterval(() => {
+        angle += 0.001;
+        const newLat = 20.5937 + Math.sin(angle) * 0.5;
+        map.panTo([newLat, 78.9629], {animate: true, duration: 1});
+    }, 100); 
+    */
+
+    // Handle Resize
+    setTimeout(() => map.invalidateSize(), 500);
 }
 
 
 // --- LINGUISTICS ENGINE ---
 const translations = {
     en: {
-        current: Current, hourly: Hourly, maps: Maps, details: Details, news: News,
-        agri: Agri, monsoon: Monsoon
+        current: "Current", hourly: "Hourly", maps: "Maps", details: "Details", news: "News",
+        agri: "Agri", monsoon: "Monsoon"
     },
     hi: {
-        current: ?????, hourly: ??? ??, maps: ???, details: ????, news: ????,
-        agri: ??, monsoon: ????
+        current: "वर्तमान", hourly: "प्रति घंटा", maps: "नक्शे", details: "विवरण", news: "समाचार",
+        agri: "कृषि", monsoon: "मानसून"
     },
     mr: {
-        current: ????, hourly: taasi, maps: ???, details: ????, news: ????,
-        agri: ??, monsoon: ????
+        current: "सध्याचे", hourly: "taasi", maps: "नकाशे", details: "तपशील", news: "बातम्या",
+        agri: "कृषी", monsoon: "मान्सून"
     }
 };
 
-window.changeLanguage = function(lang) {
+window.changeLanguage = function (lang) {
     if (!translations[lang]) return;
     const t = translations[lang];
-    
+
     // Sidebar
     document.querySelectorAll('.sidebar-item span').forEach(span => {
         const text = span.textContent.trim().toLowerCase();
@@ -2474,7 +2474,7 @@ window.changeLanguage = function(lang) {
         if (text === 'monsoon') span.textContent = t.monsoon;
     });
 
-    console.log(Language switched to, lang);
+    console.log("Language switched to", lang);
 }
 
 
@@ -2482,9 +2482,8 @@ window.changeLanguage = function(lang) {
 if (window.location.pathname.includes('/agri') || window.location.pathname.includes('/monsoon')) {
     setTimeout(() => {
         if (!window.weatherData && !localStorage.getItem('vyamir_last_session')) {
-             console.log(Vyamir System: Auto-bootstrapping India context for regional dashboard.);
-             handleSearchSelection(India Region, 20.5937, 78.9629);
+            console.log("Vyamir System: Auto-bootstrapping India context for regional dashboard.");
+            handleSearchSelection("India Region", 20.5937, 78.9629);
         }
     }, 2000);
 }
-
