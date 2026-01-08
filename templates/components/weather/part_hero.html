@@ -1,23 +1,32 @@
 <!-- Hero Section inside Glass Panel -->
 <div class="hero-card glass-panel"
-    style="flex-direction: column; align-items: flex-start; gap: 20px; padding-bottom: 30px;">
+    style="padding: 30px 40px; display: flex; align-items: center; justify-content: space-between; overflow: visible;">
 
-    <!-- Content: Temp & Condition -->
-    <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; margin-top: 10px;">
-        <div>
-            <div class="location-title" style="font-size: 2.5rem; font-weight: 500;">--</div>
-            <div class="condition-text" style="font-size: 1.4rem; font-weight: 300; opacity: 0.9;">Loading...</div>
+    <!-- Left: Location & Condition -->
+    <div style="display: flex; flex-direction: column; gap: 5px;">
+        <div class="location-title" style="font-size: 3rem; font-weight: 600; line-height: 1;">--</div>
+        <div class="condition-text" style="font-size: 1.5rem; font-weight: 300; opacity: 0.9;">Loading...</div>
+
+        <div style="display: flex; align-items: center; gap: 15px; margin-top: 15px;">
+            <div class="insight-pill"
+                style="background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem;">
+                <i class="bi bi-broadcast" style="color: var(--accent-color); margin-right: 5px;"></i>
+                <span id="history-text">Initializing...</span>
+            </div>
         </div>
-        <div class="temp-large">--°</div>
     </div>
 
-    <!-- Detailed Grid REMOVED for De-cluttering -->
-    <!-- These details are now exclusively in the right-hand sidebar -->
+    <!-- Right: Temp & AQI -->
+    <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+        <div class="temp-large"
+            style="font-size: 5rem; font-weight: 700; line-height: 1; text-shadow: 0 0 30px rgba(255,255,255,0.2);">--°
+        </div>
 
-    <!-- History / Insight -->
-    <div class="insight-pill"
-        style="background: rgba(255,255,255,0.1); padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; margin-top: 10px;">
-        <i class="bi bi-clock-history" style="color: var(--gold); margin-right: 5px;"></i>
-        <span id="history-text">Fetching historical data...</span>
+        <!-- AQI Integration -->
+        <div id="hero-aqi"
+            style="margin-top: 10px; font-size: 1rem; font-weight: 500; background: rgba(255,255,255,0.05); padding: 5px 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+            <i class="bi bi-lungs"></i> AQI: <span id="hero-aqi-val">--</span>
+        </div>
     </div>
+
 </div>

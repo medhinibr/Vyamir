@@ -187,7 +187,7 @@
 
                     <!-- Global Toast Container -->
                     <div id="toast-container" class="toast-container"></div>
-                    {% include 'components/navigation/part_sidebar.html' %}
+                    <!-- {% include 'components/navigation/part_sidebar.html' %} -->
 
                     <!-- Mobile Bottom Navigation: Floating Glassmorphic Dock -->
                     <nav class="mobile-nav glass-panel">
@@ -217,21 +217,25 @@
 
                         {% include 'components/navigation/part_header.html' %}
 
-                        <!-- Grid Container (Focused Dashboard) -->
+                        <!-- NEW FULL HEADER LAYOUT -->
+
+                        <!-- 1. Hero Section (Full Width) -->
+                        <div id="section-current" style="margin-top: 20px;">
+                            {% include 'components/weather/part_hero.html' %}
+                        </div>
+
+                        <!-- 2. Advertisement Placeholder -->
+                        <div class="ad-spot-banner"
+                            style="width:100%; height:120px; margin: 25px 0; background: #f1f3f4; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                            <span
+                                style="color: #888; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Advertisement</span>
+                        </div>
+
+                        <!-- 3. Grid Container (Charts & Details below) -->
                         <div class="grid-container">
                             <!-- Left Column -->
                             <div class="left-col">
-                                <div id="section-current">{% include 'components/weather/part_hero.html' %}</div>
                                 <div id="section-hourly">{% include 'components/weather/part_chart.html' %}</div>
-
-                                <!-- Optimization: Strategic Ad Space (Dashboard Banner) -->
-                                <div class="ad-spot-banner"
-                                    style="width:100%; height:90px; margin: 15px 0; background:rgba(255,255,255,0.02); border-radius:16px; border:1px dashed rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; cursor:default; overflow:hidden;">
-                                    <span
-                                        style="font-size:0.7rem; color:rgba(255,255,255,0.2); text-transform:uppercase; letter-spacing:1px;">Sponsored
-                                        Atmospheric Intelligence</span>
-                                </div>
-
                                 <div id="section-7day">{% include 'components/weather/part_daily_forecast.html' %}</div>
                             </div>
 

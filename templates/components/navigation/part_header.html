@@ -1,68 +1,51 @@
-<div class="header-bar">
-    <div class="logo-area" style="display: flex; align-items: center; gap: 12px; cursor: pointer;"
+<div class="header-bar"
+    style="display: flex; align-items: center; justify-content: space-between; padding: 15px 0; gap: 30px;">
+
+    <!-- 1. LEFT: Logo -->
+    <div class="logo-area" style="display: flex; align-items: center; gap: 10px; cursor: pointer;"
         onclick="scrollToHero()">
-        <img src="/static/img/logo.png" alt="Vyamir" style="width: 42px; height: 42px; object-fit: contain;">
-        <div style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; color: #fff;">
-            Vyamir</div>
+        <img src="/static/img/logo.png" alt="Vyamir" style="width: 36px; height: 36px; object-fit: contain;">
+        <span style="font-size: 1.3rem; font-weight: 700; color: #fff; letter-spacing: -0.5px;">Vyamir</span>
     </div>
 
-    <div class="search-section" style="flex: 1; display: flex; justify-content: center;">
-        <div class="header-search-container">
-            <i class="bi bi-geo" style="cursor: pointer; color: var(--accent-color); margin-right: 8px;"
-                onclick="detectLocation()" title="Detect My Location"></i>
-            <input type="text" id="header-search-input" name="dashboard-search" class="search-input"
-                placeholder="Search city..." value="{{ city if city else '' }}">
-            <!-- Save Location Button -->
-            <i class="bi bi-star" onclick="saveCurrentLocation()" title="Save Location"
-                style="color:rgba(255,255,255,0.4); cursor:pointer; margin:0 10px; transition:0.3s;"
-                onmouseover="this.style.color='#ffd700'" onmouseout="this.style.color='rgba(255,255,255,0.4)'"></i>
-            <button class="search-btn">Search</button>
+    <!-- 2. CENTER: Large Search Bar -->
+    <div class="search-section" style="flex: 1; max-width: 600px;">
+        <div class="header-search-container"
+            style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; display: flex; align-items: center; padding: 8px 15px; width: 100%;">
+            <i class="bi bi-search" style="color: rgba(255,255,255,0.4); margin-right: 10px;"></i>
+            <input type="text" id="header-search-input" class="search-input" placeholder="Search location..."
+                value="{{ city if city else '' }}"
+                style="background: transparent; border: none; color: white; width: 100%; font-size: 1rem; outline: none;">
+
+            <i class="bi bi-geo-alt" onclick="detectLocation()" title="Use My Location"
+                style="color: var(--accent-color); cursor: pointer; padding: 5px; opacity: 0.8; transition: 0.3s;"
+                onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"></i>
         </div>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 15px;">
-        <!-- Language Select -->
-        <!-- Language Select -->
-        <select onchange="changeLanguage(this.value)"
-            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 8px; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; text-align: center; font-family: 'Inter', sans-serif;">
-            <option value="en" style="background: #0b0e14;">English</option>
+    <!-- 3. RIGHT: Navigation & Tools -->
+    <nav class="top-nav" style="display: flex; align-items: center; gap: 25px;">
+        <a href="/news" class="nav-link"
+            style="color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;"
+            onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">News</a>
+        <a href="/maps" class="nav-link"
+            style="color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;"
+            onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">Maps</a>
+        <a href="/monsoon" class="nav-link"
+            style="color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;"
+            onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">Monsoon</a>
+        <a href="/agri" class="nav-link"
+            style="color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;"
+            onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">Agri</a>
 
-            <!-- Indian Languages -->
-            <option value="hi" style="background: #0b0e14;">Hindi (हिंदी)</option>
-            <option value="mr" style="background: #0b0e14;">Marathi (मराठी)</option>
-            <option value="bn" style="background: #0b0e14;">Bengali (বাংলা)</option>
-            <option value="te" style="background: #0b0e14;">Telugu (తెలుగు)</option>
-            <option value="ta" style="background: #0b0e14;">Tamil (தமிழ்)</option>
-            <option value="gu" style="background: #0b0e14;">Gujarati (ગુજરાતી)</option>
-            <option value="kn" style="background: #0b0e14;">Kannada (ಕನ್ನಡ)</option>
-            <option value="ml" style="background: #0b0e14;">Malayalam (മലയാളം)</option>
-            <option value="pa" style="background: #0b0e14;">Punjabi (ਪੰਜਾਬੀ)</option>
-            <option value="or" style="background: #0b0e14;">Odia (ଓଡ଼ିଆ)</option>
-            <option value="as" style="background: #0b0e14;">Assamese (অসমীয়া)</option>
-            <option value="ur" style="background: #0b0e14;">Urdu (اردو)</option>
-            <option value="sa" style="background: #0b0e14;">Sanskrit (संस्कृतम्)</option>
-
-            <!-- Global -->
-            <option value="es" style="background: #0b0e14;">Spanish</option>
-            <option value="fr" style="background: #0b0e14;">French</option>
-            <option value="ru" style="background: #0b0e14;">Russian</option>
-            <option value="ar" style="background: #0b0e14;">Arabic</option>
-            <option value="cn" style="background: #0b0e14;">Chinese</option>
-        </select>
+        <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2);"></div>
 
         <!-- Unit Toggle -->
         <div class="unit-toggle" onclick="toggleUnits()"
-            style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1);">
-            <div id="unit-c" style="color: white; font-weight: 700;">°C</div>
-            <div style="width: 1px; height: 12px; background: rgba(255,255,255,0.3);"></div>
-            <div id="unit-f" style="color: rgba(255,255,255,0.5);">°F</div>
+            style="cursor: pointer; display: flex; align-items: center; gap: 5px; opacity: 0.8;" title="Switch Units">
+            <span id="unit-c" style="color: white; font-weight: 700;">°C</span>
+            <span style="color: rgba(255,255,255,0.3);">/</span>
+            <span id="unit-f" style="color: rgba(255,255,255,0.5);">°F</span>
         </div>
-
-        <div id="skypoints-badge" class="skypoints-badge" style="display: none;" onclick="toggleVault()">
-            <i class="bi bi-coin" style="color: #ffd700;"></i>
-            <span id="header-points-value">0</span>
-        </div>
-
-
-    </div>
+    </nav>
 </div>
