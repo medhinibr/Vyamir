@@ -11,14 +11,21 @@
 .sidebar {
     position: fixed;
     left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 110px;
+    /* Anchor below header */
+    transform: none;
+    /* Remove centering transform */
     width: 100px;
     background: rgba(11, 14, 20, 0.6);
     backdrop-filter: blur(20px);
     border-radius: 20px;
     display: flex;
     flex-direction: column;
+    gap: 10px;
+    padding: 15px 0;
+    z-index: 100;
+    max-height: calc(100vh - 130px);
+    /* Fill remaining height */
     gap: 10px;
     padding: 15px 0;
     z-index: 100;
