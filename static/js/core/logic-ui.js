@@ -21,11 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 100);
 
-    // Initialize Unit System
-    if (!localStorage.getItem('vyamir_unit_system')) {
+    // Initialize Unit System - FORCE METRIC for refined cleanup
+    if (!localStorage.getItem('vyamir_unit_system') || localStorage.getItem('vyamir_unit_system') === 'imperial') {
         localStorage.setItem('vyamir_unit_system', 'metric');
     }
-    window.unitSystem = localStorage.getItem('vyamir_unit_system');
+    window.unitSystem = 'metric'; // Hard enforce
     updateUnitUI();
 });
 
@@ -2255,6 +2255,33 @@ window.scrollToHero = function () {
         container.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+};
+
+// --- VIEWPORT MANAGEMENT ---
+window.performWelcomeSearch = function () {
+    const query = document.getElementById('welcome-search-input').value;
+    if (!query) return;
+
+    // Transition to Dashboard
+    document.body.classList.remove('is-landing');
+    document.body.classList.add('is-dashboard');
+
+    // Smooth scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    searchCity(query);
+};
+
+// Also ensure searchCity handles the transition if called from elsewhere
+const originalSearchCity = window.searchCity;
+window.searchCity = function (query) {
+    document.body.classList.remove('is-landing');
+    document.body.classList.add('is-dashboard');
+    if (originalSearchCity) originalSearchCity(query);
+    else {
+        // Fallback if original not defined yet (should be defined below)
+        fetchWeatherData(query);
     }
 };
 
