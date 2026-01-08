@@ -65,11 +65,39 @@
             <div class="detail-desc" id="detail-pressure-desc">Stable</div>
         </div>
 
-        <!-- 8. Air Quality -->
-        <div class="detail-card glass-inner">
-            <div class="detail-header"><i class="bi bi-lungs"></i> Air Quality</div>
-            <div class="detail-value" id="detail-aqi-val">--</div>
-            <div class="detail-desc" id="detail-aqi-status">Great Air Quality</div>
+        <!-- 8. Air Quality (Expanded) -->
+        <div class="detail-card glass-inner" style="grid-column: span 1 / -1;">
+            <div class="detail-header"><i class="bi bi-lungs"></i> Air Quality Intelligence</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+                <div style="flex: 1; text-align: center; border-right: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 5px;">AQI</div>
+                    <div class="detail-value" id="detail-aqi-val" style="font-size: 1.8rem;">--</div>
+                    <div class="detail-desc" id="detail-aqi-status" style="font-size: 0.8rem; margin-top: 5px;">--</div>
+                </div>
+                <div style="flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div
+                        style="text-align: center; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px;">
+                        <div style="font-size: 0.7rem; color: #888;">PM2.5</div>
+                        <div id="detail-pm25" style="font-weight: 700; color: #fff;">--</div>
+                    </div>
+                    <div
+                        style="text-align: center; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px;">
+                        <div style="font-size: 0.7rem; color: #888;">PM10</div>
+                        <div id="detail-pm10" style="font-weight: 700; color: #fff;">--</div>
+                    </div>
+                    <div
+                        style="text-align: center; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px;">
+                        <div style="font-size: 0.7rem; color: #888;">Ozone</div>
+                        <div id="detail-o3" style="font-weight: 700; color: #fff;">--</div>
+                    </div>
+                    <div
+                        style="text-align: center; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px;">
+                        <div style="font-size: 0.7rem; color: #888;">Advice</div>
+                        <div id="detail-aqi-advice"
+                            style="font-size: 0.65rem; line-height: 1.1; color: var(--accent-color);">--</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- 9. Pollen -->

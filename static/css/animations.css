@@ -1,0 +1,146 @@
+/* --- DYNAMIC WEATHER ANIMATIONS --- */
+
+/* Base Overlay for animations */
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    /* Behind content but above background color/image */
+    opacity: 0;
+    transition: opacity 2s ease;
+}
+
+/* 1. RAIN ANIMATION */
+body.bg-rain::before {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 100%);
+    background-size: 2px 20px;
+    opacity: 0.3;
+    animation: rainDrop 0.8s linear infinite;
+}
+
+@keyframes rainDrop {
+    0% {
+        transform: translateY(-100vh);
+    }
+
+    100% {
+        transform: translateY(100vh);
+    }
+}
+
+/* 2. THUNDERSTORM ANIMATION (Lightning) */
+body.bg-thunderstorm::after {
+    background: white;
+    opacity: 0;
+    animation: lightningFlash 8s infinite;
+}
+
+/* Use a second layer for rain in storm */
+body.bg-thunderstorm::before {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0) 100%);
+    background-size: 3px 25px;
+    opacity: 0.4;
+    animation: rainDrop 0.5s linear infinite;
+}
+
+@keyframes lightningFlash {
+
+    0%,
+    90% {
+        opacity: 0;
+    }
+
+    92% {
+        opacity: 0.6;
+    }
+
+    94% {
+        opacity: 0;
+    }
+
+    96% {
+        opacity: 0.3;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+/* 3. SNOW ANIMATION */
+body.bg-snow::before {
+    background-image:
+        radial-gradient(3px 3px at 20% 30%, rgba(255, 255, 255, 0.8) 50%, rgba(0, 0, 0, 0)),
+        radial-gradient(3px 3px at 40% 70%, rgba(255, 255, 255, 0.8) 50%, rgba(0, 0, 0, 0)),
+        radial-gradient(3px 3px at 60% 20%, rgba(255, 255, 255, 0.8) 50%, rgba(0, 0, 0, 0)),
+        radial-gradient(3px 3px at 80% 80%, rgba(255, 255, 255, 0.8) 50%, rgba(0, 0, 0, 0));
+    background-size: 200px 200px;
+    opacity: 0.6;
+    animation: snowFall 6s linear infinite;
+}
+
+@keyframes snowFall {
+    0% {
+        transform: translateY(-200px);
+    }
+
+    100% {
+        transform: translateY(100vh);
+    }
+}
+
+/* 4. CLOUDS (Moving Mist) */
+body.bg-clouds::before,
+body.bg-mist::before {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+    background-size: 400px 400px;
+    opacity: 0.4;
+    animation: floatClouds 30s linear infinite;
+}
+
+@keyframes floatClouds {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 400px 0;
+    }
+}
+
+/* BACKGROUND GRADIENTS (High-Fidelity) */
+body.bg-clear {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+}
+
+body.bg-clouds {
+    background: linear-gradient(135deg, #304352 0%, #3e5069 100%);
+}
+
+body.bg-rain {
+    background: linear-gradient(135deg, #203a43 0%, #2c5364 100%);
+}
+
+body.bg-thunderstorm {
+    background: linear-gradient(135deg, #141E30 0%, #243B55 100%);
+}
+
+body.bg-snow {
+    background: linear-gradient(135deg, #83a4d4 0%, #b6fbff 100%);
+    color: #1e3c72;
+}
+
+body.bg-snow .glass-panel {
+    background: rgba(30, 60, 114, 0.2);
+}
+
+/* Adapt glass for light bg */
+body.bg-mist {
+    background: linear-gradient(135deg, #3E5151 0%, #DECBA4 100%);
+}

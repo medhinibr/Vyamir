@@ -19,6 +19,14 @@
     </div>
     <div id="map"></div>
     <div class="map-tools">
-        <div class="layer-chip active">Live Radar</div>
+        <div class="layer-chip active"
+            onclick="switchMapLayer('default'); document.querySelectorAll('.layer-chip').forEach(c=>c.classList.remove('active')); this.classList.add('active');">
+            <i class="bi bi-map"></i> Standard</div>
+        <div class="layer-chip"
+            onclick="switchMapLayer('radar'); document.querySelectorAll('.layer-chip').forEach(c=>c.classList.remove('active')); this.classList.add('active');">
+            <i class="bi bi-cloud-rain"></i> Radar</div>
+        <div class="layer-chip"
+            onclick="switchMapLayer('satellite'); document.querySelectorAll('.layer-chip').forEach(c=>c.classList.remove('active')); this.classList.add('active');">
+            <i class="bi bi-globe"></i> Satellite</div>
     </div>
 </div>

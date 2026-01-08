@@ -5,6 +5,7 @@
 @import 'components/weather/part-daily-list.css';
 @import 'components/weather/part-gauges.css';
 @import 'components/safety/part-map.css';
+@import 'animations.css';
 
 /* Hourly Scroll Customization - Hide Scrollbar */
 .hourly-scroll-track {

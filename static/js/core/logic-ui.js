@@ -608,15 +608,8 @@ async function handleSearchSelection(city, lat, lon, isInitial = false) {
         // Removed sequential calls - handled by decoupled tasks above
         try {
             if (window.initMap) {
+                // Initialize map with current coordinates
                 window.initMap(lat, lon);
-                if (window.mapInstance) {
-                    window.mapInstance.setView([lat, lon], 10);
-                    window.mapInstance.eachLayer((layer) => {
-                        if (layer instanceof L.Marker) {
-                            layer.setLatLng([lat, lon]);
-                        }
-                    });
-                }
             }
         } catch (e) { console.error("Map init failed", e); }
 
@@ -778,15 +771,27 @@ function updateDetails(data) {
     if (pressure > prevPressure + 1) pressDesc = "Rising";
     setText('detail-pressure-desc', pressDesc);
 
-    // 8. Air Quality
+    // 8. Air Quality (Enhanced)
     const aqi = data.air_quality ? data.air_quality.european_aqi[nowHour] : 0;
+    const pm25 = data.air_quality ? data.air_quality.pm2_5[nowHour] : 0;
+    const pm10 = data.air_quality ? data.air_quality.pm10[nowHour] : 0;
+    const o3 = data.air_quality ? data.air_quality.ozone[nowHour] : 0;
+
     setText('detail-aqi-val', aqi);
+    setText('detail-pm25', Math.round(pm25));
+    setText('detail-pm10', Math.round(pm10));
+    setText('detail-o3', Math.round(o3));
+
     let aqiStatus = "Good";
-    if (aqi > 20) aqiStatus = "Fair";
-    if (aqi > 40) aqiStatus = "Moderate";
-    if (aqi > 60) aqiStatus = "Poor";
-    if (aqi > 80) aqiStatus = "Very Poor";
+    let advice = "Safe for outdoor activities.";
+
+    if (aqi > 20) { aqiStatus = "Fair"; advice = "Sensitive groups should reduce exertion."; }
+    if (aqi > 40) { aqiStatus = "Moderate"; advice = "Mask recommended for sensitive nodes."; }
+    if (aqi > 60) { aqiStatus = "Poor"; advice = "Limit outdoor exposure. Wear a mask."; }
+    if (aqi > 80) { aqiStatus = "Very Poor"; advice = "Health Alert: Avoid all outdoor exertion."; }
+
     setText('detail-aqi-status', aqiStatus);
+    setText('detail-aqi-advice', advice);
 
     // 9. Pollen Aggregate (High-Fidelity Bio-Density Tracking)
     const aq = data.air_quality;
@@ -2048,30 +2053,81 @@ window.scrollToHero = function () {
     }
 };
 
-window.returnToLanding = function () {
-    // Halt current animations to prevent layering
-    if (window.pauseSkyAnimation) window.pauseSkyAnimation();
+// --------------------------------------------------------
+// GLOBAL MAP ENGINE (Leaflet + RainViewer + Satellite)
+// --------------------------------------------------------
+window.initMap = function (lat, lon) {
+    const mapId = 'map';
+    // If map already exists, just recenter it
+    if (window.mapInstance) {
+        window.mapInstance.setView([lat, lon], 10);
 
-    document.body.classList.add('is-landing');
-    document.body.classList.remove('is-dashboard');
-
-    const welcome = document.querySelector('.welcome-container');
-    if (welcome) {
-        welcome.style.display = 'flex';
-        setTimeout(() => {
-            welcome.style.opacity = '1';
-            welcome.style.visibility = 'visible';
-            initSkyGame(); // Restart constellations
-        }, 10);
+        // Move existing marker
+        if (window.mapMarker) window.mapMarker.setLatLng([lat, lon]);
+        return;
     }
 
-    const grid = document.querySelector('.grid-container');
-    if (grid) grid.style.display = 'none';
+    const mapElement = document.getElementById(mapId);
+    if (!mapElement) return;
 
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar) sidebar.style.display = 'none';
+    // Dark Matter Base Layer (CartoDB)
+    const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+    });
 
-    window.scrollTo(0, 0);
+    // Satellite Layer (Esri World Imagery)
+    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
+
+    // Initialize Map
+    window.mapInstance = L.map(mapId, {
+        center: [lat, lon],
+        zoom: 10,
+        layers: [darkLayer] // Default
+    });
+
+    // Marker
+    window.mapMarker = L.marker([lat, lon]).addTo(window.mapInstance);
+
+    // RAINVIEWER RADAR LAYER (Live Precip)
+    // We add it but initially it might be empty until we set time
+    const rainLayer = L.tileLayer('https://tile.rainviewer.com/img/radar_nowcast_png/256/{z}/{x}/{y}/2/1_1.png', {
+        opacity: 0.7,
+        attribution: '&copy; <a href="https://www.rainviewer.com/api.html">RainViewer</a>',
+        zIndex: 100
+    });
+    rainLayer.addTo(window.mapInstance);
+
+    // Layer Controls
+    const baseMaps = {
+        "Dark Map": darkLayer,
+        "Satellite": satelliteLayer
+    };
+
+    const overlayMaps = {
+        "Precipitation (Radar)": rainLayer
+    };
+
+    L.control.layers(baseMaps, overlayMaps).addTo(window.mapInstance);
+
+    // Custom Layer Chip Logic (Sync with UI)
+    window.switchMapLayer = function (type) {
+        if (type === 'radar') {
+            if (!window.mapInstance.hasLayer(rainLayer)) window.mapInstance.addLayer(rainLayer);
+        } else if (type === 'satellite') {
+            if (window.mapInstance.hasLayer(satelliteLayer)) return;
+            window.mapInstance.removeLayer(darkLayer);
+            window.mapInstance.addLayer(satelliteLayer);
+        } else {
+            // Default
+            if (window.mapInstance.hasLayer(darkLayer)) return;
+            window.mapInstance.removeLayer(satelliteLayer);
+            window.mapInstance.addLayer(darkLayer);
+        }
+    }
 };
 
 // --------------------------------------------------------
@@ -2185,3 +2241,17 @@ function getUnit(type) {
     if (type === 'precip') return window.unitSystem === 'imperial' ? 'in' : 'mm';
     return '';
 }
+
+
+// DYNAMIC BACKGROUND ENGINE
+window.updateBackground = function(code, isDay) {
+    document.body.className = document.body.className.replace(/bg-\w+/g, '').trim();
+    let bgClass = 'bg-clear';
+    if (code >= 200 && code < 300) bgClass = 'bg-thunderstorm';
+    else if (code >= 300 && code < 600) bgClass = 'bg-rain';
+    else if (code >= 600 && code < 700) bgClass = 'bg-snow';
+    else if (code >= 700 && code < 800) bgClass = 'bg-mist';
+    else if (code === 800) bgClass = isDay ? 'bg-clear' : 'bg-clear';
+    else if (code > 800) bgClass = 'bg-clouds';
+    document.body.classList.add(bgClass);
+};
