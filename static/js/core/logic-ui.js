@@ -832,30 +832,71 @@ function updateHero(data) {
         heroContent.prepend(accuracyNote);
     }
     // Daily Forecast List
+    // FORECAST TOGGLE LOGIC
+    window.toggleForecast = function (mode) {
+        const hourly = document.getElementById('section-hourly');
+        const daily = document.getElementById('section-7day');
+        const btnHourly = document.getElementById('btn-hourly');
+        const btnDaily = document.getElementById('btn-daily');
+
+        if (mode === 'hourly') {
+            hourly.style.display = 'block';
+            daily.style.display = 'none';
+            btnHourly.style.background = 'var(--accent-color)';
+            btnHourly.style.color = 'white';
+            btnDaily.style.background = 'transparent';
+            btnDaily.style.color = 'rgba(255,255,255,0.6)';
+        } else {
+            hourly.style.display = 'none';
+            daily.style.display = 'block';
+            btnDaily.style.background = 'var(--accent-color)';
+            btnDaily.style.color = 'white';
+            btnHourly.style.background = 'transparent';
+            btnHourly.style.color = 'rgba(255,255,255,0.6)';
+        }
+    };
+
+    // Daily Forecast List
     const listContainer = document.querySelector('.daily-list-vertical');
     if (listContainer) {
-        listContainer.innerHTML = '<div style="font-weight: 600; margin-bottom: 15px; font-size: 1.1rem;">15-Day Extended Forecast</div>';
+        listContainer.innerHTML = ''; // Cleared redundant header
 
         // EXTENDED FORECAST: 15 Days
         const maxDays = Math.min(15, data.daily.time.length);
+        const rainProbs = data.daily.precipitation_probability_max || []; // Safeguard
+
         for (let i = 0; i < maxDays; i++) {
             if (!data.daily.time[i]) continue;
             const date = new Date(data.daily.time[i]);
             const dayName = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             const iconCode = data.daily.weathercode[i];
+            const pop = rainProbs[i] !== undefined ? rainProbs[i] : 0;
 
             const row = document.createElement('div');
             row.className = 'daily-row';
+
+            // Rain Icon Logic
+            const rainHTML = pop > 0
+                ? `<div style="display:flex; align-items:center; gap:3px; font-size:0.75rem; color:#4fc3f7; min-width:60px;">
+                     <i class="bi bi-droplet-fill"></i> ${pop}%
+                   </div>`
+                : `<div style="min-width:60px; text-align:center; font-size:0.8rem; opacity:0.1;">-</div>`;
+
             row.innerHTML = `
-                    <div class="daily-day" style="font-size: 0.9rem;">${dayName}</div>
-                    <div class="daily-icon-group">
+                    <div class="daily-day" style="font-size: 0.9rem; flex:1;">${dayName}</div>
+                    
+                    <div class="daily-icon-group" style="flex:1.5; display:flex; align-items:center; gap:8px;">
                          <i class="${getWeatherIcon(iconCode)}" style="font-size: 1.2rem; width: 30px; text-align: center;"></i>
-                         <span style="font-size: 0.8rem; opacity: 0.8; margin-left:10px;">${getWeatherDescription(iconCode)}</span>
+                         <span style="font-size: 0.8rem; opacity: 0.8;">${getWeatherDescription(iconCode)}</span>
                     </div>
-                    <div class="daily-temp-group">
-                        <span class="day-temp-low">${Math.round(getTemp(data.daily.temperature_2m_min[i]))}°</span>
-                        <div class="temp-bar"><div class="temp-fill" style="width: 50%"></div></div>
-                        <span class="day-temp-high">${Math.round(getTemp(data.daily.temperature_2m_max[i]))}°</span>
+
+                    <!-- Rain Prob -->
+                    ${rainHTML}
+
+                    <div class="daily-temp-group" style="flex:1; justify-content:flex-end;">
+                        <span class="day-temp-low" style="opacity:0.6;">${Math.round(getTemp(data.daily.temperature_2m_min[i]))}°</span>
+                        <div class="temp-bar" style="width:40px; margin:0 8px;"><div class="temp-fill" style="width: 50%"></div></div>
+                        <span class="day-temp-high" style="font-weight:600;">${Math.round(getTemp(data.daily.temperature_2m_max[i]))}°</span>
                     </div>
                 `;
             listContainer.appendChild(row);

@@ -235,8 +235,34 @@
                         <div class="grid-container">
                             <!-- Left Column -->
                             <div class="left-col">
-                                <div id="section-hourly">{% include 'components/weather/part_chart.html' %}</div>
-                                <div id="section-7day">{% include 'components/weather/part_daily_forecast.html' %}</div>
+                                <!-- FORECAST TOGGLE CONTAINER -->
+                                <div class="glass-panel" style="padding: 20px; margin-bottom: 20px; overflow: hidden;">
+                                    <div
+                                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                        <h3 style="margin: 0; font-weight: 500;">Forecast</h3>
+
+                                        <!-- Toggle Switch -->
+                                        <div class="forecast-toggle"
+                                            style="background: rgba(0,0,0,0.3); border-radius: 20px; padding: 4px; display: flex;">
+                                            <div id="btn-hourly" onclick="toggleForecast('hourly')"
+                                                style="padding: 6px 16px; border-radius: 16px; cursor: pointer; font-size: 0.85rem; font-weight: 600; background: var(--accent-color); color: white; transition: 0.3s;">
+                                                Hourly
+                                            </div>
+                                            <div id="btn-daily" onclick="toggleForecast('daily')"
+                                                style="padding: 6px 16px; border-radius: 16px; cursor: pointer; font-size: 0.85rem; font-weight: 600; color: rgba(255,255,255,0.6); transition: 0.3s;">
+                                                15-Day
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Content Views -->
+                                    <div id="section-hourly" style="display: block; animation: fadeIn 0.5s;">
+                                        {% include 'components/weather/part_chart.html' %}
+                                    </div>
+                                    <div id="section-7day" style="display: none; animation: fadeIn 0.5s;">
+                                        {% include 'components/weather/part_daily_forecast.html' %}
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Right Column -->
