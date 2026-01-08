@@ -2,7 +2,7 @@
 
 Vyamir is a high-fidelity, professional-grade weather intelligence platform built for high situational awareness. It bridges the gap between raw meteorological telemetry and cinematic user experience, transforming complex environmental vectors into a seamless, interactive dashboard.
 
-**Deployment Node:**  [vyamir.onrender.com](https://vyamir.onrender.com/)
+**Deployment Node:**  
 
 
 ## High-Fidelity Features
