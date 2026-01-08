@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
             window.checkUserPrivacyConsent();
         }
     }, 100);
+
+    // Initialize Unit System
+    if (!localStorage.getItem('vyamir_unit_system')) {
+        localStorage.setItem('vyamir_unit_system', 'metric');
+    }
+    window.unitSystem = localStorage.getItem('vyamir_unit_system');
+    updateUnitUI();
 });
 
 function initDashboard() {
@@ -483,7 +490,8 @@ async function handleSearchSelection(city, lat, lon, isInitial = false) {
         const fetchWeatherTask = (async () => {
             try {
                 // Expanding daily vectors to include Sunrise, Sunset, and UV Index Max for a complete dashboard profile
-                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,visibility,wind_speed_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&timezone=auto`;
+                // MODIFICATION: Extended forecast days to 16 for 15-day view + 48-hour buffer
+                const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,visibility,wind_speed_10m,wind_direction_10m,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max&forecast_days=16&timezone=auto`;
                 const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&hourly=pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,european_aqi,uv_index,alder_pollen,birch_pollen,grass_pollen,ragweed_pollen,olive_pollen&timezone=auto`;
 
                 const [wRes, aRes, metaRes] = await Promise.all([
@@ -546,7 +554,8 @@ async function handleSearchSelection(city, lat, lon, isInitial = false) {
                 try { updateDetails(normalizedData); } catch (e) { console.error("Details update failed", e); }
                 try { updateNews(normalizedData); } catch (e) { console.error("News update failed", e); }
                 try { updateHazards(normalizedData); } catch (e) { console.error("Hazards update failed", e); }
-                try { if (window.initChart) window.initChart(normalizedData); } catch (e) { console.error("Chart init failed", e); }
+                try { updateHourlyScroll(normalizedData); } catch (e) { console.error("Hourly scroll failed", e); }
+                // Replaced Chart with Scroll: try { if (window.initChart) window.initChart(normalizedData); } catch (e) { console.error("Chart init failed", e); }
 
                 try { updateBackground(normalizedData.current.weathercode, normalizedData.current.is_day); } catch (e) { console.error("Background update failed", e); }
 
@@ -642,7 +651,7 @@ function updateHero(data) {
     const pressure = current.pressure_msl || current.surface_pressure || current.pressure;
 
     document.querySelector('.location-title').textContent = city;
-    document.querySelector('.temp-large').textContent = Math.round(temperature) + '°';
+    document.querySelector('.temp-large').textContent = Math.round(getTemp(temperature)) + getUnit('temp');
     document.querySelector('.condition-text').textContent = getWeatherDescription(weatherCode);
 
     // POPULATE HERO SUB-DETAILS: Synchronized with city temporal clock
@@ -650,12 +659,12 @@ function updateHero(data) {
     const nowHour = cityTime.getHours();
 
     const humidity = data.hourly.relativehumidity_2m ? data.hourly.relativehumidity_2m[nowHour] : '--';
-    const visibility = data.hourly.visibility ? (data.hourly.visibility[nowHour] / 1000).toFixed(1) : '--';
+    const visibility = data.hourly.visibility ? (data.hourly.visibility[nowHour] / 1000) : '--';
     const finalPressure = pressure || (data.hourly.surface_pressure ? data.hourly.surface_pressure[nowHour] : '--');
 
-    setText('hero-wind', wind + ' km/h');
+    setText('hero-wind', `${getSpeed(wind).toFixed(1)} ${getUnit('speed')}`);
     setText('hero-humidity', humidity + '%');
-    setText('hero-visibility', visibility + ' km');
+    setText('hero-visibility', `${getDist(visibility).toFixed(1)} ${getUnit('dist')}`);
     setText('hero-pressure', Math.round(finalPressure) + ' hPa');
     setText('history-text', data.history || 'Historical data unavailable.');
 
@@ -679,26 +688,28 @@ function updateHero(data) {
     // Daily Forecast List
     const listContainer = document.querySelector('.daily-list-vertical');
     if (listContainer) {
-        listContainer.innerHTML = '<div style="font-weight: 600; margin-bottom: 15px; font-size: 1.1rem;">7-Day Forecast</div>';
+        listContainer.innerHTML = '<div style="font-weight: 600; margin-bottom: 15px; font-size: 1.1rem;">15-Day Extended Forecast</div>';
 
-        for (let i = 0; i < 7; i++) {
+        // EXTENDED FORECAST: 15 Days
+        const maxDays = Math.min(15, data.daily.time.length);
+        for (let i = 0; i < maxDays; i++) {
             if (!data.daily.time[i]) continue;
             const date = new Date(data.daily.time[i]);
-            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             const iconCode = data.daily.weathercode[i];
 
             const row = document.createElement('div');
             row.className = 'daily-row';
             row.innerHTML = `
-                    <div class="daily-day">${dayName}</div>
+                    <div class="daily-day" style="font-size: 0.9rem;">${dayName}</div>
                     <div class="daily-icon-group">
                          <i class="${getWeatherIcon(iconCode)}" style="font-size: 1.2rem; width: 30px; text-align: center;"></i>
-                         <span style="font-size: 0.9rem; opacity: 0.8;">${getWeatherDescription(iconCode)}</span>
+                         <span style="font-size: 0.8rem; opacity: 0.8; margin-left:10px;">${getWeatherDescription(iconCode)}</span>
                     </div>
                     <div class="daily-temp-group">
-                        <span class="day-temp-low">${Math.round(data.daily.temperature_2m_min[i])}°</span>
+                        <span class="day-temp-low">${Math.round(getTemp(data.daily.temperature_2m_min[i]))}°</span>
                         <div class="temp-bar"><div class="temp-fill" style="width: 50%"></div></div>
-                        <span class="day-temp-high">${Math.round(data.daily.temperature_2m_max[i])}°</span>
+                        <span class="day-temp-high">${Math.round(getTemp(data.daily.temperature_2m_max[i]))}°</span>
                     </div>
                 `;
             listContainer.appendChild(row);
@@ -720,13 +731,13 @@ function updateDetails(data) {
     const nowHour = cityTime.getHours();
 
     const feelsLike = hourly.apparent_temperature ? hourly.apparent_temperature[nowHour] : temperature;
-    setText('detail-feels-like', Math.round(feelsLike) + '°');
-    setText('detail-feels-desc', feelsLike < temperature ? "Cooler due to wind" : "Similar to actual");
+    setText('detail-feels-like', Math.round(getTemp(feelsLike)) + '°');
+    setText('detail-feels-desc', getTemp(feelsLike) < getTemp(temperature) ? "Cooler due to wind" : "Similar to actual");
 
     // 2. Precipitation
     const precipProb = hourly.precipitation_probability ? hourly.precipitation_probability[nowHour] : 0;
     const precipAmount = hourly.precipitation ? hourly.precipitation[nowHour] : 0;
-    setText('detail-precip', precipAmount + ' mm');
+    setText('detail-precip', getPrecip(precipAmount).toFixed(1) + ' ' + getUnit('precip'));
     setText('detail-precip-desc', precipProb + '% chance in next hour');
 
     // 3. Humidity
@@ -734,10 +745,10 @@ function updateDetails(data) {
     setText('detail-humidity', humidity + '%');
     // Dew Point approx: T - ((100 - RH)/5)
     const dewPoint = Math.round(temperature - ((100 - humidity) / 5));
-    setText('detail-humidity-desc', `The dew point is ${dewPoint}°`);
+    setText('detail-humidity-desc', `The dew point is ${Math.round(getTemp(dewPoint))}°`);
 
     // 4. Wind
-    setText('detail-wind', windSpeed);
+    setText('detail-wind', `${getSpeed(windSpeed).toFixed(1)} ${getUnit('speed')}`);
     const arrow = document.getElementById('wind-arrow');
     if (arrow) arrow.style.transform = `rotate(${windDir}deg)`;
 
@@ -754,8 +765,8 @@ function updateDetails(data) {
 
     // 6. Visibility
     let vis = hourly.visibility ? hourly.visibility[nowHour] : 10000;
-    vis = (vis / 1000).toFixed(1);
-    setText('detail-visibility', vis + ' km');
+    vis = (vis / 1000);
+    setText('detail-visibility', getDist(vis).toFixed(1) + ' ' + getUnit('dist'));
 
     // 7. Pressure
     const pressure = hourly.surface_pressure ? hourly.surface_pressure[nowHour] : 1013;
@@ -901,14 +912,14 @@ function updateHazards(data) {
 
     // 3. Temperature Stress
     if (temp > 35) {
-        hazardHTML += createHazardItem('bi-thermometer-high', '#f44336', `Thermal Spike: ${temp}°C`, `Intense heat identified in ${city}. Stay hydrated.`);
+        hazardHTML += createHazardItem('bi-thermometer-high', '#f44336', `Thermal Spike: ${Math.round(getTemp(temp))}°`, `Intense heat identified in ${city}. Stay hydrated.`);
     } else if (temp < 0) {
-        hazardHTML += createHazardItem('bi-thermometer-snow', '#2196f3', `Cryo Notice: ${temp}°C`, `Sub-zero temperatures recorded near ${city}.`);
+        hazardHTML += createHazardItem('bi-thermometer-snow', '#2196f3', `Cryo Notice: ${Math.round(getTemp(temp))}°`, `Sub-zero temperatures recorded near ${city}.`);
     }
 
     // 4. Wind Velocity
     if (wind > 40) {
-        hazardHTML += createHazardItem('bi-wind', '#ffeb3b', `High Vector: ${wind} km/h`, `Strong atmospheric flow sweeping through ${city}.`);
+        hazardHTML += createHazardItem('bi-wind', '#ffeb3b', `High Vector: ${Math.round(getSpeed(wind))} ${getUnit('speed')}`, `Strong atmospheric flow sweeping through ${city}.`);
     }
 
     // 5. UV Exposure
@@ -2062,3 +2073,115 @@ window.returnToLanding = function () {
 
     window.scrollTo(0, 0);
 };
+
+// --------------------------------------------------------
+// ATMOSPHERIC UNIT CONVERSION & HELPER PROTOCOLS
+// --------------------------------------------------------
+
+window.updateHourlyScroll = function (data) {
+    const container = document.getElementById('section-hourly');
+    if (!container) return;
+
+    const hourly = data.hourly;
+    const currentHourIndex = new Date(data.current.time).getHours(); // Roughly align with current hour slot
+    // Since API returns hourly data starting from day start, we need to find the current time index.
+    // Open-Meteo hourly.time is ISO array.
+
+    // Find index nearest to now
+    const nowStr = data.current.time.slice(0, 13); // "YYYY-MM-DDTHH"
+    let startIndex = hourly.time.findIndex(t => t.startsWith(nowStr));
+    if (startIndex === -1) startIndex = 0;
+
+    let html = `
+    <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; color: #fff;">48-Hour Trajectory</h3>
+        <div style="display: flex; overflow-x: auto; gap: 15px; padding-bottom: 10px; scrollbar-width: thin;" class="hourly-scroll-track">
+    `;
+
+    for (let i = startIndex; i < startIndex + 48 && i < hourly.time.length; i++) {
+        const time = new Date(hourly.time[i]);
+        const hourLabel = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }).replace(':00', '');
+        const temp = Math.round(getTemp(hourly.temperature_2m[i]));
+        const icon = getWeatherIcon(hourly.weathercode[i]);
+        const precip = hourly.precipitation_probability[i];
+        const wind = Math.round(getSpeed(hourly.windspeed_10m[i]));
+
+        html += `
+        <div style="min-width: 70px; display: flex; flex-direction: column; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 12px 5px; border-radius: 12px;">
+            <div style="font-size: 0.8rem; opacity: 0.7;">${hourLabel}</div>
+            <i class="${icon}" style="font-size: 1.5rem; color: #fff;"></i>
+            <div style="font-size: 1.1rem; font-weight: 700;">${temp}°</div>
+            <div style="font-size: 0.75rem; color: #81d4fa;"><i class="bi bi-droplet-fill"></i> ${precip}%</div>
+            <div style="font-size: 0.75rem; color: #ccc;"><i class="bi bi-wind"></i> ${wind}</div>
+        </div>
+        `;
+    }
+
+    html += `</div></div>`;
+    container.innerHTML = html;
+};
+
+window.toggleUnits = function () {
+    window.unitSystem = window.unitSystem === 'metric' ? 'imperial' : 'metric';
+    localStorage.setItem('vyamir_unit_system', window.unitSystem);
+    updateUnitUI();
+
+    // Refresh Dashboard if data exists
+    if (window.weatherData) {
+        updateHero(window.weatherData);
+        updateDetails(window.weatherData);
+        updateHazards(window.weatherData);
+        updateHourlyScroll(window.weatherData);
+    }
+};
+
+window.updateUnitUI = function () {
+    const c = document.getElementById('unit-c');
+    const f = document.getElementById('unit-f');
+    if (c && f) {
+        if (window.unitSystem === 'metric') {
+            c.style.color = 'white'; c.style.fontWeight = '700'; c.style.opacity = '1';
+            f.style.color = 'rgba(255,255,255,0.5)'; f.style.fontWeight = '400';
+        } else {
+            f.style.color = 'white'; f.style.fontWeight = '700'; f.style.opacity = '1';
+            c.style.color = 'rgba(255,255,255,0.5)'; c.style.fontWeight = '400';
+        }
+    }
+};
+
+window.detectLocation = function () {
+    const icon = document.querySelector('.bi-geo');
+    if (icon) icon.className = "bi bi-hourglass-split spin-animation"; // Add animation class if exists
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                // Success
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                handleSearchSelection("Your Coordinates", lat, lon);
+                if (icon) icon.className = "bi bi-geo";
+            },
+            (err) => {
+                showToast("Location access denied or failed.", "error");
+                if (icon) icon.className = "bi bi-geo";
+            }
+        );
+    } else {
+        showToast("Geolocation not supported.", "error");
+    }
+};
+
+// HELPER FUNCTIONS
+function getTemp(c) { return window.unitSystem === 'imperial' ? (c * 9 / 5) + 32 : c; }
+function getSpeed(kph) { return window.unitSystem === 'imperial' ? kph * 0.621371 : kph; }
+function getDist(km) { return window.unitSystem === 'imperial' ? km * 0.621371 : km; }
+function getPrecip(mm) { return window.unitSystem === 'imperial' ? mm * 0.0393701 : mm; }
+
+function getUnit(type) {
+    if (type === 'temp') return window.unitSystem === 'imperial' ? 'F' : 'C'; // Just the letter if needed, but I used symbol in code
+    if (type === 'speed') return window.unitSystem === 'imperial' ? 'mph' : 'km/h';
+    if (type === 'dist') return window.unitSystem === 'imperial' ? 'mi' : 'km';
+    if (type === 'precip') return window.unitSystem === 'imperial' ? 'in' : 'mm';
+    return '';
+}
