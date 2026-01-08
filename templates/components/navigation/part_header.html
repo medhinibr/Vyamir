@@ -12,6 +12,10 @@
                 onclick="detectLocation()" title="Detect My Location"></i>
             <input type="text" id="header-search-input" name="dashboard-search" class="search-input"
                 placeholder="Search city..." value="{{ city if city else '' }}">
+            <!-- Save Location Button -->
+            <i class="bi bi-star" onclick="saveCurrentLocation()" title="Save Location"
+                style="color:rgba(255,255,255,0.4); cursor:pointer; margin:0 10px; transition:0.3s;"
+                onmouseover="this.style.color='#ffd700'" onmouseout="this.style.color='rgba(255,255,255,0.4)'"></i>
             <button class="search-btn">Search</button>
         </div>
     </div>

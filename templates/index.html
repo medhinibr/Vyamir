@@ -474,8 +474,23 @@
                                 style="display: flex; gap: 10px; margin-bottom: 30px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 12px;">
                                 <button id="vault-tab-id" onclick="switchVaultTab('id')" class="vault-tab-active"
                                     style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: var(--accent-color); color: white; font-weight: 600; cursor: pointer; transition: 0.3s;">Identity</button>
+                                <button id="vault-tab-saved" onclick="switchVaultTab('saved')"
+                                    style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: transparent; color: white; font-weight: 600; cursor: pointer; transition: 0.3s;">Saved</button>
                                 <button id="vault-tab-transfer" onclick="switchVaultTab('transfer')"
                                     style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: transparent; color: white; font-weight: 600; cursor: pointer; transition: 0.3s;">Transfer</button>
+                            </div>
+
+                            <!-- Saved Locations Content -->
+                            <div id="vault-saved-content" style="display: none;">
+                                <div
+                                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                                    <h4 style="color:white; margin:0;">My Locations</h4>
+                                    <span style="font-size:0.8rem; color:rgba(255,255,255,0.5);">Auto-synced
+                                        locally</span>
+                                </div>
+                                <div id="saved-locations-list" style="max-height: 200px; overflow-y: auto;">
+                                    <!-- Populated by JS -->
+                                </div>
                             </div>
 
                             <div id="vault-id-content">

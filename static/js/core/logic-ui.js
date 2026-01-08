@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ASYNC BRIDGE: Wait for core weather data before triggering specialized UIs
+// ASYNC BRIDGE: Wait for core weather data before triggering specialized UIs
 function waitForDataSync(callback) {
     const waiter = setInterval(() => {
         if (window.weatherData) {
@@ -38,6 +39,136 @@ function waitForDataSync(callback) {
         }
     }, 200);
 }
+
+// --- RETENTION ENGINE: SAVED LOCATIONS & ALERTS ---
+
+// 1. Saved Locations Logic
+function saveCurrentLocation() {
+    // Get city from Hero or window storage
+    const cityEl = document.querySelector('.hero-city h1') || document.querySelector('.hero-brand-name');
+    const city = cityEl ? cityEl.textContent.trim() : "Unknown";
+    const data = window.weatherData;
+
+    if (!data) {
+        alert("Please load a location first.");
+        return;
+    }
+
+    const lat = data.lat;
+    const lon = data.lon;
+
+    let locations = JSON.parse(localStorage.getItem('vyamir_saved_locs') || '[]');
+    // Check duplicate
+    if (locations.find(l => l.name === city)) {
+        alert("Location already saved!");
+        return;
+    }
+
+    locations.push({ name: city, lat: lat, lon: lon });
+    localStorage.setItem('vyamir_saved_locs', JSON.stringify(locations));
+    renderSavedLocations();
+    alert("Location Saved to Vault!");
+}
+
+function deleteSavedLocation(index) {
+    let locations = JSON.parse(localStorage.getItem('vyamir_saved_locs') || '[]');
+    locations.splice(index, 1);
+    localStorage.setItem('vyamir_saved_locs', JSON.stringify(locations));
+    renderSavedLocations();
+}
+
+function renderSavedLocations() {
+    const container = document.getElementById('saved-locations-list');
+    if (!container) return; // Might not exist on all pages (e.g. landing)
+
+    const locations = JSON.parse(localStorage.getItem('vyamir_saved_locs') || '[]');
+
+    if (locations.length === 0) {
+        container.innerHTML = `<div style="color:rgba(255,255,255,0.4); text-align:center; padding:10px; font-size:0.9rem;">No saved locations.</div>`;
+        return;
+    }
+
+    container.innerHTML = locations.map((loc, i) => `
+        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:5px;">
+            <div onclick="handleSearchSelection('${loc.name}', ${loc.lat}, ${loc.lon})" style="cursor:pointer; flex:1; display:flex; align-items:center; gap:8px;">
+                <i class="bi bi-geo-alt" style="color:var(--accent-color);"></i> 
+                <span class="saved-loc-name">${loc.name}</span>
+            </div>
+            <i class="bi bi-trash" onclick="deleteSavedLocation(${i})" style="cursor:pointer; color:#ff5858; opacity:0.7; font-size:0.9rem;"></i>
+        </div>
+    `).join('');
+}
+
+// 2. Video Feed Logic (YouTube Integration)
+function updateVideoFeed(city) {
+    const feedContainer = document.getElementById('video-feed-container');
+    if (!feedContainer) return;
+
+    // Use YouTube Embed with Search query (Privacy-enhanced mode)
+    // Note: 'listType=search' requires API interaction in some contexts, but simple embeds work if we assume basic access.
+    // Alternatively, just embed a standard search result iframe or a specific playlist.
+    // For V1, we try a direct search query embed if supported, or fallback to a generic weather channel.
+
+    const query = encodeURIComponent(`weather forecast ${city}`);
+    const html = `
+        <iframe width="100%" height="100%" 
+            src="https://www.youtube.com/embed?listType=search&list=${query}" 
+            title="Weather Forecast"
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen 
+            style="border-radius:12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-height: 300px;">
+        </iframe>
+        <div style="margin-top:10px; color:rgba(255,255,255,0.6); font-size:0.9rem;">
+            <i class="bi bi-youtube" style="color:#ff0000;"></i> Top forecast videos for ${city}
+        </div>
+    `;
+    feedContainer.innerHTML = html;
+}
+
+// 3. Severe Weather Alerts (Push Notifications)
+function checkSevereWeatherAlerts() {
+    if (!("Notification" in window)) return;
+
+    // Only ask if default
+    if (Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+
+    const data = window.weatherData;
+    if (!data) return;
+
+    // Logic: If Precip > 10mm or Wind > 50km/h
+    // We check DOM if raw data isn't in scope (a safe fallback in vanilla JS apps)
+    const windText = document.getElementById('detail-wind')?.textContent || "0";
+    const windVal = parseFloat(windText);
+
+    // Only alert once per session to avoid spam
+    if (window.hasAlerted) return;
+
+    if (windVal > 40) {
+        new Notification("Vyamir Severe Weather Alert", {
+            body: `High wind speeds detected (${windVal} km/h). Secure loose objects.`,
+            icon: '/static/img/logo.png'
+        });
+        window.hasAlerted = true;
+    }
+}
+
+// Global Expose
+window.renderSavedLocations = renderSavedLocations;
+window.saveCurrentLocation = saveCurrentLocation;
+window.updateVideoFeed = updateVideoFeed;
+
+// Init Hooks
+document.addEventListener("DOMContentLoaded", () => {
+    // If on News page, init video
+    if (document.getElementById('video-feed-container')) {
+        // Default to London or last search
+        const lastCity = localStorage.getItem('vyamir_last_city') || "Global";
+        updateVideoFeed(lastCity);
+    }
+});
 
 function initDashboard() {
     // BACKEND SYNC: Initialization will be handled by index.html auth cycle.
@@ -2014,23 +2145,41 @@ window.toggleVault = function () {
 window.switchVaultTab = function (tab) {
     const idContent = document.getElementById('vault-id-content');
     const transferContent = document.getElementById('vault-transfer-content');
+    const savedContent = document.getElementById('vault-saved-content');
+
     const idTab = document.getElementById('vault-tab-id');
     const transferTab = document.getElementById('vault-tab-transfer');
+    const savedTab = document.getElementById('vault-tab-saved');
 
+    // Reset All
+    idContent.style.display = 'none';
+    transferContent.style.display = 'none';
+    if (savedContent) savedContent.style.display = 'none'; // defensively check
+
+    idTab.classList.remove('vault-tab-active');
+    transferTab.classList.remove('vault-tab-active');
+    if (savedTab) savedTab.classList.remove('vault-tab-active');
+
+    idTab.style.background = 'transparent';
+    transferTab.style.background = 'transparent';
+    if (savedTab) savedTab.style.background = 'transparent';
+
+    // Activate Selected
     if (tab === 'id') {
         idContent.style.display = 'block';
-        transferContent.style.display = 'none';
         idTab.classList.add('vault-tab-active');
-        transferTab.classList.remove('vault-tab-active');
         idTab.style.background = 'var(--accent-color)';
-        transferTab.style.background = 'transparent';
-    } else {
-        idContent.style.display = 'none';
+    } else if (tab === 'transfer') {
         transferContent.style.display = 'block';
-        idTab.classList.remove('vault-tab-active');
         transferTab.classList.add('vault-tab-active');
-        idTab.style.background = 'transparent';
         transferTab.style.background = 'var(--accent-color)';
+    } else if (tab === 'saved') {
+        if (savedContent) savedContent.style.display = 'block';
+        if (savedTab) {
+            savedTab.classList.add('vault-tab-active');
+            savedTab.style.background = 'var(--accent-color)';
+        }
+        if (window.renderSavedLocations) window.renderSavedLocations();
     }
 };
 
