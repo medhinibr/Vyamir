@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Vyamir | Agricultural Intelligence</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+
+    <!-- Premium Typography: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <meta name="description"
+        content="Vyamir Agricultural Intelligence: Crop advisories, soil telemetry, and pest risk analysis for modern farming.">
+    <script id="vyamir-config" type="application/json">
+        {{ config | tojson | safe }}
+    </script>
+    <script>
+        window.VYAMIR_CONFIG = JSON.parse(document.getElementById('vyamir-config').textContent);
+        window.VYAMIR_SKIP_WELCOME = true;
+    </script>
+
+    <!-- Firebase Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-analytics.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: window.VYAMIR_CONFIG.FIREBASE_API_KEY,
+            authDomain: "vyamir-0156.firebaseapp.com",
+            projectId: "vyamir-0156",
+            storageBucket: "vyamir-0156.firebasestorage.app",
+            messagingSenderId: "587528291042",
+            appId: "1:587528291042:web:7ef286fc28ae3863b1d4bb",
+            measurementId: "G-ML1DF6JGM8"
+        };
+
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.firebaseApp = app;
+        window.firebaseAuth = auth;
+        window.db = db;
+
+        // AUTH PERSISTENCE ENGINE
+        (async () => {
+            try {
+                setTimeout(() => {
+                    const overlay = document.getElementById('session-restoration-overlay');
+                    if (overlay) {
+                        overlay.style.opacity = '0';
+                        setTimeout(() => overlay.remove(), 500);
+                    }
+                }, 4000);
+
+                await setPersistence(auth, browserLocalPersistence);
+
+                onAuthStateChanged(auth, (user) => {
+                    const overlay = document.getElementById('session-restoration-overlay');
+                    if (user) {
+                        if (window.checkUserPrivacyConsent) window.checkUserPrivacyConsent();
+                        const syncWait = setInterval(() => {
+                            if (window.vyamirSessionRestored || window.vyamirNeedsConsent) {
+                                clearInterval(syncWait);
+                                setTimeout(() => {
+                                    if (overlay) overlay.style.opacity = '0';
+                                    setTimeout(() => overlay?.remove(), 500);
+                                }, 300);
+                            }
+                        }, 50);
+                    } else {
+                        signInAnonymously(auth).catch((err) => {
+                            console.error("Auth Error:", err);
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error("Persistence Configuration Failed:", error);
+            }
+        })();
+    </script>
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6959399778170612"
+        crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/navigation/part-sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/weather/part-details.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="is-dashboard bg-clear">
+    <!-- Session Restoration Overlay -->
+    <div id="session-restoration-overlay"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0e14; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; pointer-events: none;">
+        <img src="/static/img/logo.png" alt="Vyamir"
+            style="width: 80px; height: 80px; margin-bottom: 25px; filter: drop-shadow(0 0 15px rgba(88,166,255,0.4));">
+        <div class="loader-spinner"
+            style="width: 30px; height: 30px; border: 2px solid rgba(88, 166, 255, 0.1); border-top-color: #58a6ff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;">
+        </div>
+        <div
+            style="color: rgba(255,255,255,0.7); font-family: 'Inter', sans-serif; font-size: 0.8rem; letter-spacing: 2px; font-weight: 400; text-transform: uppercase;">
+            Calibrating Agricultural Modules...</div>
+    </div>
+    <style>
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <div id="toast-container" class="toast-container"></div>
+    {% include 'components/navigation/part_sidebar.html' %}
+
+    <div class="container">
+        {% include 'components/navigation/part_header.html' %}
+
+        <!-- Agri Intelligence Grid -->
+        <div class="grid-container" style="display: block;">
+            <h2
+                style="color: white; margin: 0 0 20px 0; font-weight: 300; display: flex; align-items: center; gap: 10px;">
+                <i class="bi bi-sprout" style="color: #69f0ae;"></i> Agricultural Intelligence
+            </h2>
+
+            <!-- Crop Advisory Card -->
+            <div class="glass-panel" style="padding: 25px; margin-bottom: 25px;">
+                <h3 style="margin: 0 0 15px 0; color: #81c784; display: flex; align-items: center; gap: 10px;">
+                    <i class="bi bi-chat-square-quote"></i> Crop Advisory
+                </h3>
+                <div id="agri-advisory" style="color: rgba(255,255,255,0.9); font-size: 1.1rem; line-height: 1.6;">
+                    <div style="margin-bottom: 10px;">Analyzing local soil and atmospheric conditions for automated
+                        advice...</div>
+                    <div class="spinner-border text-success" role="status" style="width: 1.5rem; height: 1.5rem;"></div>
+                </div>
+            </div>
+
+            <div class="row" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <!-- Soil Health Card -->
+                <div class="glass-panel" style="flex: 1; min-width: 300px; padding: 25px;">
+                    <h4 style="margin: 0 0 15px 0; font-weight: 500;">Soil Telemetry (0-7cm)</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div
+                            style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Moisture</div>
+                            <div id="soil-moisture-val" style="font-size: 2rem; font-weight: 600; color: #4fc3f7;">--%
+                            </div>
+                        </div>
+                        <div
+                            style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; text-align: center;">
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Temperature</div>
+                            <div id="soil-temp-val" style="font-size: 2rem; font-weight: 600; color: #ffb74d;">--°C
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pest Forecast -->
+                <div class="glass-panel" style="flex: 1; min-width: 300px; padding: 25px;">
+                    <h4 style="margin: 0 0 15px 0; font-weight: 500; color: #ff8a65;">Pest Risk Index</h4>
+                    <div id="pest-risk-display" style="font-size: 1.1rem; font-weight: 300; line-height: 1.5;">
+                        Wait for weather data sync...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Dashboard Footer -->
+    <div class="dashboard-footer-anchor">
+        {% include 'components/navigation/part_footer.html' %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/core/logic-ui.js') }}?v=1.0.3"></script>
+    <script src="{{ url_for('static', filename='js/weather/logic-gauges.js') }}?v=1.0.3"></script>
+    <script src="{{ url_for('static', filename='js/weather/logic-charts.js') }}?v=1.0.3"></script>
+    <script src="{{ url_for('static', filename='js/safety/logic-map.js') }}?v=1.0.3"></script>
+</body>
+
+</html>
