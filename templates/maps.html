@@ -202,29 +202,28 @@
 
                         {% include 'components/navigation/part_header.html' %}
 
-                        <!-- Grid Container (Focused Dashboard) -->
-                        <div class="grid-container">
-                            <!-- Left Column -->
-                            <div class="left-col">
-                                <div id="section-current">{% include 'components/weather/part_hero.html' %}</div>
-                                <div id="section-hourly">{% include 'components/weather/part_chart.html' %}</div>
-                                <div id="section-7day">{% include 'components/weather/part_daily_forecast.html' %}</div>
-                            </div>
+                        <!-- Grid Container (Maps Only) -->
+                        <div class="grid-container" style="display: block;">
+                            <h2 style="color: white; margin: 0 0 20px 0; font-weight: 300;">Geospatial Intelligence</h2>
 
-                            <!-- Right Column -->
-                            <div class="right-col">
-                                <div id="section-details">{% include 'components/weather/part_details_grid.html' %}
-                                </div>
+                            <div id="section-maps" style="margin-bottom: 25px;">{% include
+                                'components/safety/part_map.html' %}</div>
+
+                            <div class="row" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                                <div id="section-hazards" style="flex: 1; min-width: 300px;">{% include
+                                    'components/safety/part_hazards.html' %}</div>
+                                <div id="section-satellite" style="flex: 1; min-width: 300px;">{% include
+                                    'components/media/part_satellite.html' %}</div>
                             </div>
                         </div>
 
 
 
-                        <!-- Welcome State -->
+                        <!-- Welcome State (Creative Sectional Landing Page) -->
                         <div class="welcome-container" onscroll="handleLandingScroll(this)">
                             <canvas id="sky-canvas"></canvas>
 
-                            <!-- STICKY TOP NAVBAR -->
+                            <!-- STICKY TOP NAVBAR (Branding - Hidden by default) -->
                             <nav id="sticky-brand-nav" class="sticky-nav">
                                 <div class="nav-brand-group">
                                     <img src="/static/img/logo.png" alt="Vyamir" class="nav-logo-small"
@@ -236,7 +235,7 @@
                                 </div>
                             </nav>
 
-                            <!-- SECTION 1: HERO SPLASH  -->
+                            <!-- SECTION 1: HERO SPLASH (100% Focused) -->
                             <section class="landing-section section-hero">
                                 <div class="welcome-card glass-panel">
                                     <div class="hero-branding">
@@ -264,7 +263,7 @@
                                 </div>
                             </section>
 
-                            <!-- SECTION 2: ATMOSPHERIC INSIGHTS  -->
+                            <!-- SECTION 2: ATMOSPHERIC INSIGHTS (Integrated with Footer) -->
                             <section class="landing-section section-intelligence">
                                 <div class="intelligence-header">
                                     <h2>Atmospheric Intelligence</h2>

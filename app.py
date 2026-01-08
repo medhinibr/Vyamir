@@ -22,6 +22,22 @@ def index():
     }
     return render_template('index.html', config=config)
 
+@app.route('/maps')
+def maps():
+    config = {
+        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
+        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
+    }
+    return render_template('maps.html', config=config)
+
+@app.route('/news')
+def news():
+    config = {
+        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
+        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
+    }
+    return render_template('news.html', config=config)
+
 @app.route('/robots.txt')
 def robots():
     return send_from_directory('public', 'robots.txt')
