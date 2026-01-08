@@ -2313,12 +2313,12 @@ window.initSatMap = function (lat, lon) {
     if (map.tap) map.tap.disable();
 };
 
-// --- AGRICULTURAL INTELLIGENCE MODULE ---
+//  AGRICULTURAL INTELLIGENCE MODULE 
 function initAgriPage() {
     const data = window.weatherData;
     if (!data) return;
 
-    // 1. Crop Advisory Logic (Mock Intelligence based on real data)
+    // 1. Crop Advisory Logic 
     const humidity = data.current.relative_humidity_2m;
     const temp = data.current.temperature_2m;
     const precip = data.current.precipitation;
@@ -2446,14 +2446,61 @@ const translations = {
         current: "Current", hourly: "Hourly", seven: "7-Day", maps: "Maps", details: "Details", news: "News",
         agri: "Agri", monsoon: "Monsoon", vault: "Vault"
     },
-    hi: {
+    // --- INDIAN LANGUAGES ---
+    hi: { // Hindi
         current: "वर्तमान", hourly: "प्रति घंटा", seven: "7-दिन", maps: "नक्शे", details: "विवरण", news: "समाचार",
         agri: "कृषि", monsoon: "मानसून", vault: "वॉल्ट"
     },
-    mr: {
+    mr: { // Marathi
         current: "सध्याचे", hourly: "प्रति तास", seven: "7-दिवस", maps: "नकाशे", details: "तपशील", news: "बातम्या",
         agri: "कृषी", monsoon: "मान्सून", vault: "तिजोरी"
     },
+    bn: { // Bengali
+        current: "বর্তমান", hourly: "প্রতি ঘন্টা", seven: "৭-দিন", maps: "মানচিত্র", details: "বিবরণ", news: "খবর",
+        agri: "কৃষি", monsoon: "বর্ষা", vault: "ভল্ট"
+    },
+    te: { // Telugu
+        current: "ప్రస్తుత", hourly: "గంటకు", seven: "7-రోజులు", maps: "పటాలు", details: "వివరాలు", news: "వార్తలు",
+        agri: "వ్యవసాయం", monsoon: "రుతుపవనాలు", vault: "వాల్ట్"
+    },
+    ta: { // Tamil
+        current: "தற்போதைய", hourly: "மணிநேர", seven: "7-நாட்கள்", maps: "வரைபடம்", details: "விவரங்கள்", news: "செய்திகள்",
+        agri: "விவசாயம்", monsoon: "பருவமழை", vault: "பெட்டகம்"
+    },
+    gu: { // Gujarati
+        current: "વર્તમાન", hourly: "કલાકદીઠ", seven: "7-દિવસ", maps: "નકશા", details: "વિગતો", news: "સમાચાર",
+        agri: "કૃષિ", monsoon: "ચોમાસું", vault: "તિજોરી"
+    },
+    kn: { // Kannada
+        current: "ಪ್ರಸ್ತುತ", hourly: "ಗಂಟೆಯ", seven: "7-ದಿನ", maps: "ನಕ್ಷೆಗಳು", details: "ವಿವರಗಳು", news: "ಸುದ್ದಿ",
+        agri: "ಕೃಷಿ", monsoon: "ಮುಂಗಾರು", vault: "ವಾಲ್ಟ್"
+    },
+    ml: { // Malayalam
+        current: "നിലവിലെ", hourly: "മണിക്കൂർ", seven: "7-ദിവസം", maps: "ഭൂപടം", details: "വിശദാംശങ്ങൾ", news: "വാർത്തകൾ",
+        agri: "കൃഷി", monsoon: "കാലവർഷം", vault: "നിലവറ"
+    },
+    pa: { // Punjabi
+        current: "ਮੌਜੂਦਾ", hourly: "ਘੰਟਾਵਾਰ", seven: "7-ਦਿਨ", maps: "ਨਕਸ਼ੇ", details: "ਵੇਰਵੇ", news: "ਖ਼ਬਰਾਂ",
+        agri: "ਖੇਤੀਬਾੜੀ", monsoon: "ਮਾਨਸੂਨ", vault: "ਵਾਲਟ"
+    },
+    or: { // Odia
+        current: "ବର୍ତ୍ତମାନ", hourly: "ଘଣ୍ଟା ପ୍ରତି", seven: "୭-ଦିନ", maps: "ମାନଚିତ୍ର", details: "ବିବରଣୀ", news: "ଖବର",
+        agri: "କୃଷି", monsoon: "ମୌସୁମୀ", vault: "ଭଲ୍ଟ"
+    },
+    as: { // Assamese
+        current: "বৰ্তমান", hourly: "প্ৰতি ঘণ্টা", seven: "৭-দিন", maps: "মানচিত্ৰ", details: "সবিশেষ", news: "বাতৰি",
+        agri: "কৃষি", monsoon: "মৌচুমী", vault: "ভল্ট"
+    },
+    ur: { // Urdu
+        current: "موجودہ", hourly: "گھنٹہ وار", seven: "7 دن", maps: "نقشے", details: "تفصیلات", news: "خبریں",
+        agri: "زراعت", monsoon: "مانسون", vault: "والٹ"
+    },
+    sa: { // Sanskrit
+        current: "सांप्रतम्", hourly: "होरा", seven: "सप्ताह", maps: "मानचित्रम्", details: "विवरणम्", news: "वार्ता",
+        agri: "कृषि", monsoon: "वर्षाऋतु", vault: "कोश"
+    },
+
+    // --- GLOBAL ---
     es: {
         current: "Actual", hourly: "Por hora", seven: "7 Días", maps: "Mapas", details: "Detalles", news: "Noticias",
         agri: "Agri", monsoon: "Monzón", vault: "Bóveda"
@@ -2462,25 +2509,13 @@ const translations = {
         current: "Actuel", hourly: "Horaire", seven: "7 Jours", maps: "Cartes", details: "Détails", news: "Infos",
         agri: "Agri", monsoon: "Mousson", vault: "Coffre"
     },
-    de: {
-        current: "Aktuell", hourly: "Stündlich", seven: "7-Tage", maps: "Karten", details: "Details", news: "Nachrichten",
-        agri: "Agri", monsoon: "Monsun", vault: "Tresor"
-    },
-    cn: {
-        current: "当前", hourly: "每小时", seven: "7天", maps: "地图", details: "详情", news: "新闻",
-        agri: "农业", monsoon: "季风", vault: "保险库"
-    },
-    jp: {
-        current: "現在", hourly: "毎時", seven: "7日間", maps: "地図", details: "詳細", news: "ニュース",
-        agri: "農業", monsoon: "モンスーン", vault: "保管庫"
-    },
     ru: {
         current: "Сейчас", hourly: "Почасово", seven: "7 Дней", maps: "Карты", details: "Детали", news: "Новости",
         agri: "Агро", monsoon: "Муссон", vault: "Хранилище"
     },
-    pt: {
-        current: "Atual", hourly: "Por hora", seven: "7 Dias", maps: "Mapas", details: "Detalhes", news: "Notícias",
-        agri: "Agri", monsoon: "Monção", vault: "Cofre"
+    cn: {
+        current: "当前", hourly: "每小时", seven: "7天", maps: "地图", details: "详情", news: "新闻",
+        agri: "农业", monsoon: "季风", vault: "保险库"
     },
     ar: {
         current: "الحالي", hourly: "بالساعة", seven: "7 أيام", maps: "الخرائط", details: "التفاصيل", news: "الأخبار",
