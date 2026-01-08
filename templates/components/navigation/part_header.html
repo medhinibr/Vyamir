@@ -17,6 +17,14 @@
     </div>
 
     <div style="display: flex; align-items: center; gap: 15px;">
+        <!-- Language Select -->
+        <select onchange="changeLanguage(this.value)"
+            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 5px; border-radius: 8px; outline: none; cursor: pointer;">
+            <option value="en" style="background: #0b0e14;">En</option>
+            <option value="hi" style="background: #0b0e14;">Hi</option>
+            <option value="mr" style="background: #0b0e14;">Mr</option>
+        </select>
+
         <!-- Unit Toggle -->
         <div class="unit-toggle" onclick="toggleUnits()"
             style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1);">

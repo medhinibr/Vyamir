@@ -68,7 +68,7 @@ def get_forecast_data(lat, lon):
         url = (
             f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
             "&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,"
-            "weather_code,pressure_msl,surface_pressure,visibility,wind_speed_10m,uv_index"
+            "weather_code,pressure_msl,surface_pressure,visibility,wind_speed_10m,uv_index,soil_temperature_0cm,soil_moisture_0_to_1cm,soil_moisture_1_to_3cm"
             "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max"
             "&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,pressure_msl,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m"
             "&timezone=auto"

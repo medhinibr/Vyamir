@@ -7,12 +7,6 @@ load_dotenv() # Load environmental variables immediately
 
 app = Flask(__name__)
 
-@app.route('/')
-@app.route('/privacy')
-@app.route('/terms')
-@app.route('/about')
-@app.route('/contact')
-@app.route('/cookie-policy')
 @app.route('/privacy-settings')
 def index():
     # Fetch environment vectors for frontend injection
@@ -37,6 +31,22 @@ def news():
         'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
     }
     return render_template('news.html', config=config)
+
+@app.route('/agri')
+def agri():
+    config = {
+        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
+        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
+    }
+    return render_template('agri.html', config=config)
+
+@app.route('/monsoon')
+def monsoon():
+    config = {
+        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
+        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
+    }
+    return render_template('monsoon.html', config=config)
 
 @app.route('/robots.txt')
 def robots():

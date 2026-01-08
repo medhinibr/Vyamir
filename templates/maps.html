@@ -31,7 +31,7 @@
     <meta property="og:image" content="https://vyamir.onrender.com/static/img/logo.png" />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <!-- Schema.org JSON-LD (Rich Snippets) -->
+    <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -49,6 +49,7 @@
     </script>
     <script>
         window.VYAMIR_CONFIG = JSON.parse(document.getElementById('vyamir-config').textContent);
+        window.VYAMIR_SKIP_WELCOME = true;
     </script>
 
     <!-- Firebase Integration -->
@@ -81,7 +82,6 @@
         // AUTH PERSISTENCE ENGINE: Ensure identities survive across sessions
         (async () => {
             try {
-                // Failsafe: If the app is still stuck after 4 seconds, force-remove the overlay.
                 setTimeout(() => {
                     const overlay = document.getElementById('session-restoration-overlay');
                     if (overlay) {
@@ -99,7 +99,6 @@
                         console.log("Vyamir Engine: Auth Stabilized for " + user.uid);
                         if (window.checkUserPrivacyConsent) window.checkUserPrivacyConsent();
 
-                        // WAIT FOR DATA SYNC: Only remove overlay once points/nickname are loaded or consent is needed
                         const syncWait = setInterval(() => {
                             if (window.vyamirSessionRestored || window.vyamirNeedsConsent) {
                                 clearInterval(syncWait);
