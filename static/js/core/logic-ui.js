@@ -63,6 +63,11 @@ function initDashboard() {
 }
 
 function showWelcomeScreen() {
+    if (window.VYAMIR_SKIP_WELCOME) {
+        const grid = document.querySelector('.grid-container');
+        if (grid) grid.style.display = 'block';
+        return;
+    }
     document.body.classList.add('is-landing');
     document.body.classList.remove('is-dashboard');
 
@@ -289,8 +294,6 @@ window.toggleMapExpand = function () {
         setTimeout(() => window.mapInstance.invalidateSize(), 300);
     }
 }
-
-
 
 
 
@@ -719,7 +722,6 @@ function updateDetails(data) {
     const windDir = current.wind_direction !== undefined ? current.wind_direction : current.winddirection;
 
     // 1. Feels Like
-    // ATMOSPHERIC TEMPORAL SYNC: Synchronize with city local time, not browser local time
     const cityTime = new Date(current.time);
     const nowHour = cityTime.getHours();
 
@@ -736,7 +738,6 @@ function updateDetails(data) {
     // 3. Humidity
     const humidity = hourly.relativehumidity_2m ? hourly.relativehumidity_2m[nowHour] : (current.humidity || 0); // fallbacks
     setText('detail-humidity', humidity + '%');
-    // Dew Point approx: T - ((100 - RH)/5)
     const dewPoint = Math.round(temperature - ((100 - humidity) / 5));
     setText('detail-humidity-desc', `The dew point is ${Math.round(getTemp(dewPoint))}°`);
 
@@ -771,7 +772,7 @@ function updateDetails(data) {
     if (pressure > prevPressure + 1) pressDesc = "Rising";
     setText('detail-pressure-desc', pressDesc);
 
-    // 8. Air Quality (Enhanced)
+    // 8. Air Quality
     const aqi = data.air_quality ? data.air_quality.european_aqi[nowHour] : 0;
     const pm25 = data.air_quality ? data.air_quality.pm2_5[nowHour] : 0;
     const pm10 = data.air_quality ? data.air_quality.pm10[nowHour] : 0;
@@ -818,7 +819,7 @@ function updateDetails(data) {
     setText('detail-sunrise', sunrise);
     setText('detail-sunset', sunset);
 
-    // Moon Phase Calculation (Enhanced Visuals)
+    // Moon Phase Calculation 
     const date = new Date();
     const cycle = 29.53059; // days
     const knownNewMoon = new Date('2000-01-06').getTime();
@@ -974,7 +975,7 @@ const PEXELS_API_KEY = window.VYAMIR_CONFIG ? window.VYAMIR_CONFIG.PEXELS_API_KE
 
 
 async function fetchPexelsWeatherVideos(condition) {
-    let query = 'starry night'; // Default fallback
+    let query = 'starry night'; 
     const c = condition.toLowerCase();
 
     if (c.includes('clear') || c.includes('sun')) query = 'sunny blue sky';
@@ -1001,8 +1002,6 @@ async function fetchPexelsWeatherVideos(condition) {
                 const titleBase = query.charAt(0).toUpperCase() + query.slice(1);
                 const descriptor = descriptors[idx % descriptors.length];
 
-                // QUALITY FILTER: Prefer SD/HD Ready (approx 960px or 1280px width)
-                // Avoid "Original" or "4K" to save bandwidth
                 const optimalVideo = v.video_files.find(f => f.width >= 960 && f.width <= 1280)
                     || v.video_files.find(f => f.quality === 'sd')
                     || v.video_files[0];
@@ -1072,7 +1071,7 @@ async function updateWeatherVideos() {
     }).join('');
 }
 
-// Video Modal Logic (AdSense-Compliant Native Player)
+// Video Modal Logic
 window.openVideoModal = function (url, title) {
     const modal = document.getElementById('video-modal');
     const player = document.getElementById('modal-video-player');
@@ -1175,7 +1174,7 @@ function getWeatherDescription(code) {
 
 
 
-// --- CLIENT-SIDE ROUTER (SPA LOGIC) ---
+// CLIENT-SIDE ROUTER 
 
 window.handleRoute = function (event, path) {
     if (event) event.preventDefault();
@@ -1194,11 +1193,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Cookie Consent Logic
 function initCookieConsent() {
-    window.vyamirNeedsConsent = true; // Signals index.html to reveal landing page
+    window.vyamirNeedsConsent = true; 
     if (!localStorage.getItem('vyamir_cookie_consent')) {
         setTimeout(() => {
             const popup = document.getElementById('cookie-popup');
-            // Don't show if we are already on privacy settings
             if (popup && window.location.pathname !== '/privacy-settings') {
                 popup.style.display = 'block';
                 popup.classList.add('active');
@@ -1298,18 +1296,13 @@ function renderRoute(path) {
     const routeKey = routes[path];
     if (routeKey && content[routeKey]) {
         // Hide Main App UI
-        document.body.classList.add('is-landing'); // Keep background but hide dashboard layout styling
+        document.body.classList.add('is-landing'); 
         document.body.classList.remove('is-dashboard');
 
         if (welcomeContainer) welcomeContainer.style.display = 'none';
         if (dashboardGrid) dashboardGrid.style.opacity = '0'; // Hide grid
 
-        // Hide Main Footer as Legal Pages have their own flow but we want keep footer visible? 
-        // User asked: "The footer should remain at the absolute bottom of these long pages."
-        // Our new layout puts the content inside a scrolling full-page div. 
-        // The original logic footer is inside the container. 
-        // We actually want to hide the "dashboard" footer and let the legal page handle it 
-        // OR simply hide it because the legal page is full screen.
+       
         if (footer) footer.style.display = 'none';
 
         // Show Legal UI
@@ -1339,7 +1332,7 @@ function renderRoute(path) {
 }
 
 
-// --- TOAST NOTIFICATION SYSTEM ---
+// TOAST NOTIFICATION SYSTEM 
 window.showToast = function (message, type = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -1368,10 +1361,10 @@ window.showToast = function (message, type = 'info') {
     });
 
     // Auto Remove
-    const duration = type === 'error' ? 8000 : 4000; // 8s for errors, 4s for success
+    const duration = type === 'error' ? 8000 : 4000; 
     setTimeout(() => {
         toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 400); // Wait for transition
+        setTimeout(() => toast.remove(), 400); 
     }, duration);
 };
 
@@ -1686,8 +1679,6 @@ async function initSkyPointsSystem() {
     })();
 
     const existingData = userSnap.data();
-    // INITIALIZATION GUARD: Ensure nickname, initial points, and case-insensitive index exist
-    // RETROACTIVE FIX: If points are 0 and they have no createdAt, they are considered "new" and get the 5-point welcome.
     const needsInit = !existingData ||
         !existingData.nickname ||
         !existingData.nickname_lowercase ||
@@ -1872,8 +1863,6 @@ window.handleRoute = function (e, path) {
     renderRoute(path);
 };
 
-// Update renderRoute routes object
-// This is inside a function scope in the original file, so I'll replace the block.
 
 // SkyPoints Vault: Nickname Update & Transfers
 window.updateNickname = async function (newNameRaw) {
@@ -2021,15 +2010,11 @@ window.copyReferralLink = function () {
 };
 
 
-
-// ---------------------------------------------------------------------------------
-// BRAND ORCHESTRATION: Landing Page Interactions
-// ---------------------------------------------------------------------------------
 window.handleLandingScroll = function (container) {
     const nav = document.getElementById('sticky-brand-nav');
     if (!nav) return;
 
-    // Show navbar when scrolling past the Hero
+    
     if (container.scrollTop > 100) {
         nav.classList.add('visible');
     } else {
@@ -2053,9 +2038,7 @@ window.scrollToHero = function () {
     }
 };
 
-// --------------------------------------------------------
-// GLOBAL MAP ENGINE (Leaflet + RainViewer + Satellite)
-// --------------------------------------------------------
+
 window.initMap = function (lat, lon) {
     const mapId = 'map';
     // If map already exists, just recenter it
@@ -2093,7 +2076,6 @@ window.initMap = function (lat, lon) {
     window.mapMarker = L.marker([lat, lon]).addTo(window.mapInstance);
 
     // RAINVIEWER RADAR LAYER (Live Precip)
-    // We add it but initially it might be empty until we set time
     const rainLayer = L.tileLayer('https://tile.rainviewer.com/img/radar_nowcast_png/256/{z}/{x}/{y}/2/1_1.png', {
         opacity: 0.7,
         attribution: '&copy; <a href="https://www.rainviewer.com/api.html">RainViewer</a>',
@@ -2113,7 +2095,7 @@ window.initMap = function (lat, lon) {
 
     L.control.layers(baseMaps, overlayMaps).addTo(window.mapInstance);
 
-    // Custom Layer Chip Logic (Sync with UI)
+  
     window.switchMapLayer = function (type) {
         if (type === 'radar') {
             if (!window.mapInstance.hasLayer(rainLayer)) window.mapInstance.addLayer(rainLayer);
@@ -2130,20 +2112,15 @@ window.initMap = function (lat, lon) {
     }
 };
 
-// --------------------------------------------------------
-// ATMOSPHERIC UNIT CONVERSION & HELPER PROTOCOLS
-// --------------------------------------------------------
+
 
 window.updateHourlyScroll = function (data) {
     const container = document.getElementById('section-hourly');
     if (!container) return;
 
     const hourly = data.hourly;
-    const currentHourIndex = new Date(data.current.time).getHours(); // Roughly align with current hour slot
-    // Since API returns hourly data starting from day start, we need to find the current time index.
-    // Open-Meteo hourly.time is ISO array.
-
-    // Find index nearest to now
+    const currentHourIndex = new Date(data.current.time).getHours(); 
+    
     const nowStr = data.current.time.slice(0, 13); // "YYYY-MM-DDTHH"
     let startIndex = hourly.time.findIndex(t => t.startsWith(nowStr));
     if (startIndex === -1) startIndex = 0;
@@ -2182,7 +2159,7 @@ window.toggleUnits = function () {
     localStorage.setItem('vyamir_unit_system', window.unitSystem);
     updateUnitUI();
 
-    // Refresh Dashboard if data exists
+    
     if (window.weatherData) {
         updateHero(window.weatherData);
         updateDetails(window.weatherData);
@@ -2207,7 +2184,7 @@ window.updateUnitUI = function () {
 
 window.detectLocation = function () {
     const icon = document.querySelector('.bi-geo');
-    if (icon) icon.className = "bi bi-hourglass-split spin-animation"; // Add animation class if exists
+    if (icon) icon.className = "bi bi-hourglass-split spin-animation"; 
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -2244,7 +2221,7 @@ function getUnit(type) {
 
 
 // DYNAMIC BACKGROUND ENGINE
-window.updateBackground = function(code, isDay) {
+window.updateBackground = function (code, isDay) {
     document.body.className = document.body.className.replace(/bg-\w+/g, '').trim();
     let bgClass = 'bg-clear';
     if (code >= 200 && code < 300) bgClass = 'bg-thunderstorm';
@@ -2258,25 +2235,25 @@ window.updateBackground = function(code, isDay) {
 
 
 // SATELLITE ENGINE
-window.initSatMap = function(lat, lon) {
+window.initSatMap = function (lat, lon) {
     const mapId = 'sat-map-container';
     const mapElement = document.getElementById(mapId);
     if (!mapElement) return;
-    
+
     const map = L.map(mapId, { center: [lat, lon], zoom: 6, zoomControl: false, attributionControl: false });
-    
+
     // Base: Satellite
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
-    
+
     // Overlay: Infrared Clouds (RainViewer)
     L.tileLayer('https://tile.rainviewer.com/img/satellite-infrared/512/{z}/{x}/{y}/2/1_1.png', { opacity: 0.6 }).addTo(map);
-    
+
     // Labels
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {subdomains: 'abcd', opacity: 0.8}).addTo(map);
-    
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', opacity: 0.8 }).addTo(map);
+
     // Marker
     L.marker([lat, lon]).addTo(map);
-    
+
     // Interaction Prevention (Passive View)
     map.dragging.disable();
     map.touchZoom.disable();
