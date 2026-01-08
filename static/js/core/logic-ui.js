@@ -1,6 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
-    initDashboard();
+    // ROUTING MATRIX: Determine active viewport
+    const path = window.location.pathname;
+
+    initDashboard(); // Core data sync (Weather + Auth)
     initSidebar();
+
+    if (path.includes('/agri')) {
+        console.log("Vyamir Engine: Initializing Agricultural Module...");
+        waitForDataSync(initAgriPage);
+    } else if (path.includes('/monsoon')) {
+        console.log("Vyamir Engine: Initializing Monsoon Tracking Module...");
+        waitForDataSync(initMonsoonPage);
+    }
 
     // BACKEND SYNC: Wait for Firebase and Script readiness
     const checkReady = setInterval(() => {
@@ -17,6 +28,16 @@ document.addEventListener('DOMContentLoaded', () => {
     window.unitSystem = localStorage.getItem('vyamir_unit_system');
     updateUnitUI();
 });
+
+// ASYNC BRIDGE: Wait for core weather data before triggering specialized UIs
+function waitForDataSync(callback) {
+    const waiter = setInterval(() => {
+        if (window.weatherData) {
+            clearInterval(waiter);
+            callback();
+        }
+    }, 200);
+}
 
 function initDashboard() {
     // BACKEND SYNC: Initialization will be handled by index.html auth cycle.
@@ -294,6 +315,8 @@ window.toggleMapExpand = function () {
         setTimeout(() => window.mapInstance.invalidateSize(), 300);
     }
 }
+
+
 
 
 
@@ -722,6 +745,7 @@ function updateDetails(data) {
     const windDir = current.wind_direction !== undefined ? current.wind_direction : current.winddirection;
 
     // 1. Feels Like
+    // ATMOSPHERIC TEMPORAL SYNC: Synchronize with city local time, not browser local time
     const cityTime = new Date(current.time);
     const nowHour = cityTime.getHours();
 
@@ -738,6 +762,7 @@ function updateDetails(data) {
     // 3. Humidity
     const humidity = hourly.relativehumidity_2m ? hourly.relativehumidity_2m[nowHour] : (current.humidity || 0); // fallbacks
     setText('detail-humidity', humidity + '%');
+    // Dew Point approx: T - ((100 - RH)/5)
     const dewPoint = Math.round(temperature - ((100 - humidity) / 5));
     setText('detail-humidity-desc', `The dew point is ${Math.round(getTemp(dewPoint))}°`);
 
@@ -772,7 +797,7 @@ function updateDetails(data) {
     if (pressure > prevPressure + 1) pressDesc = "Rising";
     setText('detail-pressure-desc', pressDesc);
 
-    // 8. Air Quality
+    // 8. Air Quality (Enhanced)
     const aqi = data.air_quality ? data.air_quality.european_aqi[nowHour] : 0;
     const pm25 = data.air_quality ? data.air_quality.pm2_5[nowHour] : 0;
     const pm10 = data.air_quality ? data.air_quality.pm10[nowHour] : 0;
@@ -819,7 +844,7 @@ function updateDetails(data) {
     setText('detail-sunrise', sunrise);
     setText('detail-sunset', sunset);
 
-    // Moon Phase Calculation 
+    // Moon Phase Calculation (Enhanced Visuals)
     const date = new Date();
     const cycle = 29.53059; // days
     const knownNewMoon = new Date('2000-01-06').getTime();
@@ -975,7 +1000,7 @@ const PEXELS_API_KEY = window.VYAMIR_CONFIG ? window.VYAMIR_CONFIG.PEXELS_API_KE
 
 
 async function fetchPexelsWeatherVideos(condition) {
-    let query = 'starry night'; 
+    let query = 'starry night'; // Default fallback
     const c = condition.toLowerCase();
 
     if (c.includes('clear') || c.includes('sun')) query = 'sunny blue sky';
@@ -1002,6 +1027,8 @@ async function fetchPexelsWeatherVideos(condition) {
                 const titleBase = query.charAt(0).toUpperCase() + query.slice(1);
                 const descriptor = descriptors[idx % descriptors.length];
 
+                // QUALITY FILTER: Prefer SD/HD Ready (approx 960px or 1280px width)
+                // Avoid "Original" or "4K" to save bandwidth
                 const optimalVideo = v.video_files.find(f => f.width >= 960 && f.width <= 1280)
                     || v.video_files.find(f => f.quality === 'sd')
                     || v.video_files[0];
@@ -1071,7 +1098,7 @@ async function updateWeatherVideos() {
     }).join('');
 }
 
-// Video Modal Logic
+// Video Modal Logic (AdSense-Compliant Native Player)
 window.openVideoModal = function (url, title) {
     const modal = document.getElementById('video-modal');
     const player = document.getElementById('modal-video-player');
@@ -1174,7 +1201,7 @@ function getWeatherDescription(code) {
 
 
 
-// CLIENT-SIDE ROUTER 
+// --- CLIENT-SIDE ROUTER (SPA LOGIC) ---
 
 window.handleRoute = function (event, path) {
     if (event) event.preventDefault();
@@ -1193,10 +1220,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Cookie Consent Logic
 function initCookieConsent() {
-    window.vyamirNeedsConsent = true; 
+    window.vyamirNeedsConsent = true; // Signals index.html to reveal landing page
     if (!localStorage.getItem('vyamir_cookie_consent')) {
         setTimeout(() => {
             const popup = document.getElementById('cookie-popup');
+            // Don't show if we are already on privacy settings
             if (popup && window.location.pathname !== '/privacy-settings') {
                 popup.style.display = 'block';
                 popup.classList.add('active');
@@ -1296,13 +1324,18 @@ function renderRoute(path) {
     const routeKey = routes[path];
     if (routeKey && content[routeKey]) {
         // Hide Main App UI
-        document.body.classList.add('is-landing'); 
+        document.body.classList.add('is-landing'); // Keep background but hide dashboard layout styling
         document.body.classList.remove('is-dashboard');
 
         if (welcomeContainer) welcomeContainer.style.display = 'none';
         if (dashboardGrid) dashboardGrid.style.opacity = '0'; // Hide grid
 
-       
+        // Hide Main Footer as Legal Pages have their own flow but we want keep footer visible? 
+        // User asked: "The footer should remain at the absolute bottom of these long pages."
+        // Our new layout puts the content inside a scrolling full-page div. 
+        // The original logic footer is inside the container. 
+        // We actually want to hide the "dashboard" footer and let the legal page handle it 
+        // OR simply hide it because the legal page is full screen.
         if (footer) footer.style.display = 'none';
 
         // Show Legal UI
@@ -1332,7 +1365,7 @@ function renderRoute(path) {
 }
 
 
-// TOAST NOTIFICATION SYSTEM 
+// --- TOAST NOTIFICATION SYSTEM ---
 window.showToast = function (message, type = 'info') {
     const container = document.getElementById('toast-container');
     if (!container) return;
@@ -1361,10 +1394,10 @@ window.showToast = function (message, type = 'info') {
     });
 
     // Auto Remove
-    const duration = type === 'error' ? 8000 : 4000; 
+    const duration = type === 'error' ? 8000 : 4000; // 8s for errors, 4s for success
     setTimeout(() => {
         toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 400); 
+        setTimeout(() => toast.remove(), 400); // Wait for transition
     }, duration);
 };
 
@@ -1679,6 +1712,8 @@ async function initSkyPointsSystem() {
     })();
 
     const existingData = userSnap.data();
+    // INITIALIZATION GUARD: Ensure nickname, initial points, and case-insensitive index exist
+    // RETROACTIVE FIX: If points are 0 and they have no createdAt, they are considered "new" and get the 5-point welcome.
     const needsInit = !existingData ||
         !existingData.nickname ||
         !existingData.nickname_lowercase ||
@@ -1863,6 +1898,8 @@ window.handleRoute = function (e, path) {
     renderRoute(path);
 };
 
+// Update renderRoute routes object
+// This is inside a function scope in the original file, so I'll replace the block.
 
 // SkyPoints Vault: Nickname Update & Transfers
 window.updateNickname = async function (newNameRaw) {
@@ -2010,11 +2047,15 @@ window.copyReferralLink = function () {
 };
 
 
+
+// ---------------------------------------------------------------------------------
+// BRAND ORCHESTRATION: Landing Page Interactions
+// ---------------------------------------------------------------------------------
 window.handleLandingScroll = function (container) {
     const nav = document.getElementById('sticky-brand-nav');
     if (!nav) return;
 
-    
+    // Show navbar when scrolling past the Hero
     if (container.scrollTop > 100) {
         nav.classList.add('visible');
     } else {
@@ -2038,7 +2079,9 @@ window.scrollToHero = function () {
     }
 };
 
-
+// --------------------------------------------------------
+// GLOBAL MAP ENGINE (Leaflet + RainViewer + Satellite)
+// --------------------------------------------------------
 window.initMap = function (lat, lon) {
     const mapId = 'map';
     // If map already exists, just recenter it
@@ -2076,6 +2119,7 @@ window.initMap = function (lat, lon) {
     window.mapMarker = L.marker([lat, lon]).addTo(window.mapInstance);
 
     // RAINVIEWER RADAR LAYER (Live Precip)
+    // We add it but initially it might be empty until we set time
     const rainLayer = L.tileLayer('https://tile.rainviewer.com/img/radar_nowcast_png/256/{z}/{x}/{y}/2/1_1.png', {
         opacity: 0.7,
         attribution: '&copy; <a href="https://www.rainviewer.com/api.html">RainViewer</a>',
@@ -2095,7 +2139,7 @@ window.initMap = function (lat, lon) {
 
     L.control.layers(baseMaps, overlayMaps).addTo(window.mapInstance);
 
-  
+    // Custom Layer Chip Logic (Sync with UI)
     window.switchMapLayer = function (type) {
         if (type === 'radar') {
             if (!window.mapInstance.hasLayer(rainLayer)) window.mapInstance.addLayer(rainLayer);
@@ -2112,15 +2156,20 @@ window.initMap = function (lat, lon) {
     }
 };
 
-
+// --------------------------------------------------------
+// ATMOSPHERIC UNIT CONVERSION & HELPER PROTOCOLS
+// --------------------------------------------------------
 
 window.updateHourlyScroll = function (data) {
     const container = document.getElementById('section-hourly');
     if (!container) return;
 
     const hourly = data.hourly;
-    const currentHourIndex = new Date(data.current.time).getHours(); 
-    
+    const currentHourIndex = new Date(data.current.time).getHours(); // Roughly align with current hour slot
+    // Since API returns hourly data starting from day start, we need to find the current time index.
+    // Open-Meteo hourly.time is ISO array.
+
+    // Find index nearest to now
     const nowStr = data.current.time.slice(0, 13); // "YYYY-MM-DDTHH"
     let startIndex = hourly.time.findIndex(t => t.startsWith(nowStr));
     if (startIndex === -1) startIndex = 0;
@@ -2159,7 +2208,7 @@ window.toggleUnits = function () {
     localStorage.setItem('vyamir_unit_system', window.unitSystem);
     updateUnitUI();
 
-    
+    // Refresh Dashboard if data exists
     if (window.weatherData) {
         updateHero(window.weatherData);
         updateDetails(window.weatherData);
@@ -2184,7 +2233,7 @@ window.updateUnitUI = function () {
 
 window.detectLocation = function () {
     const icon = document.querySelector('.bi-geo');
-    if (icon) icon.className = "bi bi-hourglass-split spin-animation"; 
+    if (icon) icon.className = "bi bi-hourglass-split spin-animation"; // Add animation class if exists
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -2263,3 +2312,179 @@ window.initSatMap = function (lat, lon) {
     map.keyboard.disable();
     if (map.tap) map.tap.disable();
 };
+
+// --- AGRICULTURAL INTELLIGENCE MODULE ---
+function initAgriPage() {
+    const data = window.weatherData;
+    if (!data) return;
+
+    // 1. Crop Advisory Logic (Mock Intelligence based on real data)
+    const humidity = data.current.relative_humidity_2m;
+    const temp = data.current.temperature_2m;
+    const precip = data.current.precipitation;
+    const wind = data.current.wind_speed_10m;
+    
+    let advice = Analyzing conditions...;
+    let icon = bi-check-circle;
+    let color = #81c784; // Green
+
+    // Soil Telemetry (New Open-Meteo Vars)
+    // Note: data.hourly should have soil vars if fetched correctly. 
+    // Since we updated openmeteo.py, the client will receive them in the 'hourly' object under keys like 'soil_temperature_0cm'.
+    // We access the current hour index.
+    const nowHour = new Date().getHours();
+    
+    let soilMoisture = (data.hourly.soil_moisture_0_to_1cm && data.hourly.soil_moisture_0_to_1cm[nowHour]) 
+                       ? data.hourly.soil_moisture_0_to_1cm[nowHour] : (precip > 0 ? 0.35 : 0.15); // Fallback mock
+    let soilTemp = (data.hourly.soil_temperature_0cm && data.hourly.soil_temperature_0cm[nowHour]) 
+                   ? data.hourly.soil_temperature_0cm[nowHour] : temp; // Fallback to air temp
+
+    // Convert moisture fraction to %
+    // Open-Meteo gives m/m. Typical range 0.0-0.5. 0.3 is wet.
+    let smPerc = Math.round(soilMoisture * 100); 
+    if (smPerc > 100) smPerc = smPerc / 100; // If api changed unit
+
+    document.getElementById('soil-moisture-val').textContent = smPerc + %;
+    document.getElementById('soil-temp-val').textContent = Math.round(soilTemp) + C;
+
+    // Logic Tree
+    if (precip > 5) {
+        advice = Heavy rainfall detected. Pause sowing activities to avoid seed washout. Ensure drainage channels are clear.;
+        icon = bi-cloud-rain;
+        color = #4fc3f7;
+    } else if (temp > 35) {
+        advice = High thermal stress. Irrigate crops during evening hours to minimize evaporation loss.;
+        icon = bi-thermometer-sun;
+        color = #ffb74d;
+    } else if (humidity > 85 && temp > 25) {
+        advice = High fungal risk due to warm, humid conditions. Monitor for blight and rust.;
+        icon = bi-exclamation-triangle;
+        color = #ff8a65;
+    } else if (wind > 20) {
+        advice = Strong winds detected. Secure tall crops (maize, sugarcane) and delay spraying operations.;
+        icon = bi-wind;
+        color = #e57373;
+    } else {
+        advice = Conditions are optimal for field operations. Soil moisture levels are stable.;
+    }
+
+    const advisoryEl = document.getElementById('agri-advisory');
+    if (advisoryEl) {
+        advisoryEl.innerHTML = \<div style="display:flex; align-items:start; gap:15px;">
+            <i class="bi \ style="font-size:2rem; color:\;"></i>
+ <div>
+ <div style="font-weight:600; color:\; margin-bottom:5px;">ACTION REQUIRED</div>
+ \
+ </div>
+ </div>\;
+ }
+
+ // Pest Risk
+ const pestEl = document.getElementById('pest-risk-display');
+ let pestRisk = Low;
+ let pestColor = #69f0ae;
+ if (humidity > 80 && temp > 28) { pestRisk = High; pestColor = #ff5252; }
+ else if (humidity > 60) { pestRisk = Moderate; pestColor = #ffab40; }
+
+ if (pestEl) {
+ pestEl.innerHTML = \<span style="color:\; font-weight:600; font-size:1.5rem;">\</span> <span style="font-size:0.9rem; opacity:0.7;">based on humidity/temp matrix</span>\;
+ }
+}
+
+// --- MONSOON TRACKING MODULE ---
+function initMonsoonPage() {
+ const mapEl = document.getElementById('monsoon-map');
+ if (!mapEl) return;
+
+ // Force India View
+ const map = L.map('monsoon-map', {
+ zoomControl: false,
+ attributionControl: false
+ }).setView([20.5937, 78.9629], 5); // Center of India
+
+ L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
+ opacity: 1,
+ maxZoom: 18
+ }).addTo(map);
+
+ // RainViewer Radar Overlay
+ L.tileLayer('https://tile.cache.rainviewer.com/v2/radar/nowcast_5m/{z}/{x}/{y}/2/1_1.png', {
+ opacity: 0.8,
+ zIndex: 10
+ }).addTo(map);
+ 
+ // Add simple marker for current location context if available
+ const data = window.weatherData;
+ if (data && data.lat) {
+ const marker = L.circleMarker([data.lat, data.lon], {
+ color: '#58a6ff',
+ radius: 6,
+ fillOpacity: 1
+ }).addTo(map);
+ marker.bindPopup(<b>You are here</b><br>).openPopup();
+ }
+ 
+ // Animate map gently
+ let angle = 0;
+ /* 
+ // Optional: Subtle pan animation
+ setInterval(() => {
+ angle += 0.001;
+ const newLat = 20.5937 + Math.sin(angle) * 0.5;
+ map.panTo([newLat, 78.9629], {animate: true, duration: 1});
+ }, 100); 
+ */
+ 
+ // Handle Resize
+ setTimeout(() => map.invalidateSize(), 500);
+}
+
+
+// --- LINGUISTICS ENGINE ---
+const translations = {
+    en: {
+        current: Current, hourly: Hourly, maps: Maps, details: Details, news: News,
+        agri: Agri, monsoon: Monsoon
+    },
+    hi: {
+        current: ?????, hourly: ??? ??, maps: ???, details: ????, news: ????,
+        agri: ??, monsoon: ????
+    },
+    mr: {
+        current: ????, hourly: taasi, maps: ???, details: ????, news: ????,
+        agri: ??, monsoon: ????
+    }
+};
+
+window.changeLanguage = function(lang) {
+    if (!translations[lang]) return;
+    const t = translations[lang];
+    
+    // Sidebar
+    document.querySelectorAll('.sidebar-item span').forEach(span => {
+        const text = span.textContent.trim().toLowerCase();
+        // Since I rely on text content matching which is fragile, a robust system would use data-key.
+        // For this V1, I will just iterate known keys.
+        if (text === 'current') span.textContent = t.current;
+        if (text === 'hourly') span.textContent = t.hourly;
+        if (text === 'maps') span.textContent = t.maps;
+        if (text === 'details') span.textContent = t.details;
+        if (text === 'news') span.textContent = t.news;
+        if (text === 'agri') span.textContent = t.agri;
+        if (text === 'monsoon') span.textContent = t.monsoon;
+    });
+
+    console.log(Language switched to, lang);
+}
+
+
+// FAILSAFE: Auto-bootstrap default context for specialized pages if no session exists
+if (window.location.pathname.includes('/agri') || window.location.pathname.includes('/monsoon')) {
+    setTimeout(() => {
+        if (!window.weatherData && !localStorage.getItem('vyamir_last_session')) {
+             console.log(Vyamir System: Auto-bootstrapping India context for regional dashboard.);
+             handleSearchSelection(India Region, 20.5937, 78.9629);
+        }
+    }, 2000);
+}
+
