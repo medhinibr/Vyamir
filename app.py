@@ -7,6 +7,7 @@ load_dotenv() # Load environmental variables immediately
 
 app = Flask(__name__)
 
+@app.route('/')
 @app.route('/privacy-settings')
 def index():
     # Fetch environment vectors for frontend injection
