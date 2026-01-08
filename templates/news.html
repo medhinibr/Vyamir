@@ -173,31 +173,7 @@
 
                     <!-- Global Toast Container -->
                     <div id="toast-container" class="toast-container"></div>
-                    {% include 'components/navigation/part_sidebar.html' %}
 
-                    <!-- Mobile Bottom Navigation: Floating Glassmorphic Dock -->
-                    <nav class="mobile-nav glass-panel">
-                        <div class="mobile-nav-item active" data-section="section-current">
-                            <i class="bi bi-sun"></i>
-                            <span>Current</span>
-                        </div>
-                        <div class="mobile-nav-item" data-section="section-hourly">
-                            <i class="bi bi-clock"></i>
-                            <span>Hourly</span>
-                        </div>
-                        <div class="mobile-nav-item" data-section="section-maps">
-                            <i class="bi bi-map"></i>
-                            <span>Maps</span>
-                        </div>
-                        <div class="mobile-nav-item" data-section="section-details">
-                            <i class="bi bi-grid-1x2"></i>
-                            <span>Details</span>
-                        </div>
-                        <div class="mobile-nav-item" onclick="toggleVault()">
-                            <i class="bi bi-shield-lock"></i>
-                            <span>Vault</span>
-                        </div>
-                    </nav>
 
                     <div class="container">
 
@@ -221,8 +197,8 @@
                         <!-- Welcome State Removed for Sub-Page Optimization -->
                     </div> <!-- End Container -->
 
-                    <!-- Dashboard Footer -->
-                    <div class="dashboard-footer-anchor">
+
+                    <div style="margin-top: auto; width: 100%;">
                         {% include 'components/navigation/part_footer.html' %}
                     </div>
 

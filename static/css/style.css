@@ -7,39 +7,7 @@
 @import 'components/safety/part-map.css';
 @import 'animations.css';
 
-/* Navigation & Sidebar Changes */
-.sidebar {
-    position: fixed;
-    left: 20px;
-    top: 110px;
-    /* Anchor below header */
-    transform: none;
-    /* Remove centering transform */
-    width: 100px;
-    background: rgba(11, 14, 20, 0.6);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 15px 0;
-    z-index: 100;
-    max-height: calc(100vh - 130px);
-    /* Fill remaining height */
-    gap: 10px;
-    padding: 15px 0;
-    z-index: 100;
-    max-height: 90vh;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
 
-.sidebar::-webkit-scrollbar {
-    display: none;
-}
 
 /* SKELETON LOADING */
 .skeleton {
