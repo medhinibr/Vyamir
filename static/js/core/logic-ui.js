@@ -808,15 +808,11 @@ function updateHero(data) {
     const cityTime = new Date(current.time);
     const nowHour = cityTime.getHours();
 
-    const humidity = data.hourly.relativehumidity_2m ? data.hourly.relativehumidity_2m[nowHour] : '--';
-    const visibility = data.hourly.visibility ? (data.hourly.visibility[nowHour] / 1000) : '--';
-    const finalPressure = pressure || (data.hourly.surface_pressure ? data.hourly.surface_pressure[nowHour] : '--');
+    // REMOVED: Redundant hero metrics (Wind, Humidity etc.) - Now only in Sidebar
 
-    setText('hero-wind', `${getSpeed(wind).toFixed(1)} ${getUnit('speed')}`);
-    setText('hero-humidity', humidity + '%');
-    setText('hero-visibility', `${getDist(visibility).toFixed(1)} ${getUnit('dist')}`);
-    setText('hero-pressure', Math.round(finalPressure) + ' hPa');
-    setText('history-text', data.history || 'Historical data unavailable.');
+    // Update Live Data timestamp
+    const updateTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setText('history-text', `Live Data: ${city}`);
 
     // Dynamic Accuracy Note
     const accuracyNote = document.getElementById('accuracy-note') || document.createElement('div');
