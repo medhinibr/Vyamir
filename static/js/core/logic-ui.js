@@ -917,124 +917,115 @@ function updateDetails(data) {
     setText('detail-precip', getPrecip(precipAmount).toFixed(1) + ' ' + getUnit('precip'));
     setText('detail-precip-desc', precipProb + '% chance in next hour');
 
-    // 3. Humidity
-    const humidity = hourly.relativehumidity_2m ? hourly.relativehumidity_2m[nowHour] : (current.humidity || 0); // fallbacks
-    setText('detail-humidity', humidity + '%');
-    // Dew Point approx: T - ((100 - RH)/5)
-    const dewPoint = Math.round(temperature - ((100 - humidity) / 5));
-    setText('detail-humidity-desc', `The dew point is ${Math.round(getTemp(dewPoint))}°`);
 
-    // 4. Wind
-    setText('detail-wind', `${getSpeed(windSpeed).toFixed(1)} ${getUnit('speed')}`);
-    const arrow = document.getElementById('wind-arrow');
-    if (arrow) arrow.style.transform = `rotate(${windDir}deg)`;
+    // 5. Details Grid (Strict 6)
+    setText('d-humidity', current.relative_humidity_2m + '%');
 
-    // 5. UV Index
-    const uv = hourly.uv_index ? hourly.uv_index[nowHour] : 0;
-    setText('detail-uv', uv);
-    let uvDesc = "Low";
-    if (uv > 2) uvDesc = "Moderate";
-    if (uv > 5) uvDesc = "High";
-    if (uv > 7) uvDesc = "Very High";
-    setText('detail-uv-desc', uvDesc);
-    const uvBar = document.getElementById('uv-progress');
-    if (uvBar) uvBar.style.width = Math.min((uv / 11) * 100, 100) + '%';
+    // Use existing windSpeed or fetch new if needed (removing const redeclaration)
+    const windSpeedStrict = current.wind_speed_10m !== undefined ? current.wind_speed_10m : (typeof windSpeed !== 'undefined' ? windSpeed : 0);
+    setText('d-wind', Math.round(windSpeedStrict) + ' km/h');
 
-    // 6. Visibility
+    const uvVal = (data.daily && data.daily.uv_index_max) ? data.daily.uv_index_max[0] : (current.uv_index || '--');
+    setText('d-uv', uvVal);
+
+    // Visibility
     let vis = hourly.visibility ? hourly.visibility[nowHour] : 10000;
-    vis = (vis / 1000);
-    setText('detail-visibility', getDist(vis).toFixed(1) + ' ' + getUnit('dist'));
+    setText('d-vis', (vis / 1000).toFixed(1) + ' km');
 
-    // 7. Pressure
-    const pressure = hourly.surface_pressure ? hourly.surface_pressure[nowHour] : 1013;
-    setText('detail-pressure', Math.round(pressure) + ' hPa');
-    // Trend logic: compare with 3 hours ago
-    const prevPressure = hourly.surface_pressure ? hourly.surface_pressure[Math.max(0, nowHour - 3)] : pressure;
-    let pressDesc = "Stable";
-    if (pressure < prevPressure - 1) pressDesc = "Falling";
-    if (pressure > prevPressure + 1) pressDesc = "Rising";
-    setText('detail-pressure-desc', pressDesc);
+    // Pressure
+    const press = current.pressure_msl || current.surface_pressure;
+    setText('d-pressure', Math.round(press) + ' hPa');
 
-    // 8. Air Quality (Enhanced)
-    const aqi = data.air_quality ? data.air_quality.european_aqi[nowHour] : 0;
-    const pm25 = data.air_quality ? data.air_quality.pm2_5[nowHour] : 0;
-    const pm10 = data.air_quality ? data.air_quality.pm10[nowHour] : 0;
-    const o3 = data.air_quality ? data.air_quality.ozone[nowHour] : 0;
+    // Dew Point (Calc)
+    const T = current.temperature_2m;
+    const RH = current.relative_humidity_2m;
+    // Simple approx: T - (100 - RH)/5
+    const dew = T - ((100 - RH) / 5);
+    setText('d-dew', Math.round(dew) + '°');
 
-    setText('detail-aqi-val', aqi);
-    setText('detail-pm25', Math.round(pm25));
-    setText('detail-pm10', Math.round(pm10));
-    setText('detail-o3', Math.round(o3));
+    // Update Hourly Scroll (New Horizontal Trajectory)
+    updateHourlyScroll(data);
+}
 
-    let aqiStatus = "Good";
-    let advice = "Safe for outdoor activities.";
+// NEW: Horizontal Scroll Logic
+function updateHourlyScroll(data) {
+    const container = document.getElementById('hourly-scroll-container');
+    if (!container) return;
 
-    if (aqi > 20) { aqiStatus = "Fair"; advice = "Sensitive groups should reduce exertion."; }
-    if (aqi > 40) { aqiStatus = "Moderate"; advice = "Mask recommended for sensitive nodes."; }
-    if (aqi > 60) { aqiStatus = "Poor"; advice = "Limit outdoor exposure. Wear a mask."; }
-    if (aqi > 80) { aqiStatus = "Very Poor"; advice = "Health Alert: Avoid all outdoor exertion."; }
+    container.innerHTML = '';
 
-    setText('detail-aqi-status', aqiStatus);
-    setText('detail-aqi-advice', advice);
+    const timeArr = data.hourly.time;
+    const tempArr = data.hourly.temperature_2m;
+    const codeArr = data.hourly.weather_code;
+    const rainArr = data.hourly.precipitation_probability;
 
-    // 9. Agri-Insight (Dashboard Integration)
-    if (window.initAgriPage) window.initAgriPage(); setText('detail-aqi-advice', advice);
-
-    // 9. Pollen Aggregate (High-Fidelity Bio-Density Tracking)
-    const aq = data.air_quality;
-    let totalPollen = 0;
-    if (aq) {
-        // Summing all available pollen vectors for a comprehensive Bio-Density report
-        totalPollen = (aq.grass_pollen ? aq.grass_pollen[nowHour] : 0) +
-            (aq.birch_pollen ? aq.birch_pollen[nowHour] : 0) +
-            (aq.alder_pollen ? aq.alder_pollen[nowHour] : 0) +
-            (aq.ragweed_pollen ? aq.ragweed_pollen[nowHour] : 0) +
-            (aq.olive_pollen ? aq.olive_pollen[nowHour] : 0);
+    const now = new Date();
+    // Find start index
+    let startIndex = 0;
+    for (let i = 0; i < timeArr.length; i++) {
+        if (new Date(timeArr[i]) > now) {
+            startIndex = i;
+            break;
+        }
     }
 
-    setText('detail-pollen-val', Math.round(totalPollen));
-    let pollenStatus = "Low/None";
-    if (totalPollen > 1) pollenStatus = "Low";
-    if (totalPollen > 20) pollenStatus = "Moderate";
-    if (totalPollen > 100) pollenStatus = "High";
-    setText('detail-pollen-status', `Total Bio-Density: ${pollenStatus}`);
+    // Show next 48 hours
+    for (let i = startIndex; i < Math.min(startIndex + 48, timeArr.length); i++) {
+        const t = new Date(timeArr[i]);
+        const hourLabel = t.toLocaleTimeString([], { hour: 'numeric', hour12: true });
+        const temp = Math.round(tempArr[i]);
+        const icon = getWeatherIcon(codeArr[i]);
+        const pop = rainArr[i];
 
-    // 9. Sun & Moon
-    const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    setText('detail-sunrise', sunrise);
-    setText('detail-sunset', sunset);
+        const card = document.createElement('div');
+        card.style.minWidth = '90px';
+        card.style.textAlign = 'center';
+        card.style.padding = '15px 10px';
+        card.style.background = 'rgba(255,255,255,0.03)';
+        card.style.border = '1px solid rgba(255,255,255,0.08)';
+        card.style.borderRadius = '12px';
 
-    // Moon Phase Calculation (Enhanced Visuals)
-    const date = new Date();
-    const cycle = 29.53059; // days
-    const knownNewMoon = new Date('2000-01-06').getTime();
-    const diffDays = (date.getTime() - knownNewMoon) / (1000 * 60 * 60 * 24);
-    const age = diffDays % cycle;
-
-    const moonComponent = document.getElementById('moon-visual-component');
-    const moonText = document.getElementById('detail-moon-text');
-
-    if (moonComponent && moonText) {
-        moonComponent.className = 'moon-visual'; // Reset
-
-        let phaseClass = 'new';
-        let phaseTitle = 'New Moon';
-
-        if (age < 1.84) { phaseClass = 'new'; phaseTitle = 'New Moon'; }
-        else if (age < 5.53) { phaseClass = 'waxing-crescent'; phaseTitle = 'Waxing Crescent'; }
-        else if (age < 9.22) { phaseClass = 'first-quarter'; phaseTitle = 'First Quarter'; }
-        else if (age < 12.91) { phaseClass = 'waxing-gibbous'; phaseTitle = 'Waxing Gibbous'; }
-        else if (age < 16.61) { phaseClass = 'full'; phaseTitle = 'Full Moon'; }
-        else if (age < 20.30) { phaseClass = 'waning-gibbous'; phaseTitle = 'Waning Gibbous'; }
-        else if (age < 23.99) { phaseClass = 'last-quarter'; phaseTitle = 'Last Quarter'; }
-        else if (age < 27.68) { phaseClass = 'waning-crescent'; phaseTitle = 'Waning Crescent'; }
-        else { phaseClass = 'new'; phaseTitle = 'New Moon'; }
-
-        moonComponent.classList.add(phaseClass);
-        moonText.textContent = phaseTitle;
+        card.innerHTML = `
+            <div style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 8px;">${hourLabel}</div>
+            <i class="${icon}" style="font-size: 1.4rem; margin-bottom: 8px; display:block;"></i>
+            <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 5px;">${temp}°</div>
+            <div style="font-size: 0.75rem; color: #4fc3f7;"><i class="bi bi-droplet-fill"></i> ${pop}%</div>
+        `;
+        container.appendChild(card);
     }
 }
+
+// NEW: Tab Switching Logic
+window.switchTab = function (tab) {
+    const weatherSections = ['section-current', 'section-hourly-full', 'grid-container-main'];
+    const newsSection = document.getElementById('section-news');
+    const agriSection = document.getElementById('section-agri-tab'); // Renamed to avoid ID conflict with agri page logic
+
+    // Hide all first
+    weatherSections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+        // Note: grid-container-main needs to be added to index.html grid
+    });
+    // Just manual targeting for now
+    document.getElementById('section-current').style.display = 'none';
+    document.getElementById('section-hourly-full').style.display = 'none';
+    document.querySelector('.grid-container').style.display = 'none'; // Target class
+
+    if (newsSection) newsSection.style.display = 'none';
+    if (agriSection) agriSection.style.display = 'none';
+
+    if (tab === 'weather') {
+        document.getElementById('section-current').style.display = 'flex'; // Hero is flex
+        document.getElementById('section-hourly-full').style.display = 'block';
+        document.querySelector('.grid-container').style.display = 'grid';
+    } else if (tab === 'news') {
+        if (newsSection) newsSection.style.display = 'block';
+    } else if (tab === 'agri') {
+        if (agriSection) agriSection.style.display = 'block';
+    }
+};
+
 
 function updateNews(data) {
     const newsContainer = document.getElementById('news-container');

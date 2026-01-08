@@ -25,7 +25,7 @@
 
     <!-- 3. RIGHT: Navigation & Tools -->
     <nav class="top-nav" style="display: flex; align-items: center; gap: 25px;">
-        <a href="/news" class="nav-link"
+        <a href="#" class="nav-link" onclick="switchTab('news'); return false;"
             style="color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;"
             onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">News</a>
         <a href="/maps" class="nav-link"
@@ -34,11 +34,11 @@
         <a href="/monsoon" class="nav-link"
             style="color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;"
             onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">Monsoon</a>
-        <a href="/agri" class="nav-link"
+        <a href="#" class="nav-link" onclick="switchTab('agri'); return false;"
             style="color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;"
             onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">Agri</a>
-        <a href="#section-details" class="nav-link"
-            onclick="document.getElementById('section-details').scrollIntoView({behavior: 'smooth'})"
+        <a href="#" class="nav-link"
+            onclick="switchTab('weather'); document.getElementById('section-details').scrollIntoView({behavior: 'smooth'}); return false;"
             style="color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;"
             onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">Details</a>
 
