@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Vyamir | Your Skies, Redefined</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+
+    <!-- Premium Typography: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <meta name="description"
+        content="Experience the atmosphere like never before. Vyamir provides hyper-local weather data, air quality intelligence, and cinematic environmental visualizations.">
+    <meta name="keywords"
+        content="weather app, atmospheric intelligence, air quality, real-time weather, Vyamir, meteorology, data visualization">
+    <meta property="og:title" content="Vyamir | Your Skies, Redefined">
+    <meta property="og:site_name" content="Vyamir">
+    <meta name="google-site-verification" content="gG9Ovutq5f5SMqTQSIniXCbCipiZWrwu_cGrIGiHXGE" />
+    <link rel="canonical" href="https://vyamir.onrender.com/" />
+
+    <!-- OpenGraph & Social Media Meta Tags -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://vyamir.onrender.com/" />
+    <meta property="og:title" content="Vyamir | Your Skies, Redefined" />
+    <meta property="og:description"
+        content="Real-time atmospheric intelligence and interactive weather visualization." />
+    <meta property="og:image" content="https://vyamir.onrender.com/static/img/logo.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Schema.org JSON-LD (Rich Snippets) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Vyamir",
+      "url": "https://vyamir.onrender.com/",
+      "description": "Atmospheric intelligence and weather visualization platform.",
+      "applicationCategory": "WeatherApplication",
+      "operatingSystem": "All"
+    }
+    </script>
+
+    <script id="vyamir-config" type="application/json">
+        {{ config | tojson | safe }}
+    </script>
+    <script>
+        window.VYAMIR_CONFIG = JSON.parse(document.getElementById('vyamir-config').textContent);
+    </script>
+
+    <!-- Firebase Integration -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-analytics.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: window.VYAMIR_CONFIG.FIREBASE_API_KEY,
+            authDomain: "vyamir-0156.firebaseapp.com",
+            projectId: "vyamir-0156",
+            storageBucket: "vyamir-0156.firebasestorage.app",
+            messagingSenderId: "587528291042",
+            appId: "1:587528291042:web:7ef286fc28ae3863b1d4bb",
+            measurementId: "G-ML1DF6JGM8"
+        };
+
+
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.firebaseApp = app;
+        window.firebaseAuth = auth;
+        window.db = db;
+
+        // AUTH PERSISTENCE ENGINE: Ensure identities survive across sessions
+        (async () => {
+            try {
+                // Failsafe: If the app is still stuck after 4 seconds, force-remove the overlay.
+                setTimeout(() => {
+                    const overlay = document.getElementById('session-restoration-overlay');
+                    if (overlay) {
+                        console.warn("Vyamir Engine: Force-clearing loading screen due to timeout.");
+                        overlay.style.opacity = '0';
+                        setTimeout(() => overlay.remove(), 500);
+                    }
+                }, 4000);
+
+                await setPersistence(auth, browserLocalPersistence);
+
+                onAuthStateChanged(auth, (user) => {
+                    const overlay = document.getElementById('session-restoration-overlay');
+                    if (user) {
+                        console.log("Vyamir Engine: Auth Stabilized for " + user.uid);
+                        if (window.checkUserPrivacyConsent) window.checkUserPrivacyConsent();
+
+                        // WAIT FOR DATA SYNC: Only remove overlay once points/nickname are loaded or consent is needed
+                        const syncWait = setInterval(() => {
+                            if (window.vyamirSessionRestored || window.vyamirNeedsConsent) {
+                                clearInterval(syncWait);
+                                console.log("Vyamir Engine: Identity Ready. Revealing UI.");
+                                setTimeout(() => {
+                                    if (overlay) overlay.style.opacity = '0';
+                                    setTimeout(() => overlay?.remove(), 500);
+                                }, 300);
+                            }
+                        }, 50);
+                    } else {
+                        console.log("Vyamir Engine: Initializing New anonymous Node...");
+                        signInAnonymously(auth).catch((err) => {
+                            console.error("Auth Error:", err);
+                            if (overlay) overlay.innerHTML = '<div style="color: #ff5858;">Connection Interrupted. Please refresh.</div>';
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error("Persistence Configuration Failed:", error);
+            }
+        })();
+    </script>
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6959399778170612"
+        crossorigin="anonymous"></script>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/navigation/part-sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/weather/part-details.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+{% set body_class = '' %}
+{% if weather %}
+{% set wid = weather.weather[0].id %}
+{% if wid >= 200 and wid < 300 %}{% set body_class='bg-thunderstorm' %} {% elif wid>= 300 and wid < 600 %}{% set
+        body_class='bg-rain' %} {% elif wid>= 600 and wid < 700 %}{% set body_class='bg-snow' %} {% elif wid>= 700 and
+            wid < 800 %}{% set body_class='bg-mist' %} {% elif wid==800 %}{% set body_class='bg-clear' %} {% elif wid>
+                800 %}{% set body_class = 'bg-clouds' %}
+                {% endif %}
+                {% endif %}
+
+                <body class="{{ 'is-dashboard' if weather else 'is-landing' }} {{ body_class }}">
+                    <!-- Session Restoration Overlay -->
+                    <div id="session-restoration-overlay"
+                        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0b0e14; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; pointer-events: none;">
+                        <img src="/static/img/logo.png" alt="Vyamir"
+                            style="width: 80px; height: 80px; margin-bottom: 25px; filter: drop-shadow(0 0 15px rgba(88,166,255,0.4));">
+                        <div class="loader-spinner"
+                            style="width: 30px; height: 30px; border: 2px solid rgba(88, 166, 255, 0.1); border-top-color: #58a6ff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;">
+                        </div>
+                        <div
+                            style="color: rgba(255,255,255,0.7); font-family: 'Inter', sans-serif; font-size: 0.8rem; letter-spacing: 2px; font-weight: 400; text-transform: uppercase;">
+                            Calibrating Weather Forecast & Atmospheric Intelligence...</div>
+                    </div>
+                    <style>
+                        @keyframes spin {
+                            to {
+                                transform: rotate(360deg);
+                            }
+                        }
+                    </style>
+
+                    <!-- Global Toast Container -->
+                    <div id="toast-container" class="toast-container"></div>
+                    {% include 'components/navigation/part_sidebar.html' %}
+
+                    <!-- Mobile Bottom Navigation: Floating Glassmorphic Dock -->
+                    <nav class="mobile-nav glass-panel">
+                        <div class="mobile-nav-item active" data-section="section-current">
+                            <i class="bi bi-sun"></i>
+                            <span>Current</span>
+                        </div>
+                        <div class="mobile-nav-item" data-section="section-hourly">
+                            <i class="bi bi-clock"></i>
+                            <span>Hourly</span>
+                        </div>
+                        <div class="mobile-nav-item" data-section="section-maps">
+                            <i class="bi bi-map"></i>
+                            <span>Maps</span>
+                        </div>
+                        <div class="mobile-nav-item" data-section="section-details">
+                            <i class="bi bi-grid-1x2"></i>
+                            <span>Details</span>
+                        </div>
+                        <div class="mobile-nav-item" onclick="toggleVault()">
+                            <i class="bi bi-shield-lock"></i>
+                            <span>Vault</span>
+                        </div>
+                    </nav>
+
+                    <div class="container">
+
+                        {% include 'components/navigation/part_header.html' %}
+
+                        <!-- Grid Container (News Only) -->
+                        <div class="grid-container" style="display: block;">
+                            <h2 style="color: white; margin: 0 0 20px 0; font-weight: 300;">Global Atmospheric Events
+                            </h2>
+
+                            <div class="row" style="display: flex; gap: 20px; flex-wrap: wrap;">
+                                <div id="section-news" style="flex: 2; min-width: 350px;">{% include
+                                    'components/media/part_news.html' %}</div>
+                                <div id="section-video" style="flex: 1; min-width: 300px;">{% include
+                                    'components/media/part_videos.html' %}</div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- Welcome State (Creative Sectional Landing Page) -->
+                        <div class="welcome-container" onscroll="handleLandingScroll(this)">
+                            <canvas id="sky-canvas"></canvas>
+
+                            <!-- STICKY TOP NAVBAR (Branding - Hidden by default) -->
+                            <nav id="sticky-brand-nav" class="sticky-nav">
+                                <div class="nav-brand-group">
+                                    <img src="/static/img/logo.png" alt="Vyamir" class="nav-logo-small"
+                                        onerror="this.style.display='none'">
+                                    <span class="nav-brand-name">Vyamir</span>
+                                </div>
+                                <div class="nav-actions">
+                                    <button onclick="scrollToHero()" class="nav-cta-btn">GET STARTED</button>
+                                </div>
+                            </nav>
+
+                            <!-- SECTION 1: HERO SPLASH (100% Focused) -->
+                            <section class="landing-section section-hero">
+                                <div class="welcome-card glass-panel">
+                                    <div class="hero-branding">
+                                        <div class="hero-logo-container">
+                                            <img src="/static/img/logo.png" class="hero-logo" alt="V"
+                                                onerror="this.src='https://cdn-icons-png.flaticon.com/512/1163/1163624.png'; this.onerror=null;">
+                                        </div>
+                                        <h1 class="hero-brand-name">Vyamir</h1>
+                                    </div>
+
+                                    <h2 class="welcome-title">Atmospheric Weather, Redefined.</h2>
+                                    <p class="welcome-subtitle">Advanced hyper-local forecast exploration with real-time
+                                        data and
+                                        immersive visualizations.</p>
+
+                                    <div class="welcome-search-box">
+                                        <input type="text" id="welcome-search-input" name="city-query"
+                                            placeholder="Search city (e.g. London, Ujire)..."
+                                            onkeypress="if(event.key === 'Enter') performWelcomeSearch()">
+                                        <div id="welcome-search-btn" onclick="performWelcomeSearch()">
+                                            <i class="bi bi-arrow-right" style="font-size: 1.4rem;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="welcome-tip">Tip: Move your cursor to connect constellations!</div>
+                                </div>
+                            </section>
+
+                            <!-- SECTION 2: ATMOSPHERIC INSIGHTS (Integrated with Footer) -->
+                            <section class="landing-section section-intelligence">
+                                <div class="intelligence-header">
+                                    <h2>Atmospheric Intelligence</h2>
+                                    <p>Vyamir introduces a paradigm shift in environmental data visualization
+                                        and decentralized tracking.</p>
+                                </div>
+
+                                <div class="intelligence-3col-grid">
+                                    <!-- Precision Dynamics -->
+                                    <div class="intelligence-card glass-panel">
+                                        <div class="card-icon"><i class="bi bi-cpu"></i></div>
+                                        <h3>Precision Dynamics</h3>
+                                        <p>Hyper-local temperature readings accurate to 0.2°C, leveraging
+                                            high-performance Open-Meteo backend clusters.</p>
+                                    </div>
+
+                                    <!-- Global Sync -->
+                                    <div class="intelligence-card glass-panel">
+                                        <div class="card-icon"><i class="bi bi-hdd-network"></i></div>
+                                        <h3>Global Sync</h3>
+                                        <p>Real-time processing of millions of meteorological vectors across global
+                                            satellite constellations for high-fidelity reporting.</p>
+                                    </div>
+
+                                    <!-- SkyID Vault -->
+                                    <div class="intelligence-card glass-panel">
+                                        <div class="card-icon"><i class="bi bi-database-lock"></i></div>
+                                        <h3>SkyID Vault</h3>
+                                        <p>Securely synchronize points, preferences, and environmental connections via
+                                            anonymous decentralized node logic.</p>
+                                    </div>
+                                </div>
+
+                                <div class="operational-band">
+                                    <div class="operational-status">
+                                        <span class="status-pulse"></span>
+                                        100% Operational | Serving 200,000+ Global Regions
+                                    </div>
+                                </div>
+
+                                <!-- GLOBAL FOOTER -->
+                            </section>
+
+                            <!-- SECTION 3: ATMOSPHERIC FAQ -->
+                            <section class="landing-section section-faq">
+                                <div class="faq-container">
+                                    <div class="faq-header">
+                                        <h2>Atmospheric FAQ</h2>
+                                        <div class="header-line"></div>
+                                    </div>
+
+                                    <div class="faq-grid">
+                                        <div class="faq-item glass-panel">
+                                            <div class="faq-question">
+                                                <i class="bi bi-question-circle"></i>
+                                                <h4>How accurate is Vyamir's data?</h4>
+                                            </div>
+                                            <p>We utilize the Open-Meteo API clusters, aggregating data from leading
+                                                models like ECMWF and GFS. This ensures precision metrics with a
+                                                sub-0.2°C margin of error for atmospheric telemetry.</p>
+                                        </div>
+
+                                        <div class="faq-item glass-panel">
+                                            <div class="faq-question">
+                                                <i class="bi bi-currency-exchange"></i>
+                                                <h4>What are SkyPoints utilized for?</h4>
+                                            </div>
+                                            <p>SkyPoints represent your ecosystem engagement. They are digital assets
+                                                earned through daily synchronization and can be transferred across the
+                                                decentralized SkyID network.</p>
+                                        </div>
+
+                                        <div class="faq-item glass-panel">
+                                            <div class="faq-question">
+                                                <i class="bi bi-shield-check"></i>
+                                                <h4>Is my geolocation data secure?</h4>
+                                            </div>
+                                            <p>Vyamir operates on a local-first privacy model. Precise coordinates are
+                                                only utilized with explicit authorization and are never persisted beyond
+                                                active session resolution.</p>
+                                        </div>
+
+                                        <div class="faq-item glass-panel">
+                                            <div class="faq-question">
+                                                <i class="bi bi-megaphone"></i>
+                                                <h4>Is the platform free of charge?</h4>
+                                            </div>
+                                            <p>Absolutely. Vyamir is an open-access intelligence platform. We sustain
+                                                operations through high-quality, non-intrusive integrations with the
+                                                Google AdSense network.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- GLOBAL FOOTER -->
+                                {% include 'components/navigation/part_footer.html' %}
+                            </section>
+                        </div> <!-- End Welcome Container -->
+                    </div> <!-- End Container -->
+
+                    <!-- Dashboard Footer -->
+                    <div class="dashboard-footer-anchor">
+                        {% include 'components/navigation/part_footer.html' %}
+                    </div>
+
+                    {% if weather %}
+                    <script>
+                        window.weatherData = {
+                            lat: Number("{{ weather.coord.lat }}"),
+                            lon: Number("{{ weather.coord.lon }}"),
+                            uv: Number("{{ uv.value if uv else 0 }}"),
+                            humidity: Number("{{ weather.main.humidity }}"),
+                            windDeg: Number("{{ weather.wind.deg }}"),
+                            sunrise: Number("{{ weather.sys.sunrise }}"),
+                            sunset: Number("{{ weather.sys.sunset }}"),
+                            timezone: Number("{{ weather.timezone }}")
+                        };
+                    </script>
+                    <script id="forecast-json" type="application/json">
+        {{ forecast.list | tojson | safe }}
+    </script>
+                    {% endif %}
+
+                    <!-- Video Modal -->
+                    <div id="video-modal"
+                        style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 100000; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(25px);">
+                        <div
+                            style="width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 5%;">
+                            <h3 id="modal-video-title"
+                                style="color: white; margin: 0; font-size: 1.5rem; font-weight: 300; letter-spacing: 1px;">
+                                Weather Cinematic</h3>
+                            <div style="display: flex; gap: 20px; align-items: center;">
+                                <div id="video-mute-toggle" onclick="toggleMute()"
+                                    style="cursor: pointer; color: white; font-size: 1.5rem; transition: 0.3s; opacity: 0.7;"
+                                    onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+                                    <i class="bi bi-volume-mute"></i>
+                                </div>
+                                <div onclick="closeVideoModal()"
+                                    style="cursor: pointer; color: white; font-size: 2.5rem; transition: 0.3s;"
+                                    onmouseover="this.style.transform='rotate(90deg)'"
+                                    onmouseout="this.style.transform='rotate(0deg)'">
+                                    <i class="bi bi-x"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            style="width: 100%; max-width: 1000px; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; box-shadow: 0 0 100px rgba(0,0,0,1); border: 1px solid rgba(88, 166, 255, 0.3); position: relative;">
+
+                            <!-- Loading Spinner -->
+                            <div id="video-loader"
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; z-index: 5;">
+                                <div class="spinner-border text-info" role="status" style="width: 3rem; height: 3rem;">
+                                </div>
+                                <div
+                                    style="margin-top: 15px; color: rgba(255,255,255,0.5); font-size: 0.9rem; letter-spacing: 1px;">
+                                    SYNCING VECTORS...</div>
+                            </div>
+
+                            <video id="modal-video-player" width="100%" height="100%" controls autoplay loop
+                                style="object-fit: cover; position: relative; z-index: 10;"></video>
+                        </div>
+                    </div> <!-- End Video Modal Inner Container -->
+
+                    <!-- Universal Policy Modal -->
+                    <div id="policy-modal" class="modal-overlay"
+                        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 7, 12, 0.95); z-index: 100000; backdrop-filter: blur(40px); justify-content: center; align-items: center; padding: 15px;">
+                        <div class="glass-panel"
+                            style="width: 100%; max-width: 900px; padding: 40px 20px; position: relative; max-height: 90%; border: 1px solid rgba(88, 166, 255, 0.25); display: flex; flex-direction: column; background: rgba(10, 15, 25, 0.9) !important; box-shadow: 0 50px 100px rgba(0,0,0,1);">
+                            <!-- Close Button -->
+                            <div onclick="togglePolicyModal()"
+                                style="position: absolute; right: 35px; top: 35px; cursor: pointer; font-size: 2.2rem; color: rgba(255,255,255,0.4); transition: 0.3s; line-height: 1;"
+                                onmouseover="this.style.color='white'">&times;</div>
+
+                            <div id="policy-content" style="overflow-y: auto; padding-right: 25px;">
+                                <h2 id="policy-title"
+                                    style="color: var(--accent-color); margin-bottom: 35px; font-weight: 700; font-size: 2.2rem; letter-spacing: -1px;">
+                                    Legal Notice
+                                </h2>
+                                <div id="policy-text"
+                                    style="color: rgba(255,255,255,0.85); line-height: 1.8; font-size: 1.1rem; font-weight: 300;">
+                                    Loading...
+                                </div>
+                            </div>
+
+                            <button onclick="togglePolicyModal()"
+                                style="margin-top: 40px; width: 100%; padding: 20px; border-radius: 15px; background: var(--accent-gradient); border: none; color: white; font-weight: 600; font-size: 1.1rem; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 30px rgba(88, 166, 255, 0.2);">
+                                I ACCEPT & CONTINUE
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SkyPoints Vault Modal -->
+                    <div id="vault-modal" class="modal-overlay"
+                        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 7, 12, 0.95); z-index: 100000; backdrop-filter: blur(40px); justify-content: center; align-items: center; padding: 15px;">
+                        <div class="glass-panel"
+                            style="width: 100%; max-width: 600px; padding: 40px 25px; position: relative; border: 1px solid rgba(88, 166, 255, 0.25); display: flex; flex-direction: column; background: rgba(10, 15, 25, 0.9) !important; box-shadow: 0 50px 100px rgba(0,0,0,1); overflow-y: auto; max-height: 90%;">
+                            <div onclick="toggleVault()"
+                                style="position: absolute; right: 30px; top: 30px; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3); transition: 0.3s;"
+                                onmouseover="this.style.color='white'">&times;</div>
+
+                            <h2
+                                style="color: var(--accent-color); margin-bottom: 30px; font-weight: 700; font-size: 2rem; letter-spacing: -1px; display: flex; align-items: center; gap: 15px;">
+                                <i class="bi bi-shield-lock"></i> SkyPoints Vault
+                            </h2>
+
+                            <div
+                                style="display: flex; gap: 10px; margin-bottom: 30px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 12px;">
+                                <button id="vault-tab-id" onclick="switchVaultTab('id')" class="vault-tab-active"
+                                    style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: var(--accent-color); color: white; font-weight: 600; cursor: pointer; transition: 0.3s;">Identity</button>
+                                <button id="vault-tab-transfer" onclick="switchVaultTab('transfer')"
+                                    style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: transparent; color: white; font-weight: 600; cursor: pointer; transition: 0.3s;">Transfer</button>
+                            </div>
+
+                            <div id="vault-id-content">
+                                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 20px;">Your
+                                    globally unique identity in the Vyamir ecosystem.</p>
+                                <div
+                                    style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 25px;">
+                                    <div
+                                        style="font-size: 0.8rem; color: var(--accent-color); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                                        Active Nickname</div>
+                                    <div id="vault-current-nickname"
+                                        style="font-size: 1.5rem; font-weight: 300; color: white;">Loading...</div>
+                                    <div
+                                        style="font-size: 0.8rem; color: #81c784; margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
+                                        <span><i class="bi bi-coin"></i> <span id="vault-current-points">0</span>
+                                            SkyPoints</span>
+                                        <button onclick="copyReferralLink()"
+                                            style="background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; transition: 0.3s;"
+                                            onmouseover="this.style.background='var(--accent-color)'; this.style.color='white'">Share
+                                            Identity</button>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="text" id="new-nickname-input" name="new-nickname"
+                                        placeholder="Enter new nickname..."
+                                        style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; color: white; outline: none; transition: 0.3s;"
+                                        onfocus="this.style.borderColor='var(--accent-color)'"
+                                        onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+                                    <button
+                                        onclick="updateNickname(document.getElementById('new-nickname-input').value)"
+                                        style="background: var(--accent-color); border: none; color: white; padding: 0 25px; border-radius: 12px; font-weight: 600; cursor: pointer;">Update</button>
+                                </div>
+                            </div>
+
+                            <div id="vault-transfer-content" style="display: none;">
+                                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 20px;">
+                                    Transfer SkyPoints securely to any Vyamir node.</p>
+                                <div style="display: flex; flex-direction: column; gap: 15px;">
+                                    <input type="text" id="transfer-recipient"
+                                        placeholder="Recipient Nickname (e.g. Medhini)"
+                                        style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; color: white; outline: none;">
+                                    <input type="number" id="transfer-amount" placeholder="Amount (Tokens)"
+                                        style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; color: white; outline: none;">
+                                    <button
+                                        onclick="transferPoints(document.getElementById('transfer-recipient').value, parseInt(document.getElementById('transfer-amount').value))"
+                                        style="background: var(--accent-gradient); border: none; color: white; padding: 18px; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; box-shadow: 0 10px 20px rgba(88, 166, 255, 0.2);">EXECUTE
+                                        TRANSFER</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Legal Pages Container -->
+                    <div id="legal-pages-container" class="legal-container" style="display: none;">
+                        <div class="legal-header">
+                            <a href="/" class="legal-back-btn" onclick="handleRoute(event, '/')">
+                                <i class="bi bi-arrow-left"></i> Back to Weather
+                            </a>
+                            <div style="font-weight: 700; color: white; letter-spacing: 1px; margin-left: auto;">VYAMIR
+                                LEGAL</div>
+                        </div>
+
+                        <div class="legal-content-wrapper">
+                            <div class="legal-card html-content">
+                                <h2 id="legal-page-title" class="legal-title">Title</h2>
+                                <div id="legal-page-content" class="legal-body"></div>
+                            </div>
+                            <div
+                                style="text-align: center; margin-top: 40px; color: rgba(255,255,255,0.4); font-size: 0.9rem;">
+                                Vyamir © 2025. All rights reserved.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Privacy Promise Card -->
+                    <div id="cookie-popup" class="privacy-promise-card">
+                        <div class="privacy-card-header">
+                            <div class="privacy-card-icon">
+                                <i class="bi bi-shield-lock"></i>
+                            </div>
+                            <div class="privacy-card-title">Privacy Promise</div>
+                        </div>
+                        <div class="privacy-card-body">
+                            Vyamir uses cookies to improve your weather intelligence experience and provide relevant
+                            advertisements. By continuing, you agree to our use of cookies.
+                        </div>
+                        <div class="privacy-card-footer">
+                            <button class="privacy-accept-all" onclick="acceptCookies()">Accept</button>
+                            <a href="/privacy-settings" class="privacy-customize-link"
+                                onclick="handleRoute(event, '/privacy-settings')">Cookie Settings</a>
+                        </div>
+                    </div>
+
+                    </div> <!-- End Container -->
+
+                    <script src="{{ url_for('static', filename='js/core/logic-ui.js') }}?v=1.0.2"></script>
+                    <script src="{{ url_for('static', filename='js/weather/logic-gauges.js') }}?v=1.0.2"></script>
+                    <script src="{{ url_for('static', filename='js/weather/logic-charts.js') }}?v=1.0.2"></script>
+                    <script src="{{ url_for('static', filename='js/safety/logic-map.js') }}?v=1.0.2"></script>
+                </body>
+
+</html>
