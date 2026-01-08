@@ -2329,23 +2329,23 @@ function initAgriPage() {
     let color = "#81c784"; // Green
 
     // Soil Telemetry (New Open-Meteo Vars)
-    // Note: data.hourly should have soil vars if fetched correctly. 
-    // Since we updated openmeteo.py, the client will receive them in the 'hourly' object under keys like 'soil_temperature_0cm'.
-    // We access the current hour index.
     const nowHour = new Date().getHours();
 
-    let soilMoisture = (data.hourly.soil_moisture_0_to_1cm && data.hourly.soil_moisture_0_to_1cm[nowHour])
+    let soilMoisture = (data.hourly && data.hourly.soil_moisture_0_to_1cm && data.hourly.soil_moisture_0_to_1cm[nowHour])
         ? data.hourly.soil_moisture_0_to_1cm[nowHour] : (precip > 0 ? 0.35 : 0.15); // Fallback mock
-    let soilTemp = (data.hourly.soil_temperature_0cm && data.hourly.soil_temperature_0cm[nowHour])
+    let soilTemp = (data.hourly && data.hourly.soil_temperature_0cm && data.hourly.soil_temperature_0cm[nowHour])
         ? data.hourly.soil_temperature_0cm[nowHour] : temp; // Fallback to air temp
 
     // Convert moisture fraction to %
-    // Open-Meteo gives m/m. Typical range 0.0-0.5. 0.3 is wet.
     let smPerc = Math.round(soilMoisture * 100);
-    if (smPerc > 100) smPerc = smPerc / 100; // If api changed unit
+    if (smPerc > 100) smPerc = smPerc / 100;
 
-    document.getElementById('soil-moisture-val').textContent = smPerc + "%";
-    document.getElementById('soil-temp-val').textContent = Math.round(soilTemp) + "°C";
+    // Safety checks for elements before setting textContent
+    const elMoisture = document.getElementById('soil-moisture-val');
+    const elTemp = document.getElementById('soil-temp-val');
+
+    if (elMoisture) elMoisture.textContent = smPerc + "%";
+    if (elTemp) elTemp.textContent = Math.round(soilTemp) + "°C";
 
     // Logic Tree
     if (precip > 5) {
@@ -2443,16 +2443,48 @@ function initMonsoonPage() {
 // --- LINGUISTICS ENGINE ---
 const translations = {
     en: {
-        current: "Current", hourly: "Hourly", maps: "Maps", details: "Details", news: "News",
-        agri: "Agri", monsoon: "Monsoon"
+        current: "Current", hourly: "Hourly", seven: "7-Day", maps: "Maps", details: "Details", news: "News",
+        agri: "Agri", monsoon: "Monsoon", vault: "Vault"
     },
     hi: {
-        current: "वर्तमान", hourly: "प्रति घंटा", maps: "नक्शे", details: "विवरण", news: "समाचार",
-        agri: "कृषि", monsoon: "मानसून"
+        current: "वर्तमान", hourly: "प्रति घंटा", seven: "7-दिन", maps: "नक्शे", details: "विवरण", news: "समाचार",
+        agri: "कृषि", monsoon: "मानसून", vault: "वॉल्ट"
     },
     mr: {
-        current: "सध्याचे", hourly: "taasi", maps: "नकाशे", details: "तपशील", news: "बातम्या",
-        agri: "कृषी", monsoon: "मान्सून"
+        current: "सध्याचे", hourly: "प्रति तास", seven: "7-दिवस", maps: "नकाशे", details: "तपशील", news: "बातम्या",
+        agri: "कृषी", monsoon: "मान्सून", vault: "तिजोरी"
+    },
+    es: {
+        current: "Actual", hourly: "Por hora", seven: "7 Días", maps: "Mapas", details: "Detalles", news: "Noticias",
+        agri: "Agri", monsoon: "Monzón", vault: "Bóveda"
+    },
+    fr: {
+        current: "Actuel", hourly: "Horaire", seven: "7 Jours", maps: "Cartes", details: "Détails", news: "Infos",
+        agri: "Agri", monsoon: "Mousson", vault: "Coffre"
+    },
+    de: {
+        current: "Aktuell", hourly: "Stündlich", seven: "7-Tage", maps: "Karten", details: "Details", news: "Nachrichten",
+        agri: "Agri", monsoon: "Monsun", vault: "Tresor"
+    },
+    cn: {
+        current: "当前", hourly: "每小时", seven: "7天", maps: "地图", details: "详情", news: "新闻",
+        agri: "农业", monsoon: "季风", vault: "保险库"
+    },
+    jp: {
+        current: "現在", hourly: "毎時", seven: "7日間", maps: "地図", details: "詳細", news: "ニュース",
+        agri: "農業", monsoon: "モンスーン", vault: "保管庫"
+    },
+    ru: {
+        current: "Сейчас", hourly: "Почасово", seven: "7 Дней", maps: "Карты", details: "Детали", news: "Новости",
+        agri: "Агро", monsoon: "Муссон", vault: "Хранилище"
+    },
+    pt: {
+        current: "Atual", hourly: "Por hora", seven: "7 Dias", maps: "Mapas", details: "Detalhes", news: "Notícias",
+        agri: "Agri", monsoon: "Monção", vault: "Cofre"
+    },
+    ar: {
+        current: "الحالي", hourly: "بالساعة", seven: "7 أيام", maps: "الخرائط", details: "التفاصيل", news: "الأخبار",
+        agri: "الزراعة", monsoon: "الرياح", vault: "الخزنة"
     }
 };
 
@@ -2460,20 +2492,24 @@ window.changeLanguage = function (lang) {
     if (!translations[lang]) return;
     const t = translations[lang];
 
-    // Sidebar
-    document.querySelectorAll('.sidebar-item span').forEach(span => {
-        const text = span.textContent.trim().toLowerCase();
-        // Since I rely on text content matching which is fragile, a robust system would use data-key.
-        // For this V1, I will just iterate known keys.
-        if (text === 'current') span.textContent = t.current;
-        if (text === 'hourly') span.textContent = t.hourly;
-        if (text === 'maps') span.textContent = t.maps;
-        if (text === 'details') span.textContent = t.details;
-        if (text === 'news') span.textContent = t.news;
-        if (text === 'agri') span.textContent = t.agri;
-        if (text === 'monsoon') span.textContent = t.monsoon;
-    });
+    // Helper to safely set text
+    const setText = (selector, text) => {
+        const el = document.querySelector(selector);
+        if (el) el.textContent = text;
+    };
 
+    setText('.sidebar-item[data-section="section-current"] span', t.current);
+    setText('.sidebar-item[data-section="section-hourly"] span', t.hourly);
+    setText('.sidebar-item[data-section="section-7day"] span', t.seven);
+    setText('.sidebar-item[data-section="section-maps"] span', t.maps);
+    setText('.sidebar-item[data-section="section-details"] span', t.details);
+    setText('.sidebar-item[data-section="section-video"] span', t.news);
+    setText('.sidebar-item[data-section="section-monsoon"] span', t.monsoon);
+    setText('.sidebar-item[data-section="section-agri"] span', t.agri);
+    setText('.sidebar-item[data-section="section-vault"] span', t.vault);
+
+    // Persist Language Preference (Optional for V2, good for now)
+    localStorage.setItem('vyamir_lang', lang);
     console.log("Language switched to", lang);
 }
 
