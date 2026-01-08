@@ -950,6 +950,9 @@ function updateDetails(data) {
     setText('detail-aqi-status', aqiStatus);
     setText('detail-aqi-advice', advice);
 
+    // 9. Agri-Insight (Dashboard Integration)
+    if (window.initAgriPage) window.initAgriPage(); setText('detail-aqi-advice', advice);
+
     // 9. Pollen Aggregate (High-Fidelity Bio-Density Tracking)
     const aq = data.air_quality;
     let totalPollen = 0;
