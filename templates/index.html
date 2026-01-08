@@ -31,6 +31,21 @@
     <meta property="og:image" content="https://vyamir.onrender.com/static/img/logo.png" />
     <meta name="twitter:card" content="summary_large_image" />
 
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#0b0e14">
+    <link rel="apple-touch-icon" href="/static/img/logo.png">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => console.log('Vyamir SW Registered'))
+                    .catch(err => console.log('Vyamir SW Failed:', err));
+            });
+        }
+    </script>
+
     <!-- Schema.org JSON-LD (Rich Snippets) -->
     <script type="application/ld+json">
     {
@@ -208,6 +223,15 @@
                             <div class="left-col">
                                 <div id="section-current">{% include 'components/weather/part_hero.html' %}</div>
                                 <div id="section-hourly">{% include 'components/weather/part_chart.html' %}</div>
+
+                                <!-- Optimization: Strategic Ad Space (Dashboard Banner) -->
+                                <div class="ad-spot-banner"
+                                    style="width:100%; height:90px; margin: 15px 0; background:rgba(255,255,255,0.02); border-radius:16px; border:1px dashed rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; cursor:default; overflow:hidden;">
+                                    <span
+                                        style="font-size:0.7rem; color:rgba(255,255,255,0.2); text-transform:uppercase; letter-spacing:1px;">Sponsored
+                                        Atmospheric Intelligence</span>
+                                </div>
+
                                 <div id="section-7day">{% include 'components/weather/part_daily_forecast.html' %}</div>
                             </div>
 
