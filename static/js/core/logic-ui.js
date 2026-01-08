@@ -651,7 +651,7 @@ function updateHero(data) {
     const pressure = current.pressure_msl || current.surface_pressure || current.pressure;
 
     document.querySelector('.location-title').textContent = city;
-    document.querySelector('.temp-large').textContent = Math.round(getTemp(temperature)) + getUnit('temp');
+    document.querySelector('.temp-large').textContent = Math.round(getTemp(temperature)) + '°';
     document.querySelector('.condition-text').textContent = getWeatherDescription(weatherCode);
 
     // POPULATE HERO SUB-DETAILS: Synchronized with city temporal clock
