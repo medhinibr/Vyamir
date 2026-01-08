@@ -2385,16 +2385,20 @@ window.updateUnitUI = function () {
 
 window.detectLocation = function () {
     const icon = document.querySelector('.bi-geo');
-    if (icon) icon.className = "bi bi-hourglass-split spin-animation"; // Add animation class if exists
+    if (icon) icon.className = "bi bi-hourglass-split spin-animation";
+
+    // Show 'Last Updated' immediately
+    const updateTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setText('history-text', `Last Updated: ${updateTime}`);
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
-                // Success
                 const lat = pos.coords.latitude;
                 const lon = pos.coords.longitude;
-                handleSearchSelection("Your Coordinates", lat, lon);
+                handleSearchSelection(null, lat, lon); // Pass null name to auto-resolve
                 if (icon) icon.className = "bi bi-geo";
+                showToast("Coordinates Locked.", "success");
             },
             (err) => {
                 showToast("Location access denied or failed.", "error");
