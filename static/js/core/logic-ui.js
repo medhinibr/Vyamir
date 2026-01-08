@@ -2444,82 +2444,140 @@ function initMonsoonPage() {
 const translations = {
     en: {
         current: "Current", hourly: "Hourly", seven: "7-Day", maps: "Maps", details: "Details", news: "News",
-        agri: "Agri", monsoon: "Monsoon", vault: "Vault"
+        agri: "Agri", monsoon: "Monsoon", vault: "Vault",
+        // Dashboard Metrics
+        feels_like: "Feels Like", wind: "Wind", humidity: "Humidity", precip: "Precipitation",
+        uv: "UV Index", visibility: "Visibility", pressure: "Pressure", pollen: "Pollen",
+        air_quality: "Air Quality Intelligence", sun_moon: "Sun & Moon"
     },
     // --- INDIAN LANGUAGES ---
     hi: { // Hindi
         current: "वर्तमान", hourly: "प्रति घंटा", seven: "7-दिन", maps: "नक्शे", details: "विवरण", news: "समाचार",
-        agri: "कृषि", monsoon: "मानसून", vault: "वॉल्ट"
+        agri: "कृषि", monsoon: "मानसून", vault: "वॉल्ट",
+        feels_like: "महसूस", wind: "हवा", humidity: "नमी", precip: "वर्षा",
+        uv: "यूवी सूचकांक", visibility: "दृश्यता", pressure: "दबाव", pollen: "पराग",
+        air_quality: "वायु गुणवत्ता", sun_moon: "सूर्य और चंद्रमा"
     },
     mr: { // Marathi
         current: "सध्याचे", hourly: "प्रति तास", seven: "7-दिवस", maps: "नकाशे", details: "तपशील", news: "बातम्या",
-        agri: "कृषी", monsoon: "मान्सून", vault: "तिजोरी"
+        agri: "कृषी", monsoon: "मान्सून", vault: "तिजोरी",
+        feels_like: "जाणवते", wind: "वारा", humidity: "आर्द्रता", precip: "पर्जन्य",
+        uv: "अतिनील निर्देशांक", visibility: "दृश्यमानता", pressure: "दाब", pollen: "परागकण",
+        air_quality: "हवेची गुणवत्ता", sun_moon: "सूर्य आणि चंद्र"
+    },
+    kn: { // Kannada (User Requested)
+        current: "ಪ್ರಸ್ತುತ", hourly: "ಗಂಟೆಯ", seven: "7-ದಿನ", maps: "ನಕ್ಷೆಗಳು", details: "ವಿವರಗಳು", news: "ಸುದ್ದಿ",
+        agri: "ಕೃಷಿ", monsoon: "ಮುಂಗಾರು", vault: "ವಾಲ್ಟ್",
+        feels_like: "ಅನಿಸುತ್ತದೆ", wind: "ಗಾಳಿ", humidity: "ತೇವಾಂಶ", precip: "ಮಳೆ",
+        uv: "ಯುವಿ ಸೂಚ್ಯಂಕ", visibility: "ಗೋಚರತೆ", pressure: "ಒತ್ತಡ", pollen: "ಪರಾಗ",
+        air_quality: "ವಾಯು ಗುಣಮಟ್ಟ", sun_moon: "ಸೂರ್ಯ ಮತ್ತು ಚಂದ್ರ"
     },
     bn: { // Bengali
         current: "বর্তমান", hourly: "প্রতি ঘন্টা", seven: "৭-দিন", maps: "মানচিত্র", details: "বিবরণ", news: "খবর",
-        agri: "কৃষি", monsoon: "বর্ষা", vault: "ভল্ট"
+        agri: "কৃষি", monsoon: "বর্ষা", vault: "ভল্ট",
+        feels_like: "অনুভূত", wind: "বাতাস", humidity: "আর্দ্রতা", precip: "বৃষ্টিপাত",
+        uv: "ইউভি সূচক", visibility: "দৃশ্যমানতা", pressure: "চাপ", pollen: "পরাগ",
+        air_quality: "বায়ুর গুণমান", sun_moon: "সূর্য এবং চাঁদ"
     },
     te: { // Telugu
         current: "ప్రస్తుత", hourly: "గంటకు", seven: "7-రోజులు", maps: "పటాలు", details: "వివరాలు", news: "వార్తలు",
-        agri: "వ్యవసాయం", monsoon: "రుతుపవనాలు", vault: "వాల్ట్"
+        agri: "వ్యవసాయం", monsoon: "రుతుపవనాలు", vault: "వాల్ట్",
+        feels_like: "అనిపిస్తుంది", wind: "గాలి", humidity: "తేమ", precip: "అవపాతం",
+        uv: "UV సూచిక", visibility: "దృశ్యత", pressure: "ఒత్తిడి", pollen: "పుప్పొడి",
+        air_quality: "గాలి నాణ్యత", sun_moon: "సూర్యుడు & చంద్రుడు"
     },
     ta: { // Tamil
         current: "தற்போதைய", hourly: "மணிநேர", seven: "7-நாட்கள்", maps: "வரைபடம்", details: "விவரங்கள்", news: "செய்திகள்",
-        agri: "விவசாயம்", monsoon: "பருவமழை", vault: "பெட்டகம்"
+        agri: "விவசாயம்", monsoon: "பருவமழை", vault: "பெட்டகம்",
+        feels_like: "உணர்வு", wind: "காற்று", humidity: "ஈரப்பதம்", precip: "மழைப்பொழிவு",
+        uv: "புறஊதா குறியீடு", visibility: "பார்வை", pressure: "அழுத்தம்", pollen: "மகரந்தம்",
+        air_quality: "காற்று தரம்", sun_moon: "சூரியன் & சந்திரன்"
     },
     gu: { // Gujarati
         current: "વર્તમાન", hourly: "કલાકદીઠ", seven: "7-દિવસ", maps: "નકશા", details: "વિગતો", news: "સમાચાર",
-        agri: "કૃષિ", monsoon: "ચોમાસું", vault: "તિજોરી"
-    },
-    kn: { // Kannada
-        current: "ಪ್ರಸ್ತುತ", hourly: "ಗಂಟೆಯ", seven: "7-ದಿನ", maps: "ನಕ್ಷೆಗಳು", details: "ವಿವರಗಳು", news: "ಸುದ್ದಿ",
-        agri: "ಕೃಷಿ", monsoon: "ಮುಂಗಾರು", vault: "ವಾಲ್ಟ್"
+        agri: "કૃષિ", monsoon: "ચોમાસું", vault: "તિજોરી",
+        feels_like: "અનુભવાય છે", wind: "પવન", humidity: "ભેજ", precip: "વરસાદ",
+        uv: "યુવી ઇન્ડેક્સ", visibility: "દૃશ્યતા", pressure: "દબાણ", pollen: "પરાગ",
+        air_quality: "હવાની ગુણવત્તા", sun_moon: "સૂર્ય અને ચંદ્ર"
     },
     ml: { // Malayalam
         current: "നിലവിലെ", hourly: "മണിക്കൂർ", seven: "7-ദിവസം", maps: "ഭൂപടം", details: "വിശദാംശങ്ങൾ", news: "വാർത്തകൾ",
-        agri: "കൃഷി", monsoon: "കാലവർഷം", vault: "നിലവറ"
+        agri: "കൃഷി", monsoon: "കാലവർഷം", vault: "നിലവറ",
+        feels_like: "അനുഭവപ്പെടുന്നു", wind: "കാറ്റ്", humidity: "ഈർപ്പം", precip: "മഴ",
+        uv: "UV സൂചിക", visibility: "കാഴ്ച", pressure: "മർദ്ദം", pollen: " പൂമ്പൊടി",
+        air_quality: "വായു ഗുണനിലവാരം", sun_moon: "സൂര്യനും ചന്ദ്രനും"
     },
     pa: { // Punjabi
         current: "ਮੌਜੂਦਾ", hourly: "ਘੰਟਾਵਾਰ", seven: "7-ਦਿਨ", maps: "ਨਕਸ਼ੇ", details: "ਵੇਰਵੇ", news: "ਖ਼ਬਰਾਂ",
-        agri: "ਖੇਤੀਬਾੜੀ", monsoon: "ਮਾਨਸੂਨ", vault: "ਵਾਲਟ"
+        agri: "ਖੇਤੀਬਾੜੀ", monsoon: "ਮਾਨਸੂਨ", vault: "ਵਾਲਟ",
+        feels_like: "ਮਹਿਸੂਸ", wind: "ਹਵਾ", humidity: "ਨਮੀ", precip: "ਵਰਖਾ",
+        uv: "UV ਸੂਚਕਾਂਕ", visibility: "ਦ੍ਰਿਸ਼ਟੀ", pressure: "ਦਬਾਅ", pollen: "ਪਰਾਗ",
+        air_quality: "ਹਵਾ ਦੀ ਗੁਣਵੱਤਾ", sun_moon: "ਸੂਰਜ ਅਤੇ ਚੰਦ"
     },
     or: { // Odia
         current: "ବର୍ତ୍ତମାନ", hourly: "ଘଣ୍ଟା ପ୍ରତି", seven: "୭-ଦିନ", maps: "ମାନଚିତ୍ର", details: "ବିବରଣୀ", news: "ଖବର",
-        agri: "କୃଷି", monsoon: "ମୌସୁମୀ", vault: "ଭଲ୍ଟ"
+        agri: "କୃଷି", monsoon: "ମୌସୁମୀ", vault: "ଭଲ୍ଟ",
+        feels_like: "ଅନୁଭବ ହୁଏ", wind: "ପବନ", humidity: "ଆର୍ଦ୍ରତା", precip: "ବୃଷ୍ଟିପାତ",
+        uv: "UV ସୂଚକାଙ୍କ", visibility: "ଦୃଶ୍ୟମାନତା", pressure: "ଚାପ", pollen: "ପରାଗ",
+        air_quality: "ବାୟୁ ଗୁଣବତ୍ତା", sun_moon: "ସୂର୍ଯ୍ୟ ଓ ଚନ୍ଦ୍ର"
     },
     as: { // Assamese
         current: "বৰ্তমান", hourly: "প্ৰতি ঘণ্টা", seven: "৭-দিন", maps: "মানচিত্ৰ", details: "সবিশেষ", news: "বাতৰি",
-        agri: "কৃষি", monsoon: "মৌচুমী", vault: "ভল্ট"
+        agri: "কৃষি", monsoon: "মৌচুমী", vault: "ভল্ট",
+        feels_like: "অনুভৱ", wind: "বতাহ", humidity: "আৰ্দ্ৰতা", precip: "বৃষ্টিপাত",
+        uv: "UV সূচক", visibility: "দৃশ্যমানতা", pressure: "চাপ", pollen: "পৰাগ",
+        air_quality: "বায়ুৰ গুণমান", sun_moon: "সূৰ্য আৰু চন্দ্ৰ"
     },
     ur: { // Urdu
         current: "موجودہ", hourly: "گھنٹہ وار", seven: "7 دن", maps: "نقشے", details: "تفصیلات", news: "خبریں",
-        agri: "زراعت", monsoon: "مانسون", vault: "والٹ"
+        agri: "زراعت", monsoon: "مانسون", vault: "والٹ",
+        feels_like: "محسوس", wind: "ہوا", humidity: "نمی", precip: "بارش",
+        uv: "یو وی انڈیکس", visibility: "حد نگاہ", pressure: "دباؤ", pollen: "پولن",
+        air_quality: "ہوا کا معیار", sun_moon: "سورج اور چاند"
     },
     sa: { // Sanskrit
         current: "सांप्रतम्", hourly: "होरा", seven: "सप्ताह", maps: "मानचित्रम्", details: "विवरणम्", news: "वार्ता",
-        agri: "कृषि", monsoon: "वर्षाऋतु", vault: "कोश"
+        agri: "कृषि", monsoon: "वर्षाऋतु", vault: "कोश",
+        feels_like: "अनुभवति", wind: "वायु", humidity: "आर्द्रता", precip: "वृष्टि",
+        uv: "भानु-सूचक", visibility: "दृश्यता", pressure: "नोदन", pollen: "पराग",
+        air_quality: "वायुगुणवत्ता", sun_moon: "सूर्यरश्मिः"
     },
 
     // --- GLOBAL ---
     es: {
         current: "Actual", hourly: "Por hora", seven: "7 Días", maps: "Mapas", details: "Detalles", news: "Noticias",
-        agri: "Agri", monsoon: "Monzón", vault: "Bóveda"
+        agri: "Agri", monsoon: "Monzón", vault: "Bóveda",
+        feels_like: "Sensación", wind: "Viento", humidity: "Humedad", precip: "Precipitación",
+        uv: "Índice UV", visibility: "Visibilidad", pressure: "Presión", pollen: "Polen",
+        air_quality: "Calidad Aire", sun_moon: "Sol y Luna"
     },
     fr: {
         current: "Actuel", hourly: "Horaire", seven: "7 Jours", maps: "Cartes", details: "Détails", news: "Infos",
-        agri: "Agri", monsoon: "Mousson", vault: "Coffre"
+        agri: "Agri", monsoon: "Mousson", vault: "Coffre",
+        feels_like: "Ressenti", wind: "Vent", humidity: "Humidité", precip: "Précipitations",
+        uv: "Indice UV", visibility: "Visibilité", pressure: "Pression", pollen: "Pollen",
+        air_quality: "Qualité de l'Air", sun_moon: "Soleil et Lune"
     },
     ru: {
         current: "Сейчас", hourly: "Почасово", seven: "7 Дней", maps: "Карты", details: "Детали", news: "Новости",
-        agri: "Агро", monsoon: "Муссон", vault: "Хранилище"
+        agri: "Агро", monsoon: "Муссон", vault: "Хранилище",
+        feels_like: "Ощущается", wind: "Ветер", humidity: "Влажность", precip: "Осадки",
+        uv: "УФ-индекс", visibility: "Видимость", pressure: "Давление", pollen: "Пыльца",
+        air_quality: "Качество воздуха", sun_moon: "Солнце и Луна"
     },
     cn: {
         current: "当前", hourly: "每小时", seven: "7天", maps: "地图", details: "详情", news: "新闻",
-        agri: "农业", monsoon: "季风", vault: "保险库"
+        agri: "农业", monsoon: "季风", vault: "保险库",
+        feels_like: "体感", wind: "风", humidity: "湿度", precip: "降水",
+        uv: "紫外线", visibility: "能见度", pressure: "气压", pollen: "花粉",
+        air_quality: "空气质量", sun_moon: "日与月"
     },
     ar: {
         current: "الحالي", hourly: "بالساعة", seven: "7 أيام", maps: "الخرائط", details: "التفاصيل", news: "الأخبار",
-        agri: "الزراعة", monsoon: "الرياح", vault: "الخزنة"
+        agri: "الزراعة", monsoon: "الرياح", vault: "الخزنة",
+        feels_like: "يبدو مثل", wind: "الرياح", humidity: "رطوبة", precip: "هطول",
+        uv: "مؤشر الأشعة", visibility: "الرؤية", pressure: "الضغط", pollen: "لقاح",
+        air_quality: "جودة الهواء", sun_moon: "الشمس والقمر"
     }
 };
 
@@ -2527,12 +2585,32 @@ window.changeLanguage = function (lang) {
     if (!translations[lang]) return;
     const t = translations[lang];
 
-    // Helper to safely set text
+    // Helper to safely set text content
     const setText = (selector, text) => {
-        const el = document.querySelector(selector);
-        if (el) el.textContent = text;
+        const els = document.querySelectorAll(selector);
+        els.forEach(el => {
+            // Only replace the TEXT node to avoid killing child icons
+            // But for simplicity in this specific Vyamir architecture, full replace works as icons are usually separate or we rebuild content.
+            // Actually, in sidebar items, text is in a <span>. In dashboard, it's often a text node next to an <i>.
+            // Let's target specific parent elements and update the text node specifically if needed.
+            if (el.tagName === 'SPAN' || el.children.length === 0) {
+                el.textContent = text;
+            } else {
+                // If element has icon children (like <div class="detail-header"><i class="bi bi-wind"></i> Wind</div>)
+                // We need to keep the icon.
+                const icon = el.querySelector('i');
+                if (icon) {
+                    el.innerHTML = ''; // clear
+                    el.appendChild(icon); // restore icon
+                    el.appendChild(document.createTextNode(' ' + text)); // add new text
+                } else {
+                    el.textContent = text;
+                }
+            }
+        });
     };
 
+    // 1. Sidebar Translations
     setText('.sidebar-item[data-section="section-current"] span', t.current);
     setText('.sidebar-item[data-section="section-hourly"] span', t.hourly);
     setText('.sidebar-item[data-section="section-7day"] span', t.seven);
@@ -2543,7 +2621,42 @@ window.changeLanguage = function (lang) {
     setText('.sidebar-item[data-section="section-agri"] span', t.agri);
     setText('.sidebar-item[data-section="section-vault"] span', t.vault);
 
-    // Persist Language Preference (Optional for V2, good for now)
+    // 2. Mobile Nav Translations
+    setText('.mobile-nav-item[data-section="section-current"] span', t.current);
+    setText('.mobile-nav-item[data-section="section-hourly"] span', t.hourly);
+    setText('.mobile-nav-item[data-section="section-maps"] span', t.maps);
+    setText('.mobile-nav-item[data-section="section-details"] span', t.details);
+
+    // 3. Dashboard Metrics (New!)
+    // We aim to translate the headers of the details grid cards.
+    // The selector finds the .detail-header divs.
+    // We need specific mappings. Since we don't have unique IDs for every header, relies on order or we add IDs.
+    // A smarter way for existing DOM: Find by ICON class or content? 
+    // Content is unreliable as it changes. Let's rely on the icon classes which are unique per card type.
+
+    const mapHeader = (iconClass, text) => {
+        const icon = document.querySelector(`.detail-header i.${iconClass}`);
+        if (icon && icon.parentElement) {
+            icon.parentElement.childNodes.forEach(node => {
+                if (node.nodeType === 3 && node.nodeValue.trim().length > 0) {
+                    node.nodeValue = ' ' + text;
+                }
+            });
+        }
+    };
+
+    if (t.feels_like) mapHeader('bi-thermometer-half', t.feels_like);
+    if (t.wind) mapHeader('bi-wind', t.wind);
+    if (t.humidity) mapHeader('bi-droplet', t.humidity);
+    if (t.precip) mapHeader('bi-cloud-drizzle', t.precip);
+    if (t.uv) mapHeader('bi-sun', t.uv);
+    if (t.visibility) mapHeader('bi-eye', t.visibility);
+    if (t.pressure) mapHeader('bi-speedometer2', t.pressure);
+    if (t.pollen) mapHeader('bi-flower1', t.pollen);
+    if (t.sun_moon) mapHeader('bi-moon-stars', t.sun_moon);
+    if (t.air_quality) mapHeader('bi-lungs', t.air_quality);
+
+    // Persist Language Preference
     localStorage.setItem('vyamir_lang', lang);
     console.log("Language switched to", lang);
 }

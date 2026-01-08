@@ -7,6 +7,27 @@
 @import 'components/safety/part-map.css';
 @import 'animations.css';
 
+/* Navigation & Sidebar Changes */
+.sidebar {
+    position: fixed;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100px;
+    background: rgba(11, 14, 20, 0.6);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 25px 0;
+    z-index: 100;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* More subtle border */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    /* Softer shadow */
+}
+
 /* Hourly Scroll Customization - Hide Scrollbar */
 .hourly-scroll-track {
     -ms-overflow-style: none;
