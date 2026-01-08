@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
 
     initDashboard(); // Core data sync (Weather + Auth)
-    initSidebar();
 
     if (path.includes('/agri')) {
         console.log("Vyamir Engine: Initializing Agricultural Module...");
