@@ -203,10 +203,11 @@ function initDashboard() {
             },
             (err) => {
                 console.log('Vyamir Engine: Geolocation synchronization deferred. Defaulting to London coordinates.');
-                // Defaulting to a major hub if location is denied or timed out
+                // Defaulting to limited hub if location is denied or timed out
                 window.lastLat = 51.5074;
                 window.lastLon = -0.1278;
                 window.locationSource = 'offline';
+                // SILENT FALLBACK: No error toast. Just load default.
             },
             { timeout: 5000, enableHighAccuracy: true, maximumAge: 60000 }
         );
@@ -943,7 +944,9 @@ function updateDetails(data) {
     setText('d-dew', Math.round(dew) + '°');
 
     // Update Hourly Scroll (New Horizontal Trajectory)
-    updateHourlyScroll(data);
+    try {
+        updateHourlyScroll(data);
+    } catch (e) { console.error("Hourly scroll update failed inside updateDetails", e); }
 }
 
 // NEW: Horizontal Scroll Logic
@@ -955,8 +958,8 @@ function updateHourlyScroll(data) {
 
     const timeArr = data.hourly.time;
     const tempArr = data.hourly.temperature_2m;
-    const codeArr = data.hourly.weather_code;
-    const rainArr = data.hourly.precipitation_probability;
+    const codeArr = data.hourly.weather_code || data.hourly.weathercode;
+    const rainArr = data.hourly.precipitation_probability || [];
 
     const now = new Date();
     // Find start index
@@ -1340,16 +1343,12 @@ function updateBackground(code, isDay) {
 
     if (weatherClass) body.classList.add(weatherClass);
 
-    // Smooth transition
-    const tempImg = new Image();
-    tempImg.src = url;
-    tempImg.onload = () => {
-        body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('${url}')`;
-        body.style.backgroundSize = 'cover';
-        body.style.backgroundPosition = 'center';
-        body.style.backgroundAttachment = 'fixed';
-        body.style.transition = 'background-image 1s ease-in-out';
-    };
+    // IMMEDIATE UPDATE: Bypass image load listener to ensure background replaces the blue instantly
+    body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${url}')`;
+    body.style.backgroundSize = 'cover';
+    body.style.backgroundPosition = 'center';
+    body.style.backgroundAttachment = 'fixed';
+    body.style.transition = 'background-image 1s ease-in-out';
 }
 
 function getWeatherIcon(code) {
