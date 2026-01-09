@@ -1306,19 +1306,50 @@ function setText(id, val) {
 }
 
 function updateBackground(code, isDay) {
+    const body = document.body;
     let url = '';
-    // Optimized sizes: w=1280, q=70 for faster loading
-    if (code >= 95) url = 'https://images.unsplash.com/photo-1605727216801-e27ce1d0cc28?q=70&w=1280&auto=format&fit=crop';
-    else if (code >= 71) url = 'https://images.unsplash.com/photo-1478265409131-1f65c88f965c?q=70&w=1280&auto=format&fit=crop';
-    else if (code >= 61) url = 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=70&w=1280&auto=format&fit=crop';
-    else if (code >= 1 && code <= 3) url = 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=70&w=1280&auto=format&fit=crop';
-    else url = isDay ? 'https://images.unsplash.com/photo-1622278647429-71bc97e904e8?q=70&w=1280&auto=format&fit=crop' : 'https://images.unsplash.com/photo-1507400492013-162706c8c05e?q=70&w=1280&auto=format&fit=crop';
+    let weatherClass = '';
 
-    document.body.style.backgroundImage = `url('${url}')`;
-    document.body.style.backgroundSize = 'cover';
-    document.body.style.backgroundPosition = 'center';
-    document.body.style.backgroundAttachment = 'fixed';
-    document.body.classList.add('glass-mode');
+    // Remove old weather classes
+    body.classList.remove('bg-clear', 'bg-clouds', 'bg-rain', 'bg-thunderstorm', 'bg-snow', 'bg-mist');
+
+    // WMO Weather interpretation codes
+    if (code >= 95) {
+        url = 'https://images.unsplash.com/photo-1605727216801-e27ce1d0cc28?q=70&w=1920&auto=format&fit=crop';
+        weatherClass = 'bg-thunderstorm';
+    } else if (code >= 71) {
+        url = 'https://images.unsplash.com/photo-1478265409131-1f65c88f965c?q=70&w=1920&auto=format&fit=crop';
+        weatherClass = 'bg-snow';
+    } else if (code >= 51) {
+        url = 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=70&w=1920&auto=format&fit=crop';
+        weatherClass = 'bg-rain';
+    } else if (code >= 45 && code <= 48) {
+        url = 'https://images.unsplash.com/photo-1485236715598-c8879a674a41?q=70&w=1920&auto=format&fit=crop';
+        weatherClass = 'bg-mist';
+    } else if (code >= 1 && code <= 3) {
+        url = isDay
+            ? 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=70&w=1920&auto=format&fit=crop'
+            : 'https://images.unsplash.com/photo-1507400492013-162706c8c05e?q=70&w=1920&auto=format&fit=crop';
+        weatherClass = 'bg-clouds';
+    } else {
+        url = isDay
+            ? 'https://images.unsplash.com/photo-1622278647429-71bc97e904e8?q=70&w=1920&auto=format&fit=crop'
+            : 'https://images.unsplash.com/photo-1532978393477-d32b17ac6747?q=70&w=1920&auto=format&fit=crop';
+        weatherClass = 'bg-clear';
+    }
+
+    if (weatherClass) body.classList.add(weatherClass);
+
+    // Smooth transition
+    const tempImg = new Image();
+    tempImg.src = url;
+    tempImg.onload = () => {
+        body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('${url}')`;
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = 'center';
+        body.style.backgroundAttachment = 'fixed';
+        body.style.transition = 'background-image 1s ease-in-out';
+    };
 }
 
 function getWeatherIcon(code) {

@@ -133,7 +133,6 @@ body.bg-thunderstorm {
 
 body.bg-snow {
     background: linear-gradient(135deg, #83a4d4 0%, #b6fbff 100%);
-    color: #1e3c72;
 }
 
 body.bg-snow .glass-panel {
