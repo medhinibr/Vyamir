@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
 
     initDashboard(); // Core data sync (Weather + Auth)
+    initSidebar();
 
     if (path.includes('/agri')) {
         console.log("Vyamir Engine: Initializing Agricultural Module...");
@@ -20,15 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 100);
 
-    // Initialize Unit System - FORCE METRIC for refined cleanup
-    if (!localStorage.getItem('vyamir_unit_system') || localStorage.getItem('vyamir_unit_system') === 'imperial') {
+    // Initialize Unit System
+    if (!localStorage.getItem('vyamir_unit_system')) {
         localStorage.setItem('vyamir_unit_system', 'metric');
     }
-    window.unitSystem = 'metric'; // Hard enforce
+    window.unitSystem = localStorage.getItem('vyamir_unit_system');
     updateUnitUI();
 });
 
-// ASYNC BRIDGE: Wait for core weather data before triggering specialized UIs
 // ASYNC BRIDGE: Wait for core weather data before triggering specialized UIs
 function waitForDataSync(callback) {
     const waiter = setInterval(() => {
@@ -38,136 +38,6 @@ function waitForDataSync(callback) {
         }
     }, 200);
 }
-
-// --- RETENTION ENGINE: SAVED LOCATIONS & ALERTS ---
-
-// 1. Saved Locations Logic
-function saveCurrentLocation() {
-    // Get city from Hero or window storage
-    const cityEl = document.querySelector('.hero-city h1') || document.querySelector('.hero-brand-name');
-    const city = cityEl ? cityEl.textContent.trim() : "Unknown";
-    const data = window.weatherData;
-
-    if (!data) {
-        alert("Please load a location first.");
-        return;
-    }
-
-    const lat = data.lat;
-    const lon = data.lon;
-
-    let locations = JSON.parse(localStorage.getItem('vyamir_saved_locs') || '[]');
-    // Check duplicate
-    if (locations.find(l => l.name === city)) {
-        alert("Location already saved!");
-        return;
-    }
-
-    locations.push({ name: city, lat: lat, lon: lon });
-    localStorage.setItem('vyamir_saved_locs', JSON.stringify(locations));
-    renderSavedLocations();
-    alert("Location Saved to Vault!");
-}
-
-function deleteSavedLocation(index) {
-    let locations = JSON.parse(localStorage.getItem('vyamir_saved_locs') || '[]');
-    locations.splice(index, 1);
-    localStorage.setItem('vyamir_saved_locs', JSON.stringify(locations));
-    renderSavedLocations();
-}
-
-function renderSavedLocations() {
-    const container = document.getElementById('saved-locations-list');
-    if (!container) return; // Might not exist on all pages (e.g. landing)
-
-    const locations = JSON.parse(localStorage.getItem('vyamir_saved_locs') || '[]');
-
-    if (locations.length === 0) {
-        container.innerHTML = `<div style="color:rgba(255,255,255,0.4); text-align:center; padding:10px; font-size:0.9rem;">No saved locations.</div>`;
-        return;
-    }
-
-    container.innerHTML = locations.map((loc, i) => `
-        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:5px;">
-            <div onclick="handleSearchSelection('${loc.name}', ${loc.lat}, ${loc.lon})" style="cursor:pointer; flex:1; display:flex; align-items:center; gap:8px;">
-                <i class="bi bi-geo-alt" style="color:var(--accent-color);"></i> 
-                <span class="saved-loc-name">${loc.name}</span>
-            </div>
-            <i class="bi bi-trash" onclick="deleteSavedLocation(${i})" style="cursor:pointer; color:#ff5858; opacity:0.7; font-size:0.9rem;"></i>
-        </div>
-    `).join('');
-}
-
-// 2. Video Feed Logic (YouTube Integration)
-function updateVideoFeed(city) {
-    const feedContainer = document.getElementById('video-feed-container');
-    if (!feedContainer) return;
-
-    // Use YouTube Embed with Search query (Privacy-enhanced mode)
-    // Note: 'listType=search' requires API interaction in some contexts, but simple embeds work if we assume basic access.
-    // Alternatively, just embed a standard search result iframe or a specific playlist.
-    // For V1, we try a direct search query embed if supported, or fallback to a generic weather channel.
-
-    const query = encodeURIComponent(`weather forecast ${city}`);
-    const html = `
-        <iframe width="100%" height="100%" 
-            src="https://www.youtube.com/embed?listType=search&list=${query}" 
-            title="Weather Forecast"
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen 
-            style="border-radius:12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-height: 300px;">
-        </iframe>
-        <div style="margin-top:10px; color:rgba(255,255,255,0.6); font-size:0.9rem;">
-            <i class="bi bi-youtube" style="color:#ff0000;"></i> Top forecast videos for ${city}
-        </div>
-    `;
-    feedContainer.innerHTML = html;
-}
-
-// 3. Severe Weather Alerts (Push Notifications)
-function checkSevereWeatherAlerts() {
-    if (!("Notification" in window)) return;
-
-    // Only ask if default
-    if (Notification.permission === "default") {
-        Notification.requestPermission();
-    }
-
-    const data = window.weatherData;
-    if (!data) return;
-
-    // Logic: If Precip > 10mm or Wind > 50km/h
-    // We check DOM if raw data isn't in scope (a safe fallback in vanilla JS apps)
-    const windText = document.getElementById('detail-wind')?.textContent || "0";
-    const windVal = parseFloat(windText);
-
-    // Only alert once per session to avoid spam
-    if (window.hasAlerted) return;
-
-    if (windVal > 40) {
-        new Notification("Vyamir Severe Weather Alert", {
-            body: `High wind speeds detected (${windVal} km/h). Secure loose objects.`,
-            icon: '/static/img/logo.png'
-        });
-        window.hasAlerted = true;
-    }
-}
-
-// Global Expose
-window.renderSavedLocations = renderSavedLocations;
-window.saveCurrentLocation = saveCurrentLocation;
-window.updateVideoFeed = updateVideoFeed;
-
-// Init Hooks
-document.addEventListener("DOMContentLoaded", () => {
-    // If on News page, init video
-    if (document.getElementById('video-feed-container')) {
-        // Default to London or last search
-        const lastCity = localStorage.getItem('vyamir_last_city') || "Global";
-        updateVideoFeed(lastCity);
-    }
-});
 
 function initDashboard() {
     // BACKEND SYNC: Initialization will be handled by index.html auth cycle.
@@ -203,11 +73,10 @@ function initDashboard() {
             },
             (err) => {
                 console.log('Vyamir Engine: Geolocation synchronization deferred. Defaulting to London coordinates.');
-                // Defaulting to limited hub if location is denied or timed out
+                // Defaulting to a major hub if location is denied or timed out
                 window.lastLat = 51.5074;
                 window.lastLon = -0.1278;
                 window.locationSource = 'offline';
-                // SILENT FALLBACK: No error toast. Just load default.
             },
             { timeout: 5000, enableHighAccuracy: true, maximumAge: 60000 }
         );
@@ -808,85 +677,58 @@ function updateHero(data) {
     const cityTime = new Date(current.time);
     const nowHour = cityTime.getHours();
 
-    // Update Live Data timestamp
-    const updateTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    setText('history-text', `Live Data: ${city}`); // Replaces Initializing...
+    const humidity = data.hourly.relativehumidity_2m ? data.hourly.relativehumidity_2m[nowHour] : '--';
+    const visibility = data.hourly.visibility ? (data.hourly.visibility[nowHour] / 1000) : '--';
+    const finalPressure = pressure || (data.hourly.surface_pressure ? data.hourly.surface_pressure[nowHour] : '--');
 
-    // Dynamic Accuracy Note: Removed as per "Clean clean" request if it feels like clutter, 
-    // but user specifically asked to "Stop the infinite 'Initializing...' loop" which setText above fixes.
-    // I will keep the accuracy note logic but simplified if needed. The previous implementation was fine.
-
-    // AQI BINDING FOR HERO
-    if (data.air_quality && data.air_quality.european_aqi) {
-        const aqi = data.air_quality.european_aqi[nowHour] || '--';
-        setText('hero-aqi-val', aqi);
-
-        // Color coding for AQI
-        const aqiContainer = document.getElementById('hero-aqi');
-        if (aqiContainer && typeof aqi === 'number') {
-            if (aqi < 20) aqiContainer.style.borderColor = '#4caf50'; // Good
-            else if (aqi < 40) aqiContainer.style.borderColor = '#ffeb3b'; // Fair
-            else if (aqi < 60) aqiContainer.style.borderColor = '#ff9800'; // Moderate
-            else aqiContainer.style.borderColor = '#f44336'; // Poor
-        }
-    }
+    setText('hero-wind', `${getSpeed(wind).toFixed(1)} ${getUnit('speed')}`);
+    setText('hero-humidity', humidity + '%');
+    setText('hero-visibility', `${getDist(visibility).toFixed(1)} ${getUnit('dist')}`);
+    setText('hero-pressure', Math.round(finalPressure) + ' hPa');
+    setText('history-text', data.history || 'Historical data unavailable.');
 
     // Dynamic Accuracy Note
     const accuracyNote = document.getElementById('accuracy-note') || document.createElement('div');
     accuracyNote.id = 'accuracy-note';
     if (window.locationSource === 'gps') {
-        accuracyNote.innerHTML = '<i class="bi bi-geo-alt-fill"></i> GPS Active';
+        accuracyNote.innerHTML = '<i class="bi bi-geo-alt-fill"></i> Precise GPS Location Active';
         accuracyNote.className = 'accuracy-badge gps';
+    } else if (window.locationSource === 'manual') {
+        accuracyNote.innerHTML = '<i class="bi bi-exclamation-circle"></i> Manual Search Mode: Enable GPS for pinpoint local mapping';
+        accuracyNote.className = 'accuracy-badge manual';
     } else {
-        accuracyNote.style.display = 'none'; // Hide if not GPS to keep clean
+        accuracyNote.innerHTML = '<i class="bi bi-geo-off"></i> Precise tracking unavailable. Search for a city or enable GPS for live data.';
+        accuracyNote.className = 'accuracy-badge offline';
     }
-
     const heroContent = document.querySelector('.hero-content');
     if (heroContent && !document.getElementById('accuracy-note')) {
         heroContent.prepend(accuracyNote);
     }
     // Daily Forecast List
-    // Daily Forecast List
     const listContainer = document.querySelector('.daily-list-vertical');
     if (listContainer) {
-        listContainer.innerHTML = '';
+        listContainer.innerHTML = '<div style="font-weight: 600; margin-bottom: 15px; font-size: 1.1rem;">15-Day Extended Forecast</div>';
 
         // EXTENDED FORECAST: 15 Days
         const maxDays = Math.min(15, data.daily.time.length);
-        const rainProbs = data.daily.precipitation_probability_max || [];
-
         for (let i = 0; i < maxDays; i++) {
             if (!data.daily.time[i]) continue;
             const date = new Date(data.daily.time[i]);
             const dayName = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
             const iconCode = data.daily.weathercode[i];
-            const pop = rainProbs[i] !== undefined ? rainProbs[i] : 0;
 
             const row = document.createElement('div');
             row.className = 'daily-row';
-
-            // Rain Icon Logic
-            const rainHTML = pop > 0
-                ? `<div style="display:flex; align-items:center; gap:3px; font-size:0.75rem; color:#4fc3f7; min-width:60px;">
-                     <i class="bi bi-droplet-fill"></i> ${pop}%
-                   </div>`
-                : `<div style="min-width:60px; text-align:center; font-size:0.8rem; opacity:0.1;">-</div>`;
-
             row.innerHTML = `
-                    <div class="daily-day" style="font-size: 0.9rem; flex:1;">${dayName}</div>
-                    
-                    <div class="daily-icon-group" style="flex:1.5; display:flex; align-items:center; gap:8px;">
+                    <div class="daily-day" style="font-size: 0.9rem;">${dayName}</div>
+                    <div class="daily-icon-group">
                          <i class="${getWeatherIcon(iconCode)}" style="font-size: 1.2rem; width: 30px; text-align: center;"></i>
-                         <span style="font-size: 0.8rem; opacity: 0.8;">${getWeatherDescription(iconCode)}</span>
+                         <span style="font-size: 0.8rem; opacity: 0.8; margin-left:10px;">${getWeatherDescription(iconCode)}</span>
                     </div>
-
-                    <!-- Rain Prob -->
-                    ${rainHTML}
-
-                    <div class="daily-temp-group" style="flex:1; justify-content:flex-end;">
-                        <span class="day-temp-low" style="opacity:0.6;">${Math.round(getTemp(data.daily.temperature_2m_min[i]))}°</span>
-                        <div class="temp-bar" style="width:40px; margin:0 8px;"><div class="temp-fill" style="width: 50%"></div></div>
-                        <span class="day-temp-high" style="font-weight:600;">${Math.round(getTemp(data.daily.temperature_2m_max[i]))}°</span>
+                    <div class="daily-temp-group">
+                        <span class="day-temp-low">${Math.round(getTemp(data.daily.temperature_2m_min[i]))}°</span>
+                        <div class="temp-bar"><div class="temp-fill" style="width: 50%"></div></div>
+                        <span class="day-temp-high">${Math.round(getTemp(data.daily.temperature_2m_max[i]))}°</span>
                     </div>
                 `;
             listContainer.appendChild(row);
@@ -917,117 +759,121 @@ function updateDetails(data) {
     setText('detail-precip', getPrecip(precipAmount).toFixed(1) + ' ' + getUnit('precip'));
     setText('detail-precip-desc', precipProb + '% chance in next hour');
 
+    // 3. Humidity
+    const humidity = hourly.relativehumidity_2m ? hourly.relativehumidity_2m[nowHour] : (current.humidity || 0); // fallbacks
+    setText('detail-humidity', humidity + '%');
+    // Dew Point approx: T - ((100 - RH)/5)
+    const dewPoint = Math.round(temperature - ((100 - humidity) / 5));
+    setText('detail-humidity-desc', `The dew point is ${Math.round(getTemp(dewPoint))}°`);
 
-    // 5. Details Grid (Strict 6)
-    setText('d-humidity', current.relative_humidity_2m + '%');
+    // 4. Wind
+    setText('detail-wind', `${getSpeed(windSpeed).toFixed(1)} ${getUnit('speed')}`);
+    const arrow = document.getElementById('wind-arrow');
+    if (arrow) arrow.style.transform = `rotate(${windDir}deg)`;
 
-    // Use existing windSpeed or fetch new if needed (removing const redeclaration)
-    const windSpeedStrict = current.wind_speed_10m !== undefined ? current.wind_speed_10m : (typeof windSpeed !== 'undefined' ? windSpeed : 0);
-    setText('d-wind', Math.round(windSpeedStrict) + ' km/h');
+    // 5. UV Index
+    const uv = hourly.uv_index ? hourly.uv_index[nowHour] : 0;
+    setText('detail-uv', uv);
+    let uvDesc = "Low";
+    if (uv > 2) uvDesc = "Moderate";
+    if (uv > 5) uvDesc = "High";
+    if (uv > 7) uvDesc = "Very High";
+    setText('detail-uv-desc', uvDesc);
+    const uvBar = document.getElementById('uv-progress');
+    if (uvBar) uvBar.style.width = Math.min((uv / 11) * 100, 100) + '%';
 
-    const uvVal = (data.daily && data.daily.uv_index_max) ? data.daily.uv_index_max[0] : (current.uv_index || '--');
-    setText('d-uv', uvVal);
-
-    // Visibility
+    // 6. Visibility
     let vis = hourly.visibility ? hourly.visibility[nowHour] : 10000;
-    setText('d-vis', (vis / 1000).toFixed(1) + ' km');
+    vis = (vis / 1000);
+    setText('detail-visibility', getDist(vis).toFixed(1) + ' ' + getUnit('dist'));
 
-    // Pressure
-    const press = current.pressure_msl || current.surface_pressure;
-    setText('d-pressure', Math.round(press) + ' hPa');
+    // 7. Pressure
+    const pressure = hourly.surface_pressure ? hourly.surface_pressure[nowHour] : 1013;
+    setText('detail-pressure', Math.round(pressure) + ' hPa');
+    // Trend logic: compare with 3 hours ago
+    const prevPressure = hourly.surface_pressure ? hourly.surface_pressure[Math.max(0, nowHour - 3)] : pressure;
+    let pressDesc = "Stable";
+    if (pressure < prevPressure - 1) pressDesc = "Falling";
+    if (pressure > prevPressure + 1) pressDesc = "Rising";
+    setText('detail-pressure-desc', pressDesc);
 
-    // Dew Point (Calc)
-    const T = current.temperature_2m;
-    const RH = current.relative_humidity_2m;
-    // Simple approx: T - (100 - RH)/5
-    const dew = T - ((100 - RH) / 5);
-    setText('d-dew', Math.round(dew) + '°');
+    // 8. Air Quality (Enhanced)
+    const aqi = data.air_quality ? data.air_quality.european_aqi[nowHour] : 0;
+    const pm25 = data.air_quality ? data.air_quality.pm2_5[nowHour] : 0;
+    const pm10 = data.air_quality ? data.air_quality.pm10[nowHour] : 0;
+    const o3 = data.air_quality ? data.air_quality.ozone[nowHour] : 0;
 
-    // Update Hourly Scroll (New Horizontal Trajectory)
-    try {
-        updateHourlyScroll(data);
-    } catch (e) { console.error("Hourly scroll update failed inside updateDetails", e); }
+    setText('detail-aqi-val', aqi);
+    setText('detail-pm25', Math.round(pm25));
+    setText('detail-pm10', Math.round(pm10));
+    setText('detail-o3', Math.round(o3));
+
+    let aqiStatus = "Good";
+    let advice = "Safe for outdoor activities.";
+
+    if (aqi > 20) { aqiStatus = "Fair"; advice = "Sensitive groups should reduce exertion."; }
+    if (aqi > 40) { aqiStatus = "Moderate"; advice = "Mask recommended for sensitive nodes."; }
+    if (aqi > 60) { aqiStatus = "Poor"; advice = "Limit outdoor exposure. Wear a mask."; }
+    if (aqi > 80) { aqiStatus = "Very Poor"; advice = "Health Alert: Avoid all outdoor exertion."; }
+
+    setText('detail-aqi-status', aqiStatus);
+    setText('detail-aqi-advice', advice);
+
+    // 9. Pollen Aggregate (High-Fidelity Bio-Density Tracking)
+    const aq = data.air_quality;
+    let totalPollen = 0;
+    if (aq) {
+        // Summing all available pollen vectors for a comprehensive Bio-Density report
+        totalPollen = (aq.grass_pollen ? aq.grass_pollen[nowHour] : 0) +
+            (aq.birch_pollen ? aq.birch_pollen[nowHour] : 0) +
+            (aq.alder_pollen ? aq.alder_pollen[nowHour] : 0) +
+            (aq.ragweed_pollen ? aq.ragweed_pollen[nowHour] : 0) +
+            (aq.olive_pollen ? aq.olive_pollen[nowHour] : 0);
+    }
+
+    setText('detail-pollen-val', Math.round(totalPollen));
+    let pollenStatus = "Low/None";
+    if (totalPollen > 1) pollenStatus = "Low";
+    if (totalPollen > 20) pollenStatus = "Moderate";
+    if (totalPollen > 100) pollenStatus = "High";
+    setText('detail-pollen-status', `Total Bio-Density: ${pollenStatus}`);
+
+    // 9. Sun & Moon
+    const sunrise = new Date(data.daily.sunrise[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const sunset = new Date(data.daily.sunset[0]).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    setText('detail-sunrise', sunrise);
+    setText('detail-sunset', sunset);
+
+    // Moon Phase Calculation (Enhanced Visuals)
+    const date = new Date();
+    const cycle = 29.53059; // days
+    const knownNewMoon = new Date('2000-01-06').getTime();
+    const diffDays = (date.getTime() - knownNewMoon) / (1000 * 60 * 60 * 24);
+    const age = diffDays % cycle;
+
+    const moonComponent = document.getElementById('moon-visual-component');
+    const moonText = document.getElementById('detail-moon-text');
+
+    if (moonComponent && moonText) {
+        moonComponent.className = 'moon-visual'; // Reset
+
+        let phaseClass = 'new';
+        let phaseTitle = 'New Moon';
+
+        if (age < 1.84) { phaseClass = 'new'; phaseTitle = 'New Moon'; }
+        else if (age < 5.53) { phaseClass = 'waxing-crescent'; phaseTitle = 'Waxing Crescent'; }
+        else if (age < 9.22) { phaseClass = 'first-quarter'; phaseTitle = 'First Quarter'; }
+        else if (age < 12.91) { phaseClass = 'waxing-gibbous'; phaseTitle = 'Waxing Gibbous'; }
+        else if (age < 16.61) { phaseClass = 'full'; phaseTitle = 'Full Moon'; }
+        else if (age < 20.30) { phaseClass = 'waning-gibbous'; phaseTitle = 'Waning Gibbous'; }
+        else if (age < 23.99) { phaseClass = 'last-quarter'; phaseTitle = 'Last Quarter'; }
+        else if (age < 27.68) { phaseClass = 'waning-crescent'; phaseTitle = 'Waning Crescent'; }
+        else { phaseClass = 'new'; phaseTitle = 'New Moon'; }
+
+        moonComponent.classList.add(phaseClass);
+        moonText.textContent = phaseTitle;
+    }
 }
-
-// NEW: Horizontal Scroll Logic
-function updateHourlyScroll(data) {
-    const container = document.getElementById('hourly-scroll-container');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const timeArr = data.hourly.time;
-    const tempArr = data.hourly.temperature_2m;
-    const codeArr = data.hourly.weather_code || data.hourly.weathercode;
-    const rainArr = data.hourly.precipitation_probability || [];
-
-    const now = new Date();
-    // Find start index
-    let startIndex = 0;
-    for (let i = 0; i < timeArr.length; i++) {
-        if (new Date(timeArr[i]) > now) {
-            startIndex = i;
-            break;
-        }
-    }
-
-    // Show next 48 hours
-    for (let i = startIndex; i < Math.min(startIndex + 48, timeArr.length); i++) {
-        const t = new Date(timeArr[i]);
-        const hourLabel = t.toLocaleTimeString([], { hour: 'numeric', hour12: true });
-        const temp = Math.round(tempArr[i]);
-        const icon = getWeatherIcon(codeArr[i]);
-        const pop = rainArr[i];
-
-        const card = document.createElement('div');
-        card.style.minWidth = '90px';
-        card.style.textAlign = 'center';
-        card.style.padding = '15px 10px';
-        card.style.background = 'rgba(255,255,255,0.03)';
-        card.style.border = '1px solid rgba(255,255,255,0.08)';
-        card.style.borderRadius = '12px';
-
-        card.innerHTML = `
-            <div style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 8px;">${hourLabel}</div>
-            <i class="${icon}" style="font-size: 1.4rem; margin-bottom: 8px; display:block;"></i>
-            <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 5px;">${temp}°</div>
-            <div style="font-size: 0.75rem; color: #4fc3f7;"><i class="bi bi-droplet-fill"></i> ${pop}%</div>
-        `;
-        container.appendChild(card);
-    }
-}
-
-// NEW: Tab Switching Logic
-window.switchTab = function (tab) {
-    const weatherSections = ['section-current', 'section-hourly-full', 'grid-container-main'];
-    const newsSection = document.getElementById('section-news');
-    const agriSection = document.getElementById('section-agri-tab'); // Renamed to avoid ID conflict with agri page logic
-
-    // Hide all first
-    weatherSections.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-        // Note: grid-container-main needs to be added to index.html grid
-    });
-    // Just manual targeting for now
-    document.getElementById('section-current').style.display = 'none';
-    document.getElementById('section-hourly-full').style.display = 'none';
-    document.querySelector('.grid-container').style.display = 'none'; // Target class
-
-    if (newsSection) newsSection.style.display = 'none';
-    if (agriSection) agriSection.style.display = 'none';
-
-    if (tab === 'weather') {
-        document.getElementById('section-current').style.display = 'flex'; // Hero is flex
-        document.getElementById('section-hourly-full').style.display = 'block';
-        document.querySelector('.grid-container').style.display = 'grid';
-    } else if (tab === 'news') {
-        if (newsSection) newsSection.style.display = 'block';
-    } else if (tab === 'agri') {
-        if (agriSection) agriSection.style.display = 'block';
-    }
-};
-
 
 function updateNews(data) {
     const newsContainer = document.getElementById('news-container');
@@ -1309,46 +1155,19 @@ function setText(id, val) {
 }
 
 function updateBackground(code, isDay) {
-    const body = document.body;
     let url = '';
-    let weatherClass = '';
+    // Optimized sizes: w=1280, q=70 for faster loading
+    if (code >= 95) url = 'https://images.unsplash.com/photo-1605727216801-e27ce1d0cc28?q=70&w=1280&auto=format&fit=crop';
+    else if (code >= 71) url = 'https://images.unsplash.com/photo-1478265409131-1f65c88f965c?q=70&w=1280&auto=format&fit=crop';
+    else if (code >= 61) url = 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=70&w=1280&auto=format&fit=crop';
+    else if (code >= 1 && code <= 3) url = 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=70&w=1280&auto=format&fit=crop';
+    else url = isDay ? 'https://images.unsplash.com/photo-1622278647429-71bc97e904e8?q=70&w=1280&auto=format&fit=crop' : 'https://images.unsplash.com/photo-1507400492013-162706c8c05e?q=70&w=1280&auto=format&fit=crop';
 
-    // Remove old weather classes
-    body.classList.remove('bg-clear', 'bg-clouds', 'bg-rain', 'bg-thunderstorm', 'bg-snow', 'bg-mist');
-
-    // WMO Weather interpretation codes
-    if (code >= 95) {
-        url = 'https://images.unsplash.com/photo-1605727216801-e27ce1d0cc28?q=70&w=1920&auto=format&fit=crop';
-        weatherClass = 'bg-thunderstorm';
-    } else if (code >= 71) {
-        url = 'https://images.unsplash.com/photo-1478265409131-1f65c88f965c?q=70&w=1920&auto=format&fit=crop';
-        weatherClass = 'bg-snow';
-    } else if (code >= 51) {
-        url = 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=70&w=1920&auto=format&fit=crop';
-        weatherClass = 'bg-rain';
-    } else if (code >= 45 && code <= 48) {
-        url = 'https://images.unsplash.com/photo-1485236715598-c8879a674a41?q=70&w=1920&auto=format&fit=crop';
-        weatherClass = 'bg-mist';
-    } else if (code >= 1 && code <= 3) {
-        url = isDay
-            ? 'https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=70&w=1920&auto=format&fit=crop'
-            : 'https://images.unsplash.com/photo-1507400492013-162706c8c05e?q=70&w=1920&auto=format&fit=crop';
-        weatherClass = 'bg-clouds';
-    } else {
-        url = isDay
-            ? 'https://images.unsplash.com/photo-1622278647429-71bc97e904e8?q=70&w=1920&auto=format&fit=crop'
-            : 'https://images.unsplash.com/photo-1532978393477-d32b17ac6747?q=70&w=1920&auto=format&fit=crop';
-        weatherClass = 'bg-clear';
-    }
-
-    if (weatherClass) body.classList.add(weatherClass);
-
-    // IMMEDIATE UPDATE: Bypass image load listener to ensure background replaces the blue instantly
-    body.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${url}')`;
-    body.style.backgroundSize = 'cover';
-    body.style.backgroundPosition = 'center';
-    body.style.backgroundAttachment = 'fixed';
-    body.style.transition = 'background-image 1s ease-in-out';
+    document.body.style.backgroundImage = `url('${url}')`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundAttachment = 'fixed';
+    document.body.classList.add('glass-mode');
 }
 
 function getWeatherIcon(code) {
@@ -2195,41 +2014,23 @@ window.toggleVault = function () {
 window.switchVaultTab = function (tab) {
     const idContent = document.getElementById('vault-id-content');
     const transferContent = document.getElementById('vault-transfer-content');
-    const savedContent = document.getElementById('vault-saved-content');
-
     const idTab = document.getElementById('vault-tab-id');
     const transferTab = document.getElementById('vault-tab-transfer');
-    const savedTab = document.getElementById('vault-tab-saved');
 
-    // Reset All
-    idContent.style.display = 'none';
-    transferContent.style.display = 'none';
-    if (savedContent) savedContent.style.display = 'none'; // defensively check
-
-    idTab.classList.remove('vault-tab-active');
-    transferTab.classList.remove('vault-tab-active');
-    if (savedTab) savedTab.classList.remove('vault-tab-active');
-
-    idTab.style.background = 'transparent';
-    transferTab.style.background = 'transparent';
-    if (savedTab) savedTab.style.background = 'transparent';
-
-    // Activate Selected
     if (tab === 'id') {
         idContent.style.display = 'block';
+        transferContent.style.display = 'none';
         idTab.classList.add('vault-tab-active');
+        transferTab.classList.remove('vault-tab-active');
         idTab.style.background = 'var(--accent-color)';
-    } else if (tab === 'transfer') {
+        transferTab.style.background = 'transparent';
+    } else {
+        idContent.style.display = 'none';
         transferContent.style.display = 'block';
+        idTab.classList.remove('vault-tab-active');
         transferTab.classList.add('vault-tab-active');
+        idTab.style.background = 'transparent';
         transferTab.style.background = 'var(--accent-color)';
-    } else if (tab === 'saved') {
-        if (savedContent) savedContent.style.display = 'block';
-        if (savedTab) {
-            savedTab.classList.add('vault-tab-active');
-            savedTab.style.background = 'var(--accent-color)';
-        }
-        if (window.renderSavedLocations) window.renderSavedLocations();
     }
 };
 
@@ -2275,33 +2076,6 @@ window.scrollToHero = function () {
         container.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-};
-
-// --- VIEWPORT MANAGEMENT ---
-window.performWelcomeSearch = function () {
-    const query = document.getElementById('welcome-search-input').value;
-    if (!query) return;
-
-    // Transition to Dashboard
-    document.body.classList.remove('is-landing');
-    document.body.classList.add('is-dashboard');
-
-    // Smooth scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    searchCity(query);
-};
-
-// Also ensure searchCity handles the transition if called from elsewhere
-const originalSearchCity = window.searchCity;
-window.searchCity = function (query) {
-    document.body.classList.remove('is-landing');
-    document.body.classList.add('is-dashboard');
-    if (originalSearchCity) originalSearchCity(query);
-    else {
-        // Fallback if original not defined yet (should be defined below)
-        fetchWeatherData(query);
     }
 };
 
@@ -2459,20 +2233,16 @@ window.updateUnitUI = function () {
 
 window.detectLocation = function () {
     const icon = document.querySelector('.bi-geo');
-    if (icon) icon.className = "bi bi-hourglass-split spin-animation";
-
-    // Show 'Last Updated' immediately
-    const updateTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    setText('history-text', `Last Updated: ${updateTime}`);
+    if (icon) icon.className = "bi bi-hourglass-split spin-animation"; // Add animation class if exists
 
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
+                // Success
                 const lat = pos.coords.latitude;
                 const lon = pos.coords.longitude;
-                handleSearchSelection(null, lat, lon); // Pass null name to auto-resolve
+                handleSearchSelection("Your Coordinates", lat, lon);
                 if (icon) icon.className = "bi bi-geo";
-                showToast("Coordinates Locked.", "success");
             },
             (err) => {
                 showToast("Location access denied or failed.", "error");
@@ -2543,12 +2313,12 @@ window.initSatMap = function (lat, lon) {
     if (map.tap) map.tap.disable();
 };
 
-//  AGRICULTURAL INTELLIGENCE MODULE 
+// --- AGRICULTURAL INTELLIGENCE MODULE ---
 function initAgriPage() {
     const data = window.weatherData;
     if (!data) return;
 
-    // 1. Crop Advisory Logic 
+    // 1. Crop Advisory Logic (Mock Intelligence based on real data)
     const humidity = data.current.relative_humidity_2m;
     const temp = data.current.temperature_2m;
     const precip = data.current.precipitation;
@@ -2559,23 +2329,23 @@ function initAgriPage() {
     let color = "#81c784"; // Green
 
     // Soil Telemetry (New Open-Meteo Vars)
+    // Note: data.hourly should have soil vars if fetched correctly. 
+    // Since we updated openmeteo.py, the client will receive them in the 'hourly' object under keys like 'soil_temperature_0cm'.
+    // We access the current hour index.
     const nowHour = new Date().getHours();
 
-    let soilMoisture = (data.hourly && data.hourly.soil_moisture_0_to_1cm && data.hourly.soil_moisture_0_to_1cm[nowHour])
+    let soilMoisture = (data.hourly.soil_moisture_0_to_1cm && data.hourly.soil_moisture_0_to_1cm[nowHour])
         ? data.hourly.soil_moisture_0_to_1cm[nowHour] : (precip > 0 ? 0.35 : 0.15); // Fallback mock
-    let soilTemp = (data.hourly && data.hourly.soil_temperature_0cm && data.hourly.soil_temperature_0cm[nowHour])
+    let soilTemp = (data.hourly.soil_temperature_0cm && data.hourly.soil_temperature_0cm[nowHour])
         ? data.hourly.soil_temperature_0cm[nowHour] : temp; // Fallback to air temp
 
     // Convert moisture fraction to %
+    // Open-Meteo gives m/m. Typical range 0.0-0.5. 0.3 is wet.
     let smPerc = Math.round(soilMoisture * 100);
-    if (smPerc > 100) smPerc = smPerc / 100;
+    if (smPerc > 100) smPerc = smPerc / 100; // If api changed unit
 
-    // Safety checks for elements before setting textContent
-    const elMoisture = document.getElementById('soil-moisture-val');
-    const elTemp = document.getElementById('soil-temp-val');
-
-    if (elMoisture) elMoisture.textContent = smPerc + "%";
-    if (elTemp) elTemp.textContent = Math.round(soilTemp) + "°C";
+    document.getElementById('soil-moisture-val').textContent = smPerc + "%";
+    document.getElementById('soil-temp-val').textContent = Math.round(soilTemp) + "°C";
 
     // Logic Tree
     if (precip > 5) {
@@ -2673,141 +2443,16 @@ function initMonsoonPage() {
 // --- LINGUISTICS ENGINE ---
 const translations = {
     en: {
-        current: "Current", hourly: "Hourly", seven: "7-Day", maps: "Maps", details: "Details", news: "News",
-        agri: "Agri", monsoon: "Monsoon", vault: "Vault",
-        // Dashboard Metrics
-        feels_like: "Feels Like", wind: "Wind", humidity: "Humidity", precip: "Precipitation",
-        uv: "UV Index", visibility: "Visibility", pressure: "Pressure", pollen: "Pollen",
-        air_quality: "Air Quality Intelligence", sun_moon: "Sun & Moon"
+        current: "Current", hourly: "Hourly", maps: "Maps", details: "Details", news: "News",
+        agri: "Agri", monsoon: "Monsoon"
     },
-    // --- INDIAN LANGUAGES ---
-    hi: { // Hindi
-        current: "वर्तमान", hourly: "प्रति घंटा", seven: "7-दिन", maps: "नक्शे", details: "विवरण", news: "समाचार",
-        agri: "कृषि", monsoon: "मानसून", vault: "वॉल्ट",
-        feels_like: "महसूस", wind: "हवा", humidity: "नमी", precip: "वर्षा",
-        uv: "यूवी सूचकांक", visibility: "दृश्यता", pressure: "दबाव", pollen: "पराग",
-        air_quality: "वायु गुणवत्ता", sun_moon: "सूर्य और चंद्रमा"
+    hi: {
+        current: "वर्तमान", hourly: "प्रति घंटा", maps: "नक्शे", details: "विवरण", news: "समाचार",
+        agri: "कृषि", monsoon: "मानसून"
     },
-    mr: { // Marathi
-        current: "सध्याचे", hourly: "प्रति तास", seven: "7-दिवस", maps: "नकाशे", details: "तपशील", news: "बातम्या",
-        agri: "कृषी", monsoon: "मान्सून", vault: "तिजोरी",
-        feels_like: "जाणवते", wind: "वारा", humidity: "आर्द्रता", precip: "पर्जन्य",
-        uv: "अतिनील निर्देशांक", visibility: "दृश्यमानता", pressure: "दाब", pollen: "परागकण",
-        air_quality: "हवेची गुणवत्ता", sun_moon: "सूर्य आणि चंद्र"
-    },
-    kn: { // Kannada (User Requested)
-        current: "ಪ್ರಸ್ತುತ", hourly: "ಗಂಟೆಯ", seven: "7-ದಿನ", maps: "ನಕ್ಷೆಗಳು", details: "ವಿವರಗಳು", news: "ಸುದ್ದಿ",
-        agri: "ಕೃಷಿ", monsoon: "ಮುಂಗಾರು", vault: "ವಾಲ್ಟ್",
-        feels_like: "ಅನಿಸುತ್ತದೆ", wind: "ಗಾಳಿ", humidity: "ತೇವಾಂಶ", precip: "ಮಳೆ",
-        uv: "ಯುವಿ ಸೂಚ್ಯಂಕ", visibility: "ಗೋಚರತೆ", pressure: "ಒತ್ತಡ", pollen: "ಪರಾಗ",
-        air_quality: "ವಾಯು ಗುಣಮಟ್ಟ", sun_moon: "ಸೂರ್ಯ ಮತ್ತು ಚಂದ್ರ"
-    },
-    bn: { // Bengali
-        current: "বর্তমান", hourly: "প্রতি ঘন্টা", seven: "৭-দিন", maps: "মানচিত্র", details: "বিবরণ", news: "খবর",
-        agri: "কৃষি", monsoon: "বর্ষা", vault: "ভল্ট",
-        feels_like: "অনুভূত", wind: "বাতাস", humidity: "আর্দ্রতা", precip: "বৃষ্টিপাত",
-        uv: "ইউভি সূচক", visibility: "দৃশ্যমানতা", pressure: "চাপ", pollen: "পরাগ",
-        air_quality: "বায়ুর গুণমান", sun_moon: "সূর্য এবং চাঁদ"
-    },
-    te: { // Telugu
-        current: "ప్రస్తుత", hourly: "గంటకు", seven: "7-రోజులు", maps: "పటాలు", details: "వివరాలు", news: "వార్తలు",
-        agri: "వ్యవసాయం", monsoon: "రుతుపవనాలు", vault: "వాల్ట్",
-        feels_like: "అనిపిస్తుంది", wind: "గాలి", humidity: "తేమ", precip: "అవపాతం",
-        uv: "UV సూచిక", visibility: "దృశ్యత", pressure: "ఒత్తిడి", pollen: "పుప్పొడి",
-        air_quality: "గాలి నాణ్యత", sun_moon: "సూర్యుడు & చంద్రుడు"
-    },
-    ta: { // Tamil
-        current: "தற்போதைய", hourly: "மணிநேர", seven: "7-நாட்கள்", maps: "வரைபடம்", details: "விவரங்கள்", news: "செய்திகள்",
-        agri: "விவசாயம்", monsoon: "பருவமழை", vault: "பெட்டகம்",
-        feels_like: "உணர்வு", wind: "காற்று", humidity: "ஈரப்பதம்", precip: "மழைப்பொழிவு",
-        uv: "புறஊதா குறியீடு", visibility: "பார்வை", pressure: "அழுத்தம்", pollen: "மகரந்தம்",
-        air_quality: "காற்று தரம்", sun_moon: "சூரியன் & சந்திரன்"
-    },
-    gu: { // Gujarati
-        current: "વર્તમાન", hourly: "કલાકદીઠ", seven: "7-દિવસ", maps: "નકશા", details: "વિગતો", news: "સમાચાર",
-        agri: "કૃષિ", monsoon: "ચોમાસું", vault: "તિજોરી",
-        feels_like: "અનુભવાય છે", wind: "પવન", humidity: "ભેજ", precip: "વરસાદ",
-        uv: "યુવી ઇન્ડેક્સ", visibility: "દૃશ્યતા", pressure: "દબાણ", pollen: "પરાગ",
-        air_quality: "હવાની ગુણવત્તા", sun_moon: "સૂર્ય અને ચંદ્ર"
-    },
-    ml: { // Malayalam
-        current: "നിലവിലെ", hourly: "മണിക്കൂർ", seven: "7-ദിവസം", maps: "ഭൂപടം", details: "വിശദാംശങ്ങൾ", news: "വാർത്തകൾ",
-        agri: "കൃഷി", monsoon: "കാലവർഷം", vault: "നിലവറ",
-        feels_like: "അനുഭവപ്പെടുന്നു", wind: "കാറ്റ്", humidity: "ഈർപ്പം", precip: "മഴ",
-        uv: "UV സൂചിക", visibility: "കാഴ്ച", pressure: "മർദ്ദം", pollen: " പൂമ്പൊടി",
-        air_quality: "വായു ഗുണനിലവാരം", sun_moon: "സൂര്യനും ചന്ദ്രനും"
-    },
-    pa: { // Punjabi
-        current: "ਮੌਜੂਦਾ", hourly: "ਘੰਟਾਵਾਰ", seven: "7-ਦਿਨ", maps: "ਨਕਸ਼ੇ", details: "ਵੇਰਵੇ", news: "ਖ਼ਬਰਾਂ",
-        agri: "ਖੇਤੀਬਾੜੀ", monsoon: "ਮਾਨਸੂਨ", vault: "ਵਾਲਟ",
-        feels_like: "ਮਹਿਸੂਸ", wind: "ਹਵਾ", humidity: "ਨਮੀ", precip: "ਵਰਖਾ",
-        uv: "UV ਸੂਚਕਾਂਕ", visibility: "ਦ੍ਰਿਸ਼ਟੀ", pressure: "ਦਬਾਅ", pollen: "ਪਰਾਗ",
-        air_quality: "ਹਵਾ ਦੀ ਗੁਣਵੱਤਾ", sun_moon: "ਸੂਰਜ ਅਤੇ ਚੰਦ"
-    },
-    or: { // Odia
-        current: "ବର୍ତ୍ତମାନ", hourly: "ଘଣ୍ଟା ପ୍ରତି", seven: "୭-ଦିନ", maps: "ମାନଚିତ୍ର", details: "ବିବରଣୀ", news: "ଖବର",
-        agri: "କୃଷି", monsoon: "ମୌସୁମୀ", vault: "ଭଲ୍ଟ",
-        feels_like: "ଅନୁଭବ ହୁଏ", wind: "ପବନ", humidity: "ଆର୍ଦ୍ରତା", precip: "ବୃଷ୍ଟିପାତ",
-        uv: "UV ସୂଚକାଙ୍କ", visibility: "ଦୃଶ୍ୟମାନତା", pressure: "ଚାପ", pollen: "ପରାଗ",
-        air_quality: "ବାୟୁ ଗୁଣବତ୍ତା", sun_moon: "ସୂର୍ଯ୍ୟ ଓ ଚନ୍ଦ୍ର"
-    },
-    as: { // Assamese
-        current: "বৰ্তমান", hourly: "প্ৰতি ঘণ্টা", seven: "৭-দিন", maps: "মানচিত্ৰ", details: "সবিশেষ", news: "বাতৰি",
-        agri: "কৃষি", monsoon: "মৌচুমী", vault: "ভল্ট",
-        feels_like: "অনুভৱ", wind: "বতাহ", humidity: "আৰ্দ্ৰতা", precip: "বৃষ্টিপাত",
-        uv: "UV সূচক", visibility: "দৃশ্যমানতা", pressure: "চাপ", pollen: "পৰাগ",
-        air_quality: "বায়ুৰ গুণমান", sun_moon: "সূৰ্য আৰু চন্দ্ৰ"
-    },
-    ur: { // Urdu
-        current: "موجودہ", hourly: "گھنٹہ وار", seven: "7 دن", maps: "نقشے", details: "تفصیلات", news: "خبریں",
-        agri: "زراعت", monsoon: "مانسون", vault: "والٹ",
-        feels_like: "محسوس", wind: "ہوا", humidity: "نمی", precip: "بارش",
-        uv: "یو وی انڈیکس", visibility: "حد نگاہ", pressure: "دباؤ", pollen: "پولن",
-        air_quality: "ہوا کا معیار", sun_moon: "سورج اور چاند"
-    },
-    sa: { // Sanskrit
-        current: "सांप्रतम्", hourly: "होरा", seven: "सप्ताह", maps: "मानचित्रम्", details: "विवरणम्", news: "वार्ता",
-        agri: "कृषि", monsoon: "वर्षाऋतु", vault: "कोश",
-        feels_like: "अनुभवति", wind: "वायु", humidity: "आर्द्रता", precip: "वृष्टि",
-        uv: "भानु-सूचक", visibility: "दृश्यता", pressure: "नोदन", pollen: "पराग",
-        air_quality: "वायुगुणवत्ता", sun_moon: "सूर्यरश्मिः"
-    },
-
-    // --- GLOBAL ---
-    es: {
-        current: "Actual", hourly: "Por hora", seven: "7 Días", maps: "Mapas", details: "Detalles", news: "Noticias",
-        agri: "Agri", monsoon: "Monzón", vault: "Bóveda",
-        feels_like: "Sensación", wind: "Viento", humidity: "Humedad", precip: "Precipitación",
-        uv: "Índice UV", visibility: "Visibilidad", pressure: "Presión", pollen: "Polen",
-        air_quality: "Calidad Aire", sun_moon: "Sol y Luna"
-    },
-    fr: {
-        current: "Actuel", hourly: "Horaire", seven: "7 Jours", maps: "Cartes", details: "Détails", news: "Infos",
-        agri: "Agri", monsoon: "Mousson", vault: "Coffre",
-        feels_like: "Ressenti", wind: "Vent", humidity: "Humidité", precip: "Précipitations",
-        uv: "Indice UV", visibility: "Visibilité", pressure: "Pression", pollen: "Pollen",
-        air_quality: "Qualité de l'Air", sun_moon: "Soleil et Lune"
-    },
-    ru: {
-        current: "Сейчас", hourly: "Почасово", seven: "7 Дней", maps: "Карты", details: "Детали", news: "Новости",
-        agri: "Агро", monsoon: "Муссон", vault: "Хранилище",
-        feels_like: "Ощущается", wind: "Ветер", humidity: "Влажность", precip: "Осадки",
-        uv: "УФ-индекс", visibility: "Видимость", pressure: "Давление", pollen: "Пыльца",
-        air_quality: "Качество воздуха", sun_moon: "Солнце и Луна"
-    },
-    cn: {
-        current: "当前", hourly: "每小时", seven: "7天", maps: "地图", details: "详情", news: "新闻",
-        agri: "农业", monsoon: "季风", vault: "保险库",
-        feels_like: "体感", wind: "风", humidity: "湿度", precip: "降水",
-        uv: "紫外线", visibility: "能见度", pressure: "气压", pollen: "花粉",
-        air_quality: "空气质量", sun_moon: "日与月"
-    },
-    ar: {
-        current: "الحالي", hourly: "بالساعة", seven: "7 أيام", maps: "الخرائط", details: "التفاصيل", news: "الأخبار",
-        agri: "الزراعة", monsoon: "الرياح", vault: "الخزنة",
-        feels_like: "يبدو مثل", wind: "الرياح", humidity: "رطوبة", precip: "هطول",
-        uv: "مؤشر الأشعة", visibility: "الرؤية", pressure: "الضغط", pollen: "لقاح",
-        air_quality: "جودة الهواء", sun_moon: "الشمس والقمر"
+    mr: {
+        current: "सध्याचे", hourly: "taasi", maps: "नकाशे", details: "तपशील", news: "बातम्या",
+        agri: "कृषी", monsoon: "मान्सून"
     }
 };
 
@@ -2815,79 +2460,20 @@ window.changeLanguage = function (lang) {
     if (!translations[lang]) return;
     const t = translations[lang];
 
-    // Helper to safely set text content
-    const setText = (selector, text) => {
-        const els = document.querySelectorAll(selector);
-        els.forEach(el => {
-            // Only replace the TEXT node to avoid killing child icons
-            // But for simplicity in this specific Vyamir architecture, full replace works as icons are usually separate or we rebuild content.
-            // Actually, in sidebar items, text is in a <span>. In dashboard, it's often a text node next to an <i>.
-            // Let's target specific parent elements and update the text node specifically if needed.
-            if (el.tagName === 'SPAN' || el.children.length === 0) {
-                el.textContent = text;
-            } else {
-                // If element has icon children (like <div class="detail-header"><i class="bi bi-wind"></i> Wind</div>)
-                // We need to keep the icon.
-                const icon = el.querySelector('i');
-                if (icon) {
-                    el.innerHTML = ''; // clear
-                    el.appendChild(icon); // restore icon
-                    el.appendChild(document.createTextNode(' ' + text)); // add new text
-                } else {
-                    el.textContent = text;
-                }
-            }
-        });
-    };
+    // Sidebar
+    document.querySelectorAll('.sidebar-item span').forEach(span => {
+        const text = span.textContent.trim().toLowerCase();
+        // Since I rely on text content matching which is fragile, a robust system would use data-key.
+        // For this V1, I will just iterate known keys.
+        if (text === 'current') span.textContent = t.current;
+        if (text === 'hourly') span.textContent = t.hourly;
+        if (text === 'maps') span.textContent = t.maps;
+        if (text === 'details') span.textContent = t.details;
+        if (text === 'news') span.textContent = t.news;
+        if (text === 'agri') span.textContent = t.agri;
+        if (text === 'monsoon') span.textContent = t.monsoon;
+    });
 
-    // 1. Sidebar Translations
-    setText('.sidebar-item[data-section="section-current"] span', t.current);
-    setText('.sidebar-item[data-section="section-hourly"] span', t.hourly);
-    setText('.sidebar-item[data-section="section-7day"] span', t.seven);
-    setText('.sidebar-item[data-section="section-maps"] span', t.maps);
-    setText('.sidebar-item[data-section="section-details"] span', t.details);
-    setText('.sidebar-item[data-section="section-video"] span', t.news);
-    setText('.sidebar-item[data-section="section-monsoon"] span', t.monsoon);
-    setText('.sidebar-item[data-section="section-agri"] span', t.agri);
-    setText('.sidebar-item[data-section="section-vault"] span', t.vault);
-
-    // 2. Mobile Nav Translations
-    setText('.mobile-nav-item[data-section="section-current"] span', t.current);
-    setText('.mobile-nav-item[data-section="section-hourly"] span', t.hourly);
-    setText('.mobile-nav-item[data-section="section-maps"] span', t.maps);
-    setText('.mobile-nav-item[data-section="section-details"] span', t.details);
-
-    // 3. Dashboard Metrics (New!)
-    // We aim to translate the headers of the details grid cards.
-    // The selector finds the .detail-header divs.
-    // We need specific mappings. Since we don't have unique IDs for every header, relies on order or we add IDs.
-    // A smarter way for existing DOM: Find by ICON class or content? 
-    // Content is unreliable as it changes. Let's rely on the icon classes which are unique per card type.
-
-    const mapHeader = (iconClass, text) => {
-        const icon = document.querySelector(`.detail-header i.${iconClass}`);
-        if (icon && icon.parentElement) {
-            icon.parentElement.childNodes.forEach(node => {
-                if (node.nodeType === 3 && node.nodeValue.trim().length > 0) {
-                    node.nodeValue = ' ' + text;
-                }
-            });
-        }
-    };
-
-    if (t.feels_like) mapHeader('bi-thermometer-half', t.feels_like);
-    if (t.wind) mapHeader('bi-wind', t.wind);
-    if (t.humidity) mapHeader('bi-droplet', t.humidity);
-    if (t.precip) mapHeader('bi-cloud-drizzle', t.precip);
-    if (t.uv) mapHeader('bi-sun', t.uv);
-    if (t.visibility) mapHeader('bi-eye', t.visibility);
-    if (t.pressure) mapHeader('bi-speedometer2', t.pressure);
-    if (t.pollen) mapHeader('bi-flower1', t.pollen);
-    if (t.sun_moon) mapHeader('bi-moon-stars', t.sun_moon);
-    if (t.air_quality) mapHeader('bi-lungs', t.air_quality);
-
-    // Persist Language Preference
-    localStorage.setItem('vyamir_lang', lang);
     console.log("Language switched to", lang);
 }
 

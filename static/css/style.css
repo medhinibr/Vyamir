@@ -7,27 +7,6 @@
 @import 'components/safety/part-map.css';
 @import 'animations.css';
 
-
-
-/* SKELETON LOADING */
-.skeleton {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
-    background-size: 200% 100%;
-    animation: skeleton-load 1.5s infinite;
-    border-radius: 4px;
-    color: transparent !important;
-}
-
-@keyframes skeleton-load {
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
-    }
-}
-
 /* Hourly Scroll Customization - Hide Scrollbar */
 .hourly-scroll-track {
     -ms-overflow-style: none;
@@ -39,24 +18,4 @@
 .hourly-scroll-track::-webkit-scrollbar {
     display: none;
     /* Chrome, Safari, Opera */
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.daily-row:hover {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-    transition: 0.2s;
 }

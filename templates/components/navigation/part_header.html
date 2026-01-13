@@ -1,50 +1,52 @@
-<div class="header-bar"
-    style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; gap: 30px;">
-
-    <!-- 1. LEFT: Logo -->
-    <div class="logo-area" style="display: flex; align-items: center; gap: 10px; cursor: pointer;"
+<div class="header-bar">
+    <div class="logo-area" style="display: flex; align-items: center; gap: 12px; cursor: pointer;"
         onclick="scrollToHero()">
-        <img src="/static/img/logo.png" alt="Vyamir" style="width: 36px; height: 36px; object-fit: contain;">
-        <span style="font-size: 1.3rem; font-weight: 700; color: #fff; letter-spacing: -0.5px;">Vyamir</span>
+        <img src="/static/img/logo.png" alt="Vyamir" style="width: 42px; height: 42px; object-fit: contain;">
+        <div style="font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; color: #fff;">
+            Vyamir</div>
     </div>
 
-    <!-- 2. CENTER: Large Search Bar -->
-    <div class="search-section" style="flex: 1; max-width: 600px;">
-        <div class="header-search-container"
-            style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; display: flex; align-items: center; padding: 8px 15px; width: 100%;">
-            <i class="bi bi-search" style="color: rgba(255,255,255,0.4); margin-right: 10px;"></i>
-            <input type="text" id="header-search-input" class="search-input" placeholder="Search location..."
-                value="{{ city if city else '' }}"
-                style="background: transparent; border: none; color: white; width: 100%; font-size: 1rem; outline: none;">
-
-            <i class="bi bi-geo-alt" onclick="detectLocation()" title="Use My Location"
-                style="color: var(--accent-color); cursor: pointer; padding: 5px; opacity: 0.8; transition: 0.3s;"
-                onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'"></i>
+    <div class="search-section" style="flex: 1; display: flex; justify-content: center;">
+        <div class="header-search-container">
+            <i class="bi bi-geo" style="cursor: pointer; color: var(--accent-color); margin-right: 8px;"
+                onclick="detectLocation()" title="Detect My Location"></i>
+            <input type="text" id="header-search-input" name="dashboard-search" class="search-input"
+                placeholder="Search city..." value="{{ city if city else '' }}">
+            <button class="search-btn">Search</button>
         </div>
     </div>
 
-    <!-- 3. RIGHT: Navigation & Tools -->
-    <nav class="top-nav" style="display: flex; align-items: center; gap: 25px;">
-        <a href="#" class="nav-link" onclick="switchTab('news'); return false;"
-            style="color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;"
-            onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">News</a>
-
-        <a href="#" class="nav-link" onclick="switchTab('agri'); return false;"
-            style="color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;"
-            onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">Agri</a>
-        <a href="#" class="nav-link"
-            onclick="switchTab('weather'); document.getElementById('section-details').scrollIntoView({behavior: 'smooth'}); return false;"
-            style="color: rgba(255,255,255,0.8); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.3s;"
-            onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.8)'">Details</a>
-
-        <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.2);"></div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <!-- Language Select -->
+        <!-- Language Select -->
+        <select onchange="changeLanguage(this.value)"
+            style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px 10px; border-radius: 8px; outline: none; cursor: pointer; -webkit-appearance: none; appearance: none; text-align: center;">
+            <option value="en" style="background: #0b0e14;">Global (EN)</option>
+            <option value="hi" style="background: #0b0e14;">Hindi (HI)</option>
+            <option value="mr" style="background: #0b0e14;">Marathi (MR)</option>
+            <option value="es" style="background: #0b0e14;">Spanish (ES)</option>
+            <option value="fr" style="background: #0b0e14;">French (FR)</option>
+            <option value="de" style="background: #0b0e14;">German (DE)</option>
+            <option value="cn" style="background: #0b0e14;">Chinese (CN)</option>
+            <option value="jp" style="background: #0b0e14;">Japanese (JP)</option>
+            <option value="ru" style="background: #0b0e14;">Russian (RU)</option>
+            <option value="pt" style="background: #0b0e14;">Portuguese (PT)</option>
+            <option value="ar" style="background: #0b0e14;">Arabic (AR)</option>
+        </select>
 
         <!-- Unit Toggle -->
         <div class="unit-toggle" onclick="toggleUnits()"
-            style="cursor: pointer; display: flex; align-items: center; gap: 5px; opacity: 0.8;" title="Switch Units">
-            <span id="unit-c" style="color: white; font-weight: 700;">°C</span>
-            <span style="color: rgba(255,255,255,0.3);">/</span>
-            <span id="unit-f" style="color: rgba(255,255,255,0.5);">°F</span>
+            style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(255,255,255,0.1);">
+            <div id="unit-c" style="color: white; font-weight: 700;">°C</div>
+            <div style="width: 1px; height: 12px; background: rgba(255,255,255,0.3);"></div>
+            <div id="unit-f" style="color: rgba(255,255,255,0.5);">°F</div>
         </div>
-    </nav>
+
+        <div id="skypoints-badge" class="skypoints-badge" style="display: none;" onclick="toggleVault()">
+            <i class="bi bi-coin" style="color: #ffd700;"></i>
+            <span id="header-points-value">0</span>
+        </div>
+
+
+    </div>
 </div>
