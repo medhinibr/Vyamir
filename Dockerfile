@@ -1,20 +1,35 @@
-# Use the official Python image as the base image
-FROM python:3.8-slim
+# Stage 1: Build dependencies
+FROM python:3.10-slim AS builder
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the requirements.txt file into the container
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 
-# Install the required dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy the Flask app files into the container
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Stage 2: Final runtime environment
+FROM python:3.10-slim AS runner
+
+WORKDIR /app
+
+# Copy the pre-built virtual environment from builder stage
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Copy application files
 COPY . .
 
-# Expose the port that the app will run on
+# Expose port
 EXPOSE 8080
 
-# Define the command to run your application
+# Run Flask WSGI server
 CMD ["python", "app.py"]
