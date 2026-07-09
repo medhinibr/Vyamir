@@ -31,6 +31,8 @@ export default function MonsoonModule({ weatherData }) {
       // RainViewer live radar precipitation layer
       window.L.tileLayer('https://tile.cache.rainviewer.com/v2/radar/nowcast_5m/{z}/{x}/{y}/2/1_1.png', {
         opacity: 0.8,
+        maxNativeZoom: 7,
+        maxZoom: 18,
         zIndex: 10
       }).addTo(map);
 

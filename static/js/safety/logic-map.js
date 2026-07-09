@@ -32,6 +32,8 @@ window.initMap = async function (lat, lon) {
         // RainViewer Radar Layer with correct dynamic timestamp
         L.tileLayer(`https://tilecache.rainviewer.com/v2/radar/${latestTs}/256/{z}/{x}/{y}/2/1_1.png`, {
             opacity: 0.6,
+            maxNativeZoom: 7,
+            maxZoom: 19,
             attribution: '© RainViewer Radar'
         }).addTo(mapInstance);
     } catch (e) {

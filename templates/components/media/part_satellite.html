@@ -15,7 +15,9 @@
 <script>
     setTimeout(() => {
         if (window.initSatMap && window.weatherData) {
-            window.initSatMap(window.weatherData.coord.lat, window.weatherData.coord.lon);
+            const lat = window.weatherData.lat !== undefined ? window.weatherData.lat : (window.weatherData.coord ? window.weatherData.coord.lat : 0);
+            const lon = window.weatherData.lon !== undefined ? window.weatherData.lon : (window.weatherData.coord ? window.weatherData.coord.lon : 0);
+            window.initSatMap(lat, lon);
         }
     }, 2000); // Delayed init to save resources
 </script>

@@ -2295,7 +2295,7 @@ window.initSatMap = function (lat, lon) {
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
     // Overlay: Infrared Clouds (RainViewer)
-    L.tileLayer('https://tile.rainviewer.com/img/satellite-infrared/512/{z}/{x}/{y}/2/1_1.png', { opacity: 0.6 }).addTo(map);
+    L.tileLayer('https://tile.rainviewer.com/img/satellite-infrared/512/{z}/{x}/{y}/2/1_1.png', { opacity: 0.6, maxNativeZoom: 7, maxZoom: 19 }).addTo(map);
 
     // Labels
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', opacity: 0.8 }).addTo(map);
