@@ -34,5 +34,5 @@ COPY . .
 # Expose port
 EXPOSE 8080
 
-# Run Flask WSGI server
-CMD ["python", "app.py"]
+# Run Flask WSGI production server
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "app:app"]

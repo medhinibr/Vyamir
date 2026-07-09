@@ -37,6 +37,9 @@ jobs:
       - name: Run Tests with pytest
         run: pytest
 
+      - name: Build Docker Image
+        run: docker build -t vyamir-app .
+
   deploy:
     name: Continuous Deployment
     needs: lint-and-test

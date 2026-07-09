@@ -3,7 +3,7 @@ services:
     name: vyamir
     env: python
     buildCommand: bash build.sh
-    startCommand: python app.py
+    startCommand: gunicorn --bind 0.0.0.0:8080 app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.12
