@@ -7,6 +7,9 @@
     <title>Vyamir | Your Skies, Redefined</title>
     <link rel="icon" type="image/png" href="/logo.png">
 
+    <!-- Preload Font -->
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiJ-Q.woff2" as="font" type="font/woff2" crossorigin>
+
     <!-- Premium Typography: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -126,16 +129,16 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6959399778170612"
         crossorigin="anonymous"></script>
     <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" media="print" onload="this.media='all'">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/navigation/part-sidebar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/weather/part-details.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/navigation/part-sidebar.css') }}" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/weather/part-details.css') }}" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" media="print" onload="this.media='all'">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 </head>
 
 {% set body_class = '' %}
@@ -427,10 +430,10 @@
 
                     </div> <!-- End Container -->
 
-                    <script src="{{ url_for('static', filename='js/core/logic-ui.js') }}?v=1.0.2"></script>
-                    <script src="{{ url_for('static', filename='js/weather/logic-gauges.js') }}?v=1.0.2"></script>
-                    <script src="{{ url_for('static', filename='js/weather/logic-charts.js') }}?v=1.0.2"></script>
-                    <script src="{{ url_for('static', filename='js/safety/logic-map.js') }}?v=1.0.2"></script>
+                    <script src="{{ url_for('static', filename='js/core/logic-ui.js') }}?v=1.0.2" defer></script>
+                    <script src="{{ url_for('static', filename='js/weather/logic-gauges.js') }}?v=1.0.2" defer></script>
+                    <script src="{{ url_for('static', filename='js/weather/logic-charts.js') }}?v=1.0.2" defer></script>
+                    <script src="{{ url_for('static', filename='js/safety/logic-map.js') }}?v=1.0.2" defer></script>
                 </body>
 
 </html>
