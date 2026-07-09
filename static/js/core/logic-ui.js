@@ -1019,7 +1019,6 @@ function createHazardItem(icon, color, title, desc) {
 }
 
 // Pexels API Integration for Dynamic Weather Videos
-const PEXELS_API_KEY = window.VYAMIR_CONFIG ? window.VYAMIR_CONFIG.PEXELS_API_KEY : '';
 
 
 async function fetchPexelsWeatherVideos(condition) {
@@ -1034,9 +1033,7 @@ async function fetchPexelsWeatherVideos(condition) {
     else if (c.includes('fog') || c.includes('mist')) query = 'foggy forest';
 
     try {
-        const response = await fetch(`https://api.pexels.com/videos/search?query=${query}&per_page=15&orientation=landscape`, {
-            headers: { 'Authorization': PEXELS_API_KEY }
-        });
+        const response = await fetch(`/api/pexels/videos?query=${encodeURIComponent(query)}`);
         const data = await response.json();
 
         if (data.videos && data.videos.length > 0) {

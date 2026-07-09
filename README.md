@@ -31,10 +31,18 @@ Vyamir has been migrated from a legacy server-rendered structure to a decoupled 
 * Database: Firebase Auth / Cloud Firestore
 * Deployment: Render Cloud Infrastructure
 
-## Security Architecture
+## Security & Secrets Architecture
 
-* Secret Protection: All third-party media credentials (e.g. Pexels API tokens) are strictly maintained on the server side. Requests are requested through secure backend proxy paths (/api/pexels/videos), ensuring secrets are never compiled into client-side JS bundles.
-* Runtime Initialization: Firebase credentials are dynamically requested from the backend API during mounting, rather than hardcoded in source repositories.
+* Secret Proxy Pattern: All third-party media credentials (e.g. Pexels API tokens) are strictly maintained on the server side. Requests are routed through secure backend proxy paths (/api/pexels/videos), ensuring secrets are never compiled into client-side JS bundles or exposed via browser network traces.
+* Dynamic Config Initialization: Firebase credentials are dynamically requested from the backend API during mounting, rather than hardcoded in public source repositories.
+* Safe Git Protocols: Environment configuration files (.env) and service keys are protected under Git ignore patterns.
+
+## DevOps CI/CD Pipeline
+
+The project implements a modern DevOps continuous integration and deployment pipeline via GitHub Actions to guarantee high code quality and zero-downtime deployment:
+
+* Python Code Quality Gate: Code changes undergo syntax validation and quality check processes using Flake8 linting engine.
+* Automated Deployment: Upon passing the quality gate, pushes to the main branch automatically trigger Render's webhook deploy endpoint to pull and compile the latest build artifacts.
 
 ## Quick Setup
 

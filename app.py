@@ -318,8 +318,7 @@ def serve_index():
     Serves the React application or legacy HTML templates for specific paths.
     """
     config = {
-        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
-        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
+        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY')
     }
     path = request.path.strip('/')
     
