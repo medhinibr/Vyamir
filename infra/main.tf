@@ -12,21 +12,27 @@ provider "render" {
 }
 
 resource "render_web_service" "vyamir" {
-  name    = "vyamir-app"
-  plan    = "free"
-  runtime = "docker"
-  
-  repo {
-    url    = "https://github.com/medhinibr/Vyamir"
-    branch = "main"
+  name   = "vyamir-app"
+  plan   = "free"
+  region = "oregon"
+
+  runtime_source = {
+    docker = {
+      repo_url = "https://github.com/medhinibr/Vyamir"
+      branch   = "main"
+    }
   }
 
-  docker_command = "gunicorn --bind 0.0.0.0:8080 app:app"
-  
   env_vars = {
-    "PEXELS_API_KEY"      = var.pexels_api_key
-    "FIREBASE_API_KEY"    = var.firebase_api_key
-    "GMAIL_APP_PASSWORD"  = var.gmail_password
+    "PEXELS_API_KEY" = {
+      value = var.pexels_api_key
+    }
+    "FIREBASE_API_KEY" = {
+      value = var.firebase_api_key
+    }
+    "GMAIL_APP_PASSWORD" = {
+      value = var.gmail_password
+    }
   }
 }
 
