@@ -1,17 +1,18 @@
 import requests
 import feedparser
 from datetime import datetime, timedelta
-
-# Global cache for geocoding results
-_geo_cache = {}
+from backend.cache import get_cache, set_cache
 
 def search_city(query):
     """
-    Search for a city using Nominatim with caching.
+    Search for a city using Nominatim with caching (24 hours).
     """
     query = query.lower().strip()
-    if query in _geo_cache:
-        return _geo_cache[query]
+    cache_key = f"geo:{query}"
+    
+    cached = get_cache(cache_key)
+    if cached is not None:
+        return cached
 
     try:
         # 1. Try Nominatim
@@ -32,7 +33,7 @@ def search_city(query):
                     'admin1': item.get('address', {}).get('state'),
                     'country': item.get('address', {}).get('country')
                 })
-            _geo_cache[query] = results
+            set_cache(cache_key, results, expiry_seconds=86400) # 24 hours
             return results
             
         # 2. Fallback to Open-Meteo
@@ -40,29 +41,27 @@ def search_city(query):
         response = requests.get(url, timeout=5)
         data = response.json()
         if 'results' in data:
-            _geo_cache[query] = data['results']
-            return data['results']
+            results = data['results']
+            set_cache(cache_key, results, expiry_seconds=86400) # 24 hours
+            return results
             
         return []
     except Exception as e:
         print(f"Geocoding Error: {e}")
         return []
 
-# Global cache for weather data
-_weather_cache = {}
-
 def get_forecast_data(lat, lon):
     """
     Fetch comprehensive weather data from Open-Meteo with caching (15 min).
     """
     # Round coords to 2 decimals to increase cache hit rate for nearby clicks
-    key = f"{round(float(lat), 2)}_{round(float(lon), 2)}"
-    now = datetime.now()
+    lat_r = round(float(lat), 2)
+    lon_r = round(float(lon), 2)
+    cache_key = f"forecast:{lat_r}:{lon_r}"
     
-    if key in _weather_cache:
-        timestamp, data = _weather_cache[key]
-        if (now - timestamp).total_seconds() < 900: # 15 minutes
-            return data
+    cached = get_cache(cache_key)
+    if cached is not None:
+        return cached
 
     try:
         url = (
@@ -76,7 +75,7 @@ def get_forecast_data(lat, lon):
         response = requests.get(url, timeout=5)
         data = response.json()
         
-        _weather_cache[key] = (now, data)
+        set_cache(cache_key, data, expiry_seconds=900) # 15 minutes
         return data
     except Exception as e:
         print(f"Forecast Error: {e}")
@@ -86,38 +85,60 @@ def get_historical_trend(lat, lon, current_temp):
     """
     Compare today's weather with exactly one year ago.
     """
-    try:
-        today = datetime.now()
-        last_year = today - timedelta(days=365)
-        date_str = last_year.strftime('%Y-%m-%d')
-        
-        url = (
-            f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}"
-            f"&start_date={date_str}&end_date={date_str}&daily=temperature_2m_max,temperature_2m_min"
-            "&timezone=auto"
-        )
-        response = requests.get(url)
-        data = response.json()
-        
-        if 'daily' in data and data['daily']['temperature_2m_max']:
-            hist_max = data['daily']['temperature_2m_max'][0]
-            diff = current_temp - hist_max
+    lat_r = round(float(lat), 2)
+    lon_r = round(float(lon), 2)
+    today_str = datetime.now().strftime('%Y-%m-%d')
+    cache_key = f"historical:{lat_r}:{lon_r}:{today_str}"
+    
+    cached = get_cache(cache_key)
+    if cached is not None:
+        hist_max = cached
+    else:
+        try:
+            today = datetime.now()
+            last_year = today - timedelta(days=365)
+            date_str = last_year.strftime('%Y-%m-%d')
             
-            if abs(diff) < 1:
-                return "Similar to last year."
-            elif diff > 0:
-                return f"Today is {abs(int(diff))}°C warmer than last year."
+            url = (
+                f"https://archive-api.open-meteo.com/v1/archive?latitude={lat}&longitude={lon}"
+                f"&start_date={date_str}&end_date={date_str}&daily=temperature_2m_max,temperature_2m_min"
+                "&timezone=auto"
+            )
+            response = requests.get(url)
+            data = response.json()
+            
+            if 'daily' in data and data['daily']['temperature_2m_max']:
+                hist_max = data['daily']['temperature_2m_max'][0]
+                set_cache(cache_key, hist_max, expiry_seconds=86400) # 24 hours
             else:
-                return f"Today is {abs(int(diff))}°C cooler than last year."
-        return "Historical data unavailable."
-    except Exception as e:
-        print(f"Historical Error: {e}")
-        return "Historical data unavailable."
+                hist_max = None
+        except Exception as e:
+            print(f"Historical Error: {e}")
+            hist_max = None
+
+    if hist_max is not None:
+        diff = current_temp - hist_max
+        if abs(diff) < 1:
+            return "Similar to last year."
+        elif diff > 0:
+            return f"Today is {abs(int(diff))}°C warmer than last year."
+        else:
+            return f"Today is {abs(int(diff))}°C cooler than last year."
+            
+    return "Historical data unavailable."
 
 def get_air_quality_data(lat, lon):
     """
     Fetch Air Quality and Pollen data.
     """
+    lat_r = round(float(lat), 2)
+    lon_r = round(float(lon), 2)
+    cache_key = f"aqi:{lat_r}:{lon_r}"
+    
+    cached = get_cache(cache_key)
+    if cached is not None:
+        return cached
+
     try:
         url = (
             f"https://air-quality-api.open-meteo.com/v1/air-quality?latitude={lat}&longitude={lon}"
@@ -125,24 +146,21 @@ def get_air_quality_data(lat, lon):
             "&timezone=auto"
         )
         response = requests.get(url)
-        return response.json()
+        data = response.json()
+        set_cache(cache_key, data, expiry_seconds=900) # 15 minutes
+        return data
     except Exception as e:
         print(f"AQI Error: {e}")
         return None
 
-# Global cache for news to avoid unnecessary parsing
-_news_cache = []
-_news_cache_time = None
-
 def get_news_feed():
     """
-    Fetch top weather news with simple caching.
+    Fetch top weather news with simple caching (10 min).
     """
-    global _news_cache, _news_cache_time
-    
-    # Cache for 10 minutes
-    if _news_cache and _news_cache_time and (datetime.now() - _news_cache_time).total_seconds() < 600:
-        return _news_cache
+    cache_key = "news_feed"
+    cached = get_cache(cache_key)
+    if cached is not None:
+        return cached
 
     try:
         url = "https://moxie.foxweather.com/google-publisher/weather-news.xml"
@@ -155,9 +173,8 @@ def get_news_feed():
                 'published': entry.published
             })
         
-        _news_cache = news_items
-        _news_cache_time = datetime.now()
+        set_cache(cache_key, news_items, expiry_seconds=600) # 10 minutes
         return news_items
     except Exception as e:
         print(f"News Error: {e}")
-        return _news_cache if _news_cache else []
+        return []

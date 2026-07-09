@@ -3,67 +3,61 @@ from backend import openmeteo
 from dotenv import load_dotenv
 import os
 import math
+import requests
+import logging
+
+# Configure standardized logging matrix
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger("vyamir")
+
 load_dotenv() # Load environmental variables immediately
 
 app = Flask(__name__)
+FRONTEND_DIST = os.path.abspath(os.path.join(os.path.dirname(__file__), 'frontend/dist'))
 
-@app.route('/')
-@app.route('/privacy-settings')
-def index():
-    # Fetch environment vectors for frontend injection
-    config = {
-        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
-        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
-    }
-    return render_template('index.html', config=config)
+@app.route('/api/config')
+def get_client_config():
+    """
+    Expose public configuration vectors dynamically.
+    Enables API security by avoiding hardcoding keys in built files.
+    """
+    return jsonify({
+        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY')
+    })
 
-@app.route('/maps')
-def maps():
-    config = {
-        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
-        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
-    }
-    return render_template('maps.html', config=config)
-
-@app.route('/news')
-def news():
-    config = {
-        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
-        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
-    }
-    return render_template('news.html', config=config)
-
-@app.route('/agri')
-def agri():
-    config = {
-        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
-        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
-    }
-    return render_template('agri.html', config=config)
-
-@app.route('/monsoon')
-def monsoon():
-    config = {
-        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
-        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
-    }
-    return render_template('monsoon.html', config=config)
-
-@app.route('/robots.txt')
-def robots():
-    return send_from_directory('public', 'robots.txt')
-
-@app.route('/sitemap.xml')
-def static_from_root():
-    return send_from_directory('public', 'sitemap.xml', mimetype='application/xml')
-
-@app.route('/ads.txt')
-def ads_txt():
-    return send_from_directory('public', 'ads.txt')
-
-@app.route('/logo.png')
-def logo_png():
-    return send_from_directory('public', 'logo.png')
+@app.route('/api/pexels/videos')
+def pexels_videos_proxy():
+    """
+    Pexels API Proxy (Proxy Pattern).
+    Shields the PEXELS_API_KEY from exposure in client-side code.
+    """
+    query = request.args.get('query', 'starry night')
+    pexels_key = os.getenv('PEXELS_API_KEY')
+    
+    if not pexels_key:
+        logger.warning("PEXELS_API_KEY not found in environment.")
+        return jsonify({"videos": []})
+        
+    try:
+        url = "https://api.pexels.com/videos/search"
+        params = {
+            "query": query,
+            "per_page": 15,
+            "orientation": "landscape"
+        }
+        headers = {
+            "Authorization": pexels_key
+        }
+        # Fetch from Pexels securely on the server side
+        response = requests.get(url, params=params, headers=headers, timeout=5)
+        return jsonify(response.json())
+    except Exception as e:
+        logger.error(f"Pexels Proxy Error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/api/search')
 def search():
@@ -98,7 +92,7 @@ def get_weather():
                 'history': "Historical synchronization deferred to minimize IP load."
             })
 
-        # Execute API calls in parallel to maximize performance (Legacy Support)
+        # Execute API calls in parallel to maximize performance
         with ThreadPoolExecutor(max_workers=4) as executor:
             future_forecast = executor.submit(openmeteo.get_forecast_data, lat, lon)
             future_aqi = executor.submit(openmeteo.get_air_quality_data, lat, lon)
@@ -106,24 +100,21 @@ def get_weather():
 
             # Wait for forecast as it's needed for historical trend
             forecast = future_forecast.result()
-            print(f"Open-Meteo Response: {forecast}", flush=True)
+            logger.info(f"Open-Meteo Response: {forecast}")
 
             if not forecast:
                 return jsonify({'error': 'Failed to fetch forecast'}), 500
             
-            # Log the full response for diagnostics in Render
             if 'error' in forecast:
-                print(f"Open-Meteo API Error: {forecast}")
+                logger.error(f"Open-Meteo API Error: {forecast}")
                 return jsonify({'error': f"Atmospheric Link Error: {forecast.get('reason', 'Unknown API Error')}"}), 502
 
-            # Secure way to get current weather data (handling both legacy and new Open-Meteo formats)
             current_raw = forecast.get('current', forecast.get('current_weather', {}))
             
             if not current_raw:
-                print(f"Critical Error: 'current' block missing in response. Response: {forecast}")
+                logger.error(f"Critical Error: 'current' block missing in response. Response: {forecast}")
                 return jsonify({'error': 'Meteorological stream interrupted: Current data unavailable in API response.'}), 500
             
-            # Normalize Current Data for the frontend
             current_weather = {
                 'time': current_raw.get('time'),
                 'temperature': current_raw.get('temperature_2m', current_raw.get('temperature')),
@@ -136,7 +127,6 @@ def get_weather():
                 'pressure': current_raw.get('surface_pressure', current_raw.get('pressure'))
             }
             
-            # Normalize Hourly Keys for frontend consistency
             hourly_raw = forecast.get('hourly', {})
             hourly = {
                 'time': hourly_raw.get('time'),
@@ -149,10 +139,12 @@ def get_weather():
                 'visibility': hourly_raw.get('visibility'),
                 'surface_pressure': hourly_raw.get('surface_pressure'),
                 'windspeed_10m': hourly_raw.get('wind_speed_10m', hourly_raw.get('windspeed_10m')),
-                'uv_index': hourly_raw.get('uv_index')
+                'uv_index': hourly_raw.get('uv_index'),
+                'soil_temperature_0cm': hourly_raw.get('soil_temperature_0cm'),
+                'soil_moisture_0_to_1cm': hourly_raw.get('soil_moisture_0_to_1cm'),
+                'soil_moisture_1_to_3cm': hourly_raw.get('soil_moisture_1_to_3cm')
             }
 
-            # Normalize Daily Keys
             daily_raw = forecast.get('daily', {})
             daily = {
                 'time': daily_raw.get('time'),
@@ -163,10 +155,8 @@ def get_weather():
                 'sunset': daily_raw.get('sunset')
             }
             
-            # Historical trend needs current temp
             future_history = executor.submit(openmeteo.get_historical_trend, lat, lon, current_weather['temperature'])
             
-            # Collect other results
             history_text = future_history.result()
             aqi_data = future_aqi.result()
             news = future_news.result()
@@ -182,7 +172,7 @@ def get_weather():
         })
 
     except Exception as e:
-        print(f"Server Error: {e}")
+        logger.error(f"Server Error: {e}")
         return jsonify({'error': str(e)}), 500
 
 
@@ -193,7 +183,7 @@ MAIL_USERNAME = 'vyamir.app@gmail.com'
 MAIL_PASSWORD = os.getenv('GMAIL_APP_PASSWORD')
 
 if not MAIL_PASSWORD:
-    print('Warning: GMAIL_APP_PASSWORD not found in environment.')
+    logger.warning('GMAIL_APP_PASSWORD not found in environment.')
 
 import smtplib
 from email.mime.text import MIMEText
@@ -246,56 +236,113 @@ def send_email():
     msg.attach(MIMEText(html_body, 'html'))
 
     try:
-        # Sanitize credentials
         username = MAIL_USERNAME.strip()
         password = MAIL_PASSWORD.strip()
 
-        # Check for placeholder
         if 'YOUR_APP_PASSWORD' in password:
-            print("Email skipped: Password not configured in app.py")
+            logger.info("Email skipped: Password not configured in app.py")
             return jsonify({"status": "skipped", "message": "Email config missing"}), 200
 
-        print(f"Attempting SMTP connection to {SMTP_SERVER}:{SMTP_PORT}...")
+        logger.info(f"Attempting SMTP connection to {SMTP_SERVER}:{SMTP_PORT}...")
         server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        server.set_debuglevel(1) # Enable verbose SMTP logging in terminal
+        server.set_debuglevel(1)
         server.starttls()
         
-        print(f"Logging in as {username}...")
+        logger.info(f"Logging in as {username}...")
         try:
             server.login(username, password)
-            print("SMTP Login Successful!")
-            
-            # Send message using the MIMEMultipart object
+            logger.info("SMTP Login Successful!")
             server.send_message(msg)
-            print(f"Email DISPATCHED to {username} successfully!")
-            
+            logger.info(f"Email DISPATCHED to {username} successfully!")
             server.quit()
             return jsonify({"status": "success", "message": "Email sent"})
         except smtplib.SMTPAuthenticationError as auth_err:
-            print(f"SMTP Authentication Error: {auth_err}")
-            print("\n" + "="*60)
-            print("GOOGLE SECURITY ERROR: Standard passwords are BLOCKED.")
-            print("You MUST generate an 'App Password' for Vyamir.")
-            print("1. Go here: https://myaccount.google.com/apppasswords")
-            print("2. Name it 'Vyamir'")
-            print("3. Copy the 16-character code")
-            print("4. Paste it into app.py (MAIL_PASSWORD)")
-            print("="*60 + "\n")
+            logger.error(f"SMTP Authentication Error: {auth_err}")
             return jsonify({
                 "status": "error", 
                 "message": f"Google Blocked Login: {str(auth_err)}"
             }), 500
         except Exception as smtp_err:
-            print(f"SMTP Send Error: {smtp_err}")
+            logger.error(f"SMTP Send Error: {smtp_err}")
             return jsonify({"status": "error", "message": f"SMTP Dispatch Failed: {str(smtp_err)}"}), 500
 
-
     except Exception as e:
-        print(f"General Email Error: {e}")
+        logger.error(f"General Email Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+
+@app.route('/robots.txt')
+def robots():
+    return send_from_directory('public', 'robots.txt')
+
+@app.route('/sitemap.xml')
+def static_from_root():
+    return send_from_directory('public', 'sitemap.xml', mimetype='application/xml')
+
+@app.route('/ads.txt')
+def ads_txt():
+    return send_from_directory('public', 'ads.txt')
+
+@app.route('/logo.png')
+def logo_png():
+    return send_from_directory('public', 'logo.png')
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('public', 'logo.png', mimetype='image/png')
+
+
+# --- STATIC ASSETS & SPA ROUTING FOR REACT ---
+
+@app.route('/assets/<path:path>')
+def serve_assets(path):
+    """
+    Serve React application bundle files (JS, CSS, images).
+    """
+    return send_from_directory(os.path.join(FRONTEND_DIST, 'assets'), path)
+
+@app.route('/index.html')
+@app.route('/')
+@app.route('/maps')
+@app.route('/news')
+@app.route('/agri')
+@app.route('/monsoon')
+@app.route('/privacy-settings')
+@app.route('/privacy')
+@app.route('/terms')
+@app.route('/about')
+@app.route('/contact')
+@app.route('/cookie-policy')
+def serve_index():
+    """
+    Serves the React application. Falls back to legacy HTML templates
+    if the React build is not present (for backward compatibility).
+    """
+    if not os.path.exists(os.path.join(FRONTEND_DIST, 'index.html')):
+        config = {
+            'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
+            'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
+        }
+        # Extract target page name to serve correct legacy template
+        path = request.path.strip('/')
+        if not path or path == 'index.html':
+            return render_template('index.html', config=config)
+        elif path in ['maps', 'news', 'agri', 'monsoon']:
+            return render_template(f'{path}.html', config=config)
+        return render_template('index.html', config=config)
+        
+    return send_from_directory(FRONTEND_DIST, 'index.html')
+
+@app.route('/<path:path>')
+def serve_fallback(path):
+    """
+    Catch-all route. Serve file from build output if it exists,
+    otherwise fallback to index.html to allow React Router / client-side SPA routing.
+    """
+    if os.path.exists(os.path.join(FRONTEND_DIST, path)):
+        return send_from_directory(FRONTEND_DIST, path)
+    return send_from_directory(FRONTEND_DIST, 'index.html')
 
 
 if __name__ == "__main__":
     app.run(port=int(os.environ.get("PORT", 8080)), host='0.0.0.0', debug=True)
-

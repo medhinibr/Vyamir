@@ -1,54 +1,66 @@
-# Vyamir | Next-Generation Atmospheric Intelligence
+# Vyamir - High-Fidelity Atmospheric Intelligence Platform
 
-Vyamir is a high-fidelity, professional-grade weather intelligence platform built for high situational awareness. It bridges the gap between raw meteorological telemetry and cinematic user experience, transforming complex environmental vectors into a seamless, interactive dashboard.
+Vyamir is a professional-grade weather intelligence platform designed for high situational awareness. The application bridges the gap between raw meteorological telemetry and a premium user experience, translating complex environmental vectors into a seamless, glassmorphic dashboard.
 
-**Deployment Node:**  
+Live Application: https://vyamir.onrender.com/
+Repository URL: https://github.com/medhinibr/Vyamir
 
+## Core Architecture
 
-## High-Fidelity Features
+Vyamir has been migrated from a legacy server-rendered structure to a decoupled Single Page Application (SPA) architecture supported by a secure Flask utility proxy.
 
-- **Zenith Glass HUD**: A premium, state-of-the-art interface utilizing advanced glassmorphism and motion dynamics for maximum clarity.
-- **Hybrid Telemetry Engine**: Optimized client-side ingestion of Open-Meteo data to bypass server-side rate limits and ensure sub-second orbital synchronization.
-- **Cinematic Atmosphere**: Dynamic, condition-aware HD video loops powered by the Pexels engine, providing immediate visual context.
-- **SkyID Ecosystem**: Secure, privacy-first identity management utilizing Firebase and Cloud Firestore for persistent user state.
-- **Meteorological Dispatch**: Integrated SMTP engine for direct weather reporting and secure communication.
+### Frontend
+* React 19 SPA compiled with Vite.
+* State-driven Zenith Glass HUD styling with fluid transitions.
+* Progressive page loads using responsive Skeleton Shimmer screens.
+* Interactive geographical canvas utilizing Leaflet and the RainViewer API for real-time regional Doppler radar overlays.
 
+### Backend Proxy
+* Flask WSGI application managing security-sensitive API handshakes.
+* Multi-threaded asynchronous queries using ThreadPoolExecutor to aggregate coordinates, forecast charts, historical records, and weather news feeds.
+* Adaptive caching engine supporting Redis with an automated, in-memory local cache fallback (15-minute expiration window) to avoid Open-Meteo and Pexels rate limits.
 
+### Database & Identity
+* Firebase Authentication (Anonymous tokens resolved dynamically at runtime).
+* Cloud Firestore database syncing gamified points economies (SkyPoints) and user nickname profiles.
 
-##  Technical Architecture
+## Technical Stack
 
-### Core Stack
-- **Backend**: Python / Flask (WSGI Architecture)
-- **Frontend**: ESNext JavaScript (Vanilla Architecture) & CSS3 Design System
-- **Database**: Firebase Auth & Cloud Firestore (NoSQL)
-- **Deployment**: Render Cloud Infrastructure
+* Backend: Python / Flask
+* Frontend: React / ESNext JavaScript / CSS3 Variables
+* Database: Firebase Auth / Cloud Firestore
+* Deployment: Render Cloud Infrastructure
 
-### Data Vectors & APIs
-- **Open-Meteo**: Primary meteorological and air quality telemetry.
-- **RainViewer API**: Real-time Doppler radar and satellite mapping.
-- **Nominatim (OSM)**: Global geographic coordinate and reverse resolution.
-- **Pexels API**: Atmospheric media asset ingestion.
+## Security Architecture
 
+* Secret Protection: All third-party media credentials (e.g. Pexels API tokens) are strictly maintained on the server side. Requests are requested through secure backend proxy paths (/api/pexels/videos), ensuring secrets are never compiled into client-side JS bundles.
+* Runtime Initialization: Firebase credentials are dynamically requested from the backend API during mounting, rather than hardcoded in source repositories.
 
+## Quick Setup
 
-##  Quick Setup & Initialization
+### Prerequisites
+* Python 3.10+
+* Node.js 18+
 
-Vyamir requires a secured environment for full deployment.
+### Setup Environment
+Create a `.env` file in the root folder with the following variables:
+```env
+FIREBASE_API_KEY=your_firebase_api_key
+PEXELS_API_KEY=your_pexels_api_key
+GMAIL_APP_PASSWORD=your_gmail_app_password
+```
 
-1. **Environment Variables**: Populate a `.env` file with the following vectors:
-   ```env
-   FIREBASE_API_KEY=your_key
-   PEXELS_API_KEY=your_key
-   GMAIL_APP_PASSWORD=your_password
-   ```
-
-2. **Backend Sync**:
+### Installation
+1. Install backend dependencies and initialize the server:
    ```bash
    pip install -r requirements.txt
    python app.py
    ```
+2. In a separate shell, build the frontend SPA:
+   ```bash
+   cd frontend
+   npm install
+   npm run build
+   ```
 
-For detailed contribution protocols and local development calibration, please refer to the **[Development Guide](./DEV_GUIDE.md)**.
-
-
-*Vyamir Systems © 2025. Atmospheric Intelligence, Redefined.*
+Vyamir Systems. Atmospheric Intelligence, Redefined.
