@@ -3,7 +3,7 @@ FROM python:3.10-slim AS builder
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
     && rm -rf /var/lib/apt/lists/*
@@ -20,6 +20,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 FROM python:3.10-slim AS runner
 
 WORKDIR /app
+
+# Upgrade and clean final environment packages to resolve base-image vulnerabilities
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 
 # Copy the pre-built virtual environment from builder stage
 COPY --from=builder /opt/venv /opt/venv
