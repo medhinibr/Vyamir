@@ -176,7 +176,9 @@ export default function Dashboard({ weatherData, tempUnit, locationSource, onOpe
     "Local vector alignment suggests clear visibility ahead.",
     "Standard thermal currents active across the region."
   ];
-  const localInsight = insights[cityHash % insights.length];
+  const localInsight = weatherData.insights && weatherData.insights.length > 0
+    ? weatherData.insights[0]
+    : insights[cityHash % insights.length];
 
   // Fetch condition videos from backend proxy
   useEffect(() => {

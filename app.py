@@ -69,6 +69,25 @@ def search():
 
 from concurrent.futures import ThreadPoolExecutor
 
+def generate_weather_insights(temp, aqi, rain_chance):
+    insights = []
+    if aqi and aqi > 100:
+        insights.append("Air quality is poor. Wear a mask if stepping out.")
+    elif aqi and aqi > 50:
+        insights.append("Moderate air quality. Sensitive groups should monitor symptoms.")
+    
+    if rain_chance and rain_chance > 60:
+        insights.append("Carry an umbrella! Rain is likely today.")
+    elif rain_chance and rain_chance > 30:
+        insights.append("Subtle cloud condensation; slight chance of light rain.")
+        
+    if temp and temp > 35:
+        insights.append("High thermal index. Stay hydrated and avoid long exposure.")
+    elif temp and temp < 10:
+        insights.append("Low temperature. Keep warm and monitor thermal systems.")
+        
+    return insights if insights else ["Atmospheric conditions are stable. Enjoy your day!"]
+
 @app.route('/api/get_weather')
 def get_weather():
     try:
@@ -160,6 +179,16 @@ def get_weather():
             history_text = future_history.result()
             aqi_data = future_aqi.result()
             news = future_news.result()
+            
+            # Extract AQI
+            european_aqi_list = aqi_data.get('hourly', {}).get('european_aqi', []) if aqi_data else []
+            aqi = european_aqi_list[0] if european_aqi_list else 0
+
+            # Extract precipitation probability
+            precipitation_probability_list = hourly.get('precipitation_probability', [])
+            rain_chance = max(precipitation_probability_list[:12]) if precipitation_probability_list else 0
+            
+            insights = generate_weather_insights(current_weather['temperature'], aqi, rain_chance)
         
         return jsonify({
             'city': city_name,
@@ -168,7 +197,8 @@ def get_weather():
             'daily': daily,
             'history': history_text,
             'air_quality': aqi_data['hourly'] if aqi_data else None,
-            'news': news
+            'news': news,
+            'insights': insights
         })
 
     except Exception as e:
