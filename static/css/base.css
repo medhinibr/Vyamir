@@ -2118,7 +2118,7 @@ body.is-dashboard .privacy-promise-card {
 }
 
 .privacy-accept-all {
-    background: var(--accent-color);
+    background: #1f6feb;
     color: white;
     border: none;
     padding: 10px 25px;
@@ -2130,9 +2130,9 @@ body.is-dashboard .privacy-promise-card {
 }
 
 .privacy-accept-all:hover {
-    background: #4a95eb;
+    background: #1555b7;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(88, 166, 255, 0.3);
+    box-shadow: 0 5px 15px rgba(31, 111, 235, 0.4);
 }
 
 .privacy-customize-link {
