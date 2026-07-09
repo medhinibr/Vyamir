@@ -8,6 +8,8 @@ Vyamir provides real-time weather intelligence with a focus on cinematic UI and 
 
 To ensure complete credential isolation, Vyamir implements a secure proxy API pattern. The React 19 client resolves dynamic configurations on initialization and proxies all external requests (including weather telemetry and video backgrounds) through Flask backend services, shielding third-party credentials from client-side network exposure.
 
+The platform integrates an AI-inspired meteorological insight engine. Upon receiving telemetry requests, the backend parses temperature indices, precipitation probabilities, and air quality indices (AQI) to compile dynamic, personalized environmental advice (e.g. AQI warnings, hydration notices, and precipitation alerts).
+
 ## 2. Technical Stack
 
 * Core: Python, Flask, Gunicorn
@@ -22,13 +24,16 @@ The project follows a rigorous DevOps lifecycle:
 
 * **Continuous Integration (CI)**:
   * Static analysis: Lint checks are managed automatically via flake8 on every commit to flag syntax errors and code styling anomalies.
-  * Unit Testing: Integration tests are executed using pytest to verify that Flask routes and proxies resolve with correct response structures.
+  * Unit Testing: Integration tests are executed using pytest to verify that Flask routes, dynamic insights, and proxies resolve with correct response structures.
   * Image Validation: GitHub Actions builds the Docker image locally to check for compile-time errors prior to deployment.
 * **Continuous Deployment (CD)**:
   * Automated orchestration: A webhook deploy step triggers Render builds upon successful CI checks, supporting zero-downtime continuous deployment.
 * **Infrastructure as Code (IaC)**:
   * Terraform configuration: Provider and resource declarations are stored in the `/infra` directory to provision the Render web service, Git repository triggers, and production environment variables.
   * Render Blueprints: The environment configuration is declared in `render.yaml` to automate container parameters and deployment rules.
+* **Performance Optimization & Caching**:
+  * Asset Caching Policy: Deployed response header injectors in the Flask layer to enforce Cache-Control rules. Static assets (CSS, JS, images, XML sitemaps) are cached globally for 1 year (`public, max-age=31536000, immutable`), while dynamic APIs have cache-prevention headers.
+  * Non-blocking Execution: Bottom script imports are loaded with the `defer` attribute to optimize browser parsing speeds and core web vitals.
 * **Observability & Reliability**:
   * Healthcheck integrations: The web service container uses automated health monitoring. A native Python request probe queries `/api/config` inside the container every 30 seconds to confirm availability without relying on heavy external dependencies.
   * Restart Policies: Services are defined with restart-on-failure policies to minimize downtime in the event of system exceptions.
@@ -59,7 +64,8 @@ The project follows a rigorous DevOps lifecycle:
 ├── render.yaml                # Render Blueprint infrastructure configuration
 ├── requirements.txt           # Python dependency manifests
 ├── test_app.py                # Route verification tests
-└── app.py                     # WSGI application configuration
+├── app.py                     # WSGI application configuration
+└── DEV_GUIDE.md               # Local development and validation guide
 ```
 
 ## 5. Deployment Setup
