@@ -45,6 +45,7 @@ variable "render_api_key" {
 variable "render_owner_id" {
   type        = string
   description = "Render Owner ID (usr-... or tea-...)"
+  default     = "usr-d58o01ogjchc73a9oilg"
 }
 
 variable "pexels_api_key" {
