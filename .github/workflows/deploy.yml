@@ -44,4 +44,11 @@ jobs:
     steps:
       - name: Trigger Render Deploy
         run: |
-          curl -f -X POST "https://api.render.com/deploy/srv-d59vfdmr433s7383maq0?key=${{ secrets.RENDER_API_KEY }}"
+          KEY_OR_URL="${{ secrets.RENDER_API_KEY }}"
+          if [[ "$KEY_OR_URL" == http* ]]; then
+            echo "Triggering deployment via full hook URL."
+            curl -f -X POST "$KEY_OR_URL"
+          else
+            echo "Triggering deployment via service ID and key."
+            curl -f -X POST "https://api.render.com/deploy/srv-d59vfdmr433s7383maq0?key=$KEY_OR_URL"
+          fi
