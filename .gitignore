@@ -33,3 +33,10 @@ firebase-key.json
 .DS_Store
 Thumbs.db
 .env
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+*.tfvars.json

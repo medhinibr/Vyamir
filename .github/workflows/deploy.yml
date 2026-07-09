@@ -55,3 +55,38 @@ jobs:
             echo "Triggering deployment via service ID and key."
             curl -f -X POST "https://api.render.com/deploy/srv-d59vfdmr433s7383maq0?key=$KEY_OR_URL"
           fi
+
+  terraform:
+    name: Infrastructure as Code
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./infra
+
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: ./infra
+        env:
+          TF_VAR_render_api_key: ${{ secrets.RENDER_API_KEY }}
+          TF_VAR_pexels_api_key: ${{ secrets.PEXELS_API_KEY }}
+          TF_VAR_firebase_api_key: ${{ secrets.FIREBASE_API_KEY }}
+          TF_VAR_gmail_password: ${{ secrets.GMAIL_APP_PASSWORD }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./infra
+        env:
+          TF_VAR_render_api_key: ${{ secrets.RENDER_API_KEY }}
+          TF_VAR_pexels_api_key: ${{ secrets.PEXELS_API_KEY }}
+          TF_VAR_firebase_api_key: ${{ secrets.FIREBASE_API_KEY }}
+          TF_VAR_gmail_password: ${{ secrets.GMAIL_APP_PASSWORD }}
