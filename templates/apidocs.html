@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vyamir API Documentation</title>
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
+  <style>
+    html { box-sizing: border-box; overflow-y: scroll; }
+    *, *:before, *:after { box-sizing: inherit; }
+    body { margin: 0; background: #0b0f19; font-family: 'Inter', sans-serif; }
+    
+    /* Premium Glassmorphic Header */
+    .swagger-header {
+      background: rgba(11, 15, 25, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 15px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand {
+      color: #ffffff;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .brand span {
+      color: #38bdf8;
+    }
+    .back-home {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .back-home:hover {
+      color: #38bdf8;
+    }
+
+    /* Dark theme adaptation for Swagger UI */
+    .swagger-ui {
+      filter: invert(0.88) hue-rotate(180deg);
+      padding: 20px 40px;
+    }
+    .swagger-ui .info {
+      margin: 30px 0;
+    }
+    .swagger-ui .scheme-container {
+      background: #f0f0f0;
+      box-shadow: none;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="swagger-header">
+    <div class="brand">VYAMIR<span>.API</span></div>
+    <a href="/" class="back-home">Return to Dashboard</a>
+  </div>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = function() {
+      const ui = SwaggerUIBundle({
+        url: "/static/swagger/openapi.json",
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "BaseLayout"
+      });
+      window.ui = ui;
+    };
+  </script>
+</body>
+</html>

@@ -15,10 +15,11 @@ Vyamir has been migrated from a legacy server-rendered structure to a decoupled 
 * Progressive page loads using responsive Skeleton Shimmer screens.
 * Interactive geographical canvas utilizing Leaflet and the RainViewer API for real-time regional Doppler radar overlays.
 
-### Backend Proxy
+### Backend Proxy & APIs
 * Flask WSGI application managing security-sensitive API handshakes.
 * Multi-threaded asynchronous queries using ThreadPoolExecutor to aggregate coordinates, forecast charts, historical records, and weather news feeds.
 * Adaptive caching engine supporting Redis with an automated, in-memory local cache fallback (15-minute expiration window) to avoid Open-Meteo and Pexels rate limits.
+* OpenAPI Swagger UI: Interactive, dark-mode Swagger interface mapping all endpoints, accessible directly under the `/apidocs` endpoint.
 
 ### Database & Identity
 * Firebase Authentication (Anonymous tokens resolved dynamically at runtime).
@@ -42,7 +43,19 @@ Vyamir has been migrated from a legacy server-rendered structure to a decoupled 
 The project implements a modern DevOps continuous integration and deployment pipeline via GitHub Actions to guarantee high code quality and zero-downtime deployment:
 
 * Python Code Quality Gate: Code changes undergo syntax validation and quality check processes using Flake8 linting engine.
+* Automated Unit Tests: Every push to main triggers automated test execution using PyTest, testing routing safety and responses.
 * Automated Deployment: Upon passing the quality gate, pushes to the main branch automatically trigger Render's webhook deploy endpoint to pull and compile the latest build artifacts.
+
+## Load Testing
+
+The repository contains an out-of-the-box load testing setup using Locust to benchmark the Flask endpoints under simulated concurrent traffic.
+
+To run load tests locally:
+1. Initialize the locust environment:
+   ```bash
+   locust -f locustfile.py
+   ```
+2. Navigate to `http://localhost:8089` in your browser to configure client spawn rate and observe throughput and response latency.
 
 ## Quick Setup
 

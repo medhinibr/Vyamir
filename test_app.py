@@ -28,3 +28,8 @@ def test_legacy_news(client):
     """Test that the news route renders successfully."""
     response = client.get('/news')
     assert response.status_code == 200
+
+def test_apidocs(client):
+    """Test that the API documentation route renders successfully."""
+    response = client.get('/apidocs')
+    assert response.status_code == 200

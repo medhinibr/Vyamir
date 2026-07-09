@@ -1,0 +1,96 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Vyamir API Engine",
+    "description": "High-fidelity proxy and security orchestrator endpoints for the Vyamir platform.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/api/config": {
+      "get": {
+        "summary": "Retrieve client configurations",
+        "description": "Exposes dynamic public variables such as Firebase authentication keys.",
+        "responses": {
+          "200": {
+            "description": "Success response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "FIREBASE_API_KEY": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/get_weather": {
+      "get": {
+        "summary": "Fetch weather telemetry",
+        "description": "Asynchronously queries Open-Meteo weather APIs, parses coordinates, and returns parsed forecasts.",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Aggregated real-time weather details"
+          }
+        }
+      }
+    },
+    "/api/pexels/videos": {
+      "get": {
+        "summary": "Retrieve condition-mapped weather clips",
+        "description": "Proxies Pexels search API to securely query HD atmospheric clips mapping the weather condition.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of video URLs and metadata descriptors"
+          }
+        }
+      }
+    }
+  }
+}

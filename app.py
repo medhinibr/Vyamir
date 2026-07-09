@@ -301,6 +301,13 @@ def serve_assets(path):
     """
     return send_from_directory(os.path.join(FRONTEND_DIST, 'assets'), path)
 
+@app.route('/apidocs')
+def serve_apidocs():
+    """
+    Serves the OpenAPI Swagger documentation page.
+    """
+    return render_template('apidocs.html')
+
 @app.route('/index.html')
 @app.route('/')
 @app.route('/maps')
