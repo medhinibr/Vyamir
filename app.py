@@ -19,6 +19,19 @@ load_dotenv() # Load environmental variables immediately
 app = Flask(__name__)
 FRONTEND_DIST = os.path.abspath(os.path.join(os.path.dirname(__file__), 'frontend/dist'))
 
+@app.after_request
+def add_caching_headers(response):
+    """
+    Apply efficient caching rules:
+    - Cache static assets (CSS, JS, images) for 1 year (31,536,000 seconds).
+    - Prevent caching on dynamic API routes.
+    """
+    if request.path.startswith('/static/') or request.path.startswith('/assets/') or request.path.endswith('.png') or request.path.endswith('.xml') or request.path.endswith('.txt'):
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    else:
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    return response
+
 @app.route('/api/config')
 def get_client_config():
     """
