@@ -315,19 +315,22 @@ def serve_assets(path):
 @app.route('/cookie-policy')
 def serve_index():
     """
-    Serves the React application. Falls back to legacy HTML templates
-    if the React build is not present (for backward compatibility).
+    Serves the React application or legacy HTML templates for specific paths.
     """
+    config = {
+        'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
+        'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
+    }
+    path = request.path.strip('/')
+    
+    # Force legacy templates for maps and news
+    if path in ['maps', 'news']:
+        return render_template(f'{path}.html', config=config)
+        
     if not os.path.exists(os.path.join(FRONTEND_DIST, 'index.html')):
-        config = {
-            'FIREBASE_API_KEY': os.getenv('FIREBASE_API_KEY'),
-            'PEXELS_API_KEY': os.getenv('PEXELS_API_KEY')
-        }
-        # Extract target page name to serve correct legacy template
-        path = request.path.strip('/')
         if not path or path == 'index.html':
             return render_template('index.html', config=config)
-        elif path in ['maps', 'news', 'agri', 'monsoon']:
+        elif path in ['agri', 'monsoon']:
             return render_template(f'{path}.html', config=config)
         return render_template('index.html', config=config)
         

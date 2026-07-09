@@ -182,8 +182,8 @@ body.is-dashboard .welcome-container {
 }
 
 .container {
-    max-width: 1500px;
-    margin: 0 auto;
+    max-width: 100%;
+    margin: 0;
     padding: 20px 20px 0 110px;
     /* Standardized sidebar offset */
     box-sizing: border-box;

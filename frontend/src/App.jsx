@@ -22,7 +22,12 @@ export default function App() {
   const [skyPoints, setSkyPoints] = useState(null);
 
   // Layout & Routing States
-  const [activeSection, setActiveSection] = useState('dashboard'); // 'dashboard', 'agri', 'monsoon'
+  const [activeSection, setActiveSection] = useState(() => {
+    const path = window.location.pathname;
+    if (path.includes('/monsoon')) return 'monsoon';
+    if (path.includes('/agri')) return 'agri';
+    return 'dashboard';
+  }); // 'dashboard', 'agri', 'monsoon'
   const [weatherData, setWeatherData] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [locationSource, setLocationSource] = useState('offline'); // 'gps', 'manual', 'offline'
@@ -305,6 +310,10 @@ export default function App() {
 
   // Scroll logic for sections inside the Dashboard view
   const handleSectionChange = (sectionId) => {
+    if (sectionId === 'maps' || sectionId === 'news') {
+      window.location.href = `/${sectionId}`;
+      return;
+    }
     setActiveSection(sectionId);
     if (sectionId === 'agri' || sectionId === 'monsoon') {
       window.scrollTo({ top: 0, behavior: 'smooth' });

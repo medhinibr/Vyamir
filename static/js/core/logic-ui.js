@@ -338,10 +338,30 @@ function initSidebar() {
                     const offset = window.innerWidth <= 768 ? 10 : 0; // Minor offset for mobile
                     const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
                     window.scrollTo({ top, behavior: 'smooth' });
+                } else {
+                    // Element not found on this page. If on a sub-page, redirect to dashboard.
+                    const path = window.location.pathname;
+                    if (path !== '/' && path !== '/index.html') {
+                        window.location.href = `/?scroll=${sectionId}`;
+                    }
                 }
             }
         });
     });
+
+    // Check for incoming scroll parameter on load
+    const params = new URLSearchParams(window.location.search);
+    const scrollToSection = params.get('scroll');
+    if (scrollToSection) {
+        setTimeout(() => {
+            const el = document.getElementById(scrollToSection);
+            if (el) {
+                const offset = window.innerWidth <= 768 ? 10 : 0;
+                const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+                window.scrollTo({ top, behavior: 'smooth' });
+            }
+        }, 500);
+    }
 
     // OBSERVER ENGINE: Update active state on scroll
     window.addEventListener('scroll', () => {
@@ -669,9 +689,12 @@ function updateHero(data) {
     const wind = current.wind_speed_10m !== undefined ? current.wind_speed_10m : current.windspeed;
     const pressure = current.pressure_msl || current.surface_pressure || current.pressure;
 
-    document.querySelector('.location-title').textContent = city;
-    document.querySelector('.temp-large').textContent = Math.round(getTemp(temperature)) + '°';
-    document.querySelector('.condition-text').textContent = getWeatherDescription(weatherCode);
+    const locTitle = document.querySelector('.location-title');
+    if (locTitle) locTitle.textContent = city;
+    const tempLarge = document.querySelector('.temp-large');
+    if (tempLarge) tempLarge.textContent = Math.round(getTemp(temperature)) + '°';
+    const condText = document.querySelector('.condition-text');
+    if (condText) condText.textContent = getWeatherDescription(weatherCode);
 
     // POPULATE HERO SUB-DETAILS: Synchronized with city temporal clock
     const cityTime = new Date(current.time);
@@ -2119,13 +2142,25 @@ window.initMap = function (lat, lon) {
     window.mapMarker = L.marker([lat, lon]).addTo(window.mapInstance);
 
     // RAINVIEWER RADAR LAYER (Live Precip)
-    // We add it but initially it might be empty until we set time
-    const rainLayer = L.tileLayer('https://tile.rainviewer.com/img/radar_nowcast_png/256/{z}/{x}/{y}/2/1_1.png', {
+    const rainLayer = L.tileLayer('https://tilecache.rainviewer.com/v2/radar/nowcast_5m/{z}/{x}/{y}/2/1_1.png', {
         opacity: 0.7,
         attribution: '&copy; <a href="https://www.rainviewer.com/api.html">RainViewer</a>',
+        maxNativeZoom: 7,
+        maxZoom: 19,
         zIndex: 100
     });
     rainLayer.addTo(window.mapInstance);
+
+    // Asynchronously update to the latest real-time frame
+    fetch('https://api.rainviewer.com/public/weather-maps.json')
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.radar && data.radar.past && data.radar.past.length > 0) {
+                const latestTs = data.radar.past[data.radar.past.length - 1].time;
+                rainLayer.setUrl(`https://tilecache.rainviewer.com/v2/radar/${latestTs}/256/{z}/{x}/{y}/2/1_1.png`);
+            }
+        })
+        .catch(err => console.log("Vyamir Engine: Radar dynamic timestamp fallback active.", err));
 
     // Layer Controls
     const baseMaps = {
@@ -2295,7 +2330,18 @@ window.initSatMap = function (lat, lon) {
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
     // Overlay: Infrared Clouds (RainViewer)
-    L.tileLayer('https://tile.rainviewer.com/img/satellite-infrared/512/{z}/{x}/{y}/2/1_1.png', { opacity: 0.6, maxNativeZoom: 7, maxZoom: 19 }).addTo(map);
+    const satOverlay = L.tileLayer('', { opacity: 0.6, maxNativeZoom: 7, maxZoom: 19 });
+    satOverlay.addTo(map);
+
+    fetch('https://api.rainviewer.com/public/weather-maps.json')
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.satellite && data.satellite.infrared && data.satellite.infrared.length > 0) {
+                const latestTs = data.satellite.infrared[data.satellite.infrared.length - 1].time;
+                satOverlay.setUrl(`https://tilecache.rainviewer.com/v2/satellite/${latestTs}/256/{z}/{x}/{y}/2/1_1.png`);
+            }
+        })
+        .catch(err => console.log("Vyamir Engine: Satellite overlay sync failed.", err));
 
     // Labels
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', opacity: 0.8 }).addTo(map);
@@ -2408,8 +2454,10 @@ function initMonsoonPage() {
     }).addTo(map);
 
     // RainViewer Radar Overlay
-    L.tileLayer('https://tile.cache.rainviewer.com/v2/radar/nowcast_5m/{z}/{x}/{y}/2/1_1.png', {
+    L.tileLayer('https://tilecache.rainviewer.com/v2/radar/nowcast_5m/{z}/{x}/{y}/2/1_1.png', {
         opacity: 0.8,
+        maxNativeZoom: 7,
+        maxZoom: 18,
         zIndex: 10
     }).addTo(map);
 
