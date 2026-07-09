@@ -1,5 +1,9 @@
 # Vyamir - High-Fidelity Atmospheric Intelligence Platform
 
+[![Deploy Vyamir to Render](https://github.com/medhinibr/Vyamir/actions/workflows/deploy.yml/badge.svg)](https://github.com/medhinibr/Vyamir/actions/workflows/deploy.yml)
+[![Python Version](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 Vyamir is a production-grade weather intelligence platform designed for high situational awareness. The application bridges the gap between raw meteorological telemetry and a premium user experience, translating complex environmental vectors into a seamless, glassmorphic dashboard.
 
 Live Application: https://vyamir.onrender.com/
@@ -97,5 +101,12 @@ Run the stress-test suite using:
 locust -f locustfile.py
 ```
 Open your browser at `http://localhost:8089` to specify the concurrent user simulation.
+
+### Running with Docker Compose (Orchestration)
+You can launch the entire stack, including the Flask application and Redis caching engine, in containerized mode with a single command:
+```bash
+docker-compose up --build
+```
+This spins up the services locally, automatically configures the Redis connection details, and performs continuous automated health check evaluations.
 
 Vyamir Systems. Atmospheric Intelligence, Redefined.
