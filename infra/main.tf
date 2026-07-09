@@ -8,7 +8,8 @@ terraform {
 }
 
 provider "render" {
-  api_key = var.render_api_key
+  api_key  = var.render_api_key
+  owner_id = var.render_owner_id
 }
 
 resource "render_web_service" "vyamir" {
@@ -39,6 +40,11 @@ resource "render_web_service" "vyamir" {
 variable "render_api_key" {
   type        = string
   description = "Render API Key"
+}
+
+variable "render_owner_id" {
+  type        = string
+  description = "Render Owner ID (usr-... or tea-...)"
 }
 
 variable "pexels_api_key" {
