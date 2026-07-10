@@ -1,3 +1,12 @@
+window.addEventListener('load', () => {
+    const loader = document.getElementById('atmospheric-loader');
+    if (loader) {
+        loader.style.opacity = '0';
+        loader.style.visibility = 'hidden';
+        setTimeout(() => loader.remove(), 500);
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     // ROUTING MATRIX: Determine active viewport
     const path = window.location.pathname;
@@ -203,17 +212,25 @@ function initSkyGame() {
                     const forceDirectionX = dx / distance;
                     const forceDirectionY = dy / distance;
                     const force = (mouseDistance - distance) / mouseDistance;
-                    // Gentle attraction
-                    const directionX = forceDirectionX * force * 0.6;
-                    const directionY = forceDirectionY * force * 0.6;
+                    // Gentle fluid attraction
+                    const directionX = forceDirectionX * force * 0.15;
+                    const directionY = forceDirectionY * force * 0.15;
                     this.vx += directionX;
                     this.vy += directionY;
                 }
             }
 
             // Friction
-            this.vx *= 0.98;
-            this.vy *= 0.98;
+            this.vx *= 0.95;
+            this.vy *= 0.95;
+
+            // Cap maximum speed for smooth organic motion
+            const maxSpeed = 1.8;
+            const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+            if (currentSpeed > maxSpeed) {
+                this.vx = (this.vx / currentSpeed) * maxSpeed;
+                this.vy = (this.vy / currentSpeed) * maxSpeed;
+            }
 
             // Min speed check to keep them moving
             if (Math.abs(this.vx) < 0.2) this.vx += (Math.random() - 0.5) * 0.1;
