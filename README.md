@@ -1,5 +1,8 @@
 # Vyamir
 
+![DevOps](https://img.shields.io/badge/DevOps-Pipeline-blue?logo=githubactions)
+![IaC](https://img.shields.io/badge/IaC-Terraform-purple?logo=terraform)
+
 Vyamir is a high-performance, containerized atmospheric intelligence dashboard. The project emphasizes automated deployment, declarative infrastructure, and system reliability.
 
 ## 1. Project Overview
