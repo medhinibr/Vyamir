@@ -23,7 +23,7 @@
 
 .header-search-container:focus-within {
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3);
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.35);
 }
 
 .search-icon {
