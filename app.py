@@ -372,15 +372,11 @@ def serve_index():
     }
     path = request.path.strip('/')
     
-    # Force legacy templates for maps and news
-    if path in ['maps', 'news']:
+    # Force legacy/document templates to render via Jinja
+    if path in ['maps', 'news', 'agri', 'monsoon', 'privacy', 'terms', 'about', 'contact', 'cookie-policy']:
         return render_template(f'{path}.html', config=config)
         
     if not os.path.exists(os.path.join(FRONTEND_DIST, 'index.html')):
-        if not path or path == 'index.html':
-            return render_template('index.html', config=config)
-        elif path in ['agri', 'monsoon']:
-            return render_template(f'{path}.html', config=config)
         return render_template('index.html', config=config)
         
     return send_from_directory(FRONTEND_DIST, 'index.html')

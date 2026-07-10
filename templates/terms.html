@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Vyamir | Terms & Conditions</title>
+    <link rel="icon" type="image/png" href="/static/img/logo.png">
+
+    <!-- Premium Typography: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <meta name="description" content="Vyamir Terms & Conditions - Learn about the conditions governing the use of our atmospheric intelligence network.">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/navigation/part-sidebar.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="is-dashboard bg-clear">
+    <!-- Session Restoration Overlay / Atmospheric Loader -->
+    <div id="session-restoration-overlay"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #0f1015 0%, #050508 100%); z-index: 100000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; pointer-events: none;">
+        <img src="/static/img/logo.png" alt="Vyamir"
+            style="width: 80px; height: 80px; margin-bottom: 25px; filter: drop-shadow(0 0 15px rgba(88,166,255,0.4));">
+        <div class="loader-spinner"
+            style="width: 40px; height: 40px; border: 3px solid rgba(88, 166, 255, 0.1); border-top-color: #58a6ff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;">
+        </div>
+        <div style="color: #ffffff; font-family: 'Outfit', sans-serif; font-size: 1rem; letter-spacing: 2px; font-weight: 300; text-transform: uppercase; animation: pulse 1.5s ease-in-out infinite;">
+            Vyamir: Synchronizing Atmosphere...</div>
+    </div>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+    </style>
+
+    <!-- Global Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+    {% include 'components/navigation/part_sidebar.html' %}
+
+    <div class="container">
+        {% include 'components/navigation/part_header.html' %}
+
+        <!-- Breadcrumbs -->
+        <div class="breadcrumb-container">
+            <a href="/">Home</a> &gt; <span>Terms & Conditions</span>
+        </div>
+
+        <div class="doc-container">
+            <a href="/" class="back-home-btn">
+                <i class="bi bi-arrow-left"></i> Back to Home
+            </a>
+            
+            <h1>Terms & Conditions</h1>
+            <p>Welcome to Vyamir. By accessing our platform, you agree to comply with the terms and conditions outlined below, which govern our interaction matrix.</p>
+            
+            <h2>Usage Agreement</h2>
+            <p>You agree to utilize our service and data feeds solely for personal or non-commercial environmental monitoring. Any bulk querying or scrapers attempting to stress our Open-Meteo connection endpoints will be filtered automatically.</p>
+            
+            <h2>Disclaimer of Warranties</h2>
+            <p>While we aggregate records from high-precision meteorological model networks, all forecasts are provided on an "as-is" basis without warranties of absolute accuracy.</p>
+            
+            <h2>Intellectual Property</h2>
+            <p>The visual engine, custom layout elements, logos, and constellation canvas code are proprietary assets of the Vyamir architecture team.</p>
+            
+            <h2>Terms Modifications</h2>
+            <p>We reserve the right to refine these terms at any time. Your continued usage of the dashboard constitutes acknowledgment of the updated protocols.</p>
+        </div>
+
+        {% include 'components/navigation/part_footer.html' %}
+    </div>
+
+    <!-- Script to Dismiss Atmospheric Loader -->
+    <script>
+        window.addEventListener('load', () => {
+            const overlay = document.getElementById('session-restoration-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 500);
+            }
+        });
+    </script>
+</body>
+
+</html>

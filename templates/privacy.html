@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Vyamir | Privacy Policy</title>
+    <link rel="icon" type="image/png" href="/static/img/logo.png">
+
+    <!-- Premium Typography: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <meta name="description" content="Vyamir Privacy Policy - Learn how we handle your atmospheric data securely.">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components/navigation/part-sidebar.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="is-dashboard bg-clear">
+    <!-- Session Restoration Overlay / Atmospheric Loader -->
+    <div id="session-restoration-overlay"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #0f1015 0%, #050508 100%); z-index: 100000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; pointer-events: none;">
+        <img src="/static/img/logo.png" alt="Vyamir"
+            style="width: 80px; height: 80px; margin-bottom: 25px; filter: drop-shadow(0 0 15px rgba(88,166,255,0.4));">
+        <div class="loader-spinner"
+            style="width: 40px; height: 40px; border: 3px solid rgba(88, 166, 255, 0.1); border-top-color: #58a6ff; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;">
+        </div>
+        <div style="color: #ffffff; font-family: 'Outfit', sans-serif; font-size: 1rem; letter-spacing: 2px; font-weight: 300; text-transform: uppercase; animation: pulse 1.5s ease-in-out infinite;">
+            Vyamir: Synchronizing Atmosphere...</div>
+    </div>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+    </style>
+
+    <!-- Global Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+    {% include 'components/navigation/part_sidebar.html' %}
+
+    <div class="container">
+        {% include 'components/navigation/part_header.html' %}
+
+        <!-- Breadcrumbs -->
+        <div class="breadcrumb-container">
+            <a href="/">Home</a> &gt; <span>Privacy Policy</span>
+        </div>
+
+        <div class="doc-container">
+            <a href="/" class="back-home-btn">
+                <i class="bi bi-arrow-left"></i> Back to Home
+            </a>
+            
+            <h1>Privacy Policy</h1>
+            <p>At Vyamir, your privacy is integral to our architectural design. We operate on a local-first privacy model to guarantee your atmospheric telemetry queries remain yours alone.</p>
+            
+            <h2>Data Collection and Usage</h2>
+            <p>We do not store user location permanently. Precise coordinates are processed entirely in-memory to resolve environmental telemetry vectors and are never persisted beyond active session resolution.</p>
+            
+            <h2>Decentralized Synchronization</h2>
+            <p>We prioritize user anonymity using our SkyID Vault logic. Any stored preferences or synchronization elements are associated with anonymous, decentralized nodes, ensuring no identity linkage occurs.</p>
+            
+            <h2>Third-Party Connections</h2>
+            <p>Our platform requests high-fidelity meteorology records from Open-Meteo API clusters. Additionally, we integrate non-intrusive elements from the Google AdSense network to sustain global operations.</p>
+            
+            <h2>Contact Us</h2>
+            <p>If you have any queries about our privacy protocol or data handling, please refer to our <a href="/contact" style="color: #58a6ff; text-decoration: none;">Contact Page</a>.</p>
+        </div>
+
+        {% include 'components/navigation/part_footer.html' %}
+    </div>
+
+    <!-- Script to Dismiss Atmospheric Loader -->
+    <script>
+        window.addEventListener('load', () => {
+            const overlay = document.getElementById('session-restoration-overlay');
+            if (overlay) {
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                }, 500);
+            }
+        });
+    </script>
+</body>
+
+</html>

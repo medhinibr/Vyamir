@@ -33,3 +33,28 @@ def test_apidocs(client):
     """Test that the API documentation route renders successfully."""
     response = client.get('/apidocs')
     assert response.status_code == 200
+
+def test_privacy_policy(client):
+    """Test that the privacy policy route renders successfully."""
+    response = client.get('/privacy')
+    assert response.status_code == 200
+
+def test_terms_conditions(client):
+    """Test that the terms & conditions route renders successfully."""
+    response = client.get('/terms')
+    assert response.status_code == 200
+
+def test_about_us(client):
+    """Test that the about us route renders successfully."""
+    response = client.get('/about')
+    assert response.status_code == 200
+
+def test_contact_support(client):
+    """Test that the contact support route renders successfully."""
+    response = client.get('/contact')
+    assert response.status_code == 200
+
+def test_cookie_policy(client):
+    """Test that the cookie policy route renders successfully."""
+    response = client.get('/cookie-policy')
+    assert response.status_code == 200

@@ -937,6 +937,12 @@ body {
     box-shadow: none !important;
 }
 
+.footer-links a.active {
+    color: var(--accent-color);
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+}
+
 .footer-copyright {
     color: rgba(255, 255, 255, 0.2);
     font-size: 0.75rem;
@@ -2325,4 +2331,74 @@ body.is-landing .mobile-nav {
     margin: 8px 0;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 4px;
+}
+
+/* Document & Legal Content Pages Styling */
+.doc-container {
+    max-width: 800px;
+    margin: 40px auto 80px;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    color: #e0e0e0;
+    line-height: 1.7;
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.3);
+}
+.doc-container h1 {
+    color: #58a6ff;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 25px;
+    font-size: 2.2rem;
+}
+.doc-container h2 {
+    color: #ffffff;
+    font-weight: 700;
+    margin-top: 35px;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+}
+.doc-container p {
+    margin-bottom: 15px;
+    color: rgba(255, 255, 255, 0.8);
+}
+.doc-container ul {
+    margin-bottom: 20px;
+    padding-left: 20px;
+}
+.doc-container li {
+    margin-bottom: 8px;
+    color: rgba(255, 255, 255, 0.8);
+}
+.breadcrumb-container {
+    max-width: 800px;
+    margin: 40px auto 0;
+    padding: 0 10px;
+    font-size: 0.85rem;
+    color: var(--secondary-text);
+}
+.breadcrumb-container a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.breadcrumb-container a:hover {
+    color: #ffffff;
+}
+.back-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 20px;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+.back-home-btn:hover {
+    color: #ffffff;
+    transform: translateX(-3px);
 }

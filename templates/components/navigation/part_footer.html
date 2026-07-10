@@ -1,14 +1,14 @@
 <footer class="landing-footer">
     <div class="footer-content">
         <div class="footer-links">
-            <a href="/privacy" onclick="handleRoute(event, '/privacy')">Privacy Policy</a>
-            <a href="/terms" onclick="handleRoute(event, '/terms')">Terms & Conditions</a>
-            <a href="/cookie-policy" onclick="handleRoute(event, '/cookie-policy')">Cookie Policy</a>
-            <a href="/about" onclick="handleRoute(event, '/about')">About</a>
-            <a href="/contact" onclick="handleRoute(event, '/contact')">Contact</a>
+            <a href="/privacy" class="{% if request.path == '/privacy' %}active{% endif %}" onclick="handleRoute(event, '/privacy')">Privacy Policy</a>
+            <a href="/terms" class="{% if request.path == '/terms' %}active{% endif %}" onclick="handleRoute(event, '/terms')">Terms & Conditions</a>
+            <a href="/cookie-policy" class="{% if request.path == '/cookie-policy' %}active{% endif %}" onclick="handleRoute(event, '/cookie-policy')">Cookie Policy</a>
+            <a href="/about" class="{% if request.path == '/about' %}active{% endif %}" onclick="handleRoute(event, '/about')">About</a>
+            <a href="/contact" class="{% if request.path == '/contact' %}active{% endif %}" onclick="handleRoute(event, '/contact')">Contact</a>
         </div>
         <div class="footer-copyright">
-            VYAMIR © 2025 | NEXT-GENERATION ATMOSPHERIC DATA ARCHITECTURE
+            VYAMIR © 2026 | NEXT-GENERATION ATMOSPHERIC DATA ARCHITECTURE | Last updated on: July 2026
         </div>
     </div>
 </footer>
