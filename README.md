@@ -118,4 +118,4 @@ The project follows a rigorous DevOps lifecycle:
 * Environment: Production (Render Cloud)
 
 ---
-LinkedIn Profile: https://linkedin.com/in/medhinibr
+LinkedIn Profile: https://linkedin.com/in/medhinibr.
