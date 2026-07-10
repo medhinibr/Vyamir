@@ -58,3 +58,19 @@ def test_cookie_policy(client):
     """Test that the cookie policy route renders successfully."""
     response = client.get('/cookie-policy')
     assert response.status_code == 200
+
+def test_ads_txt(client):
+    """Test that the ads.txt route returns the verification file."""
+    response = client.get('/ads.txt')
+    assert response.status_code == 200
+    assert b"google.com" in response.data
+
+def test_robots_txt(client):
+    """Test that the robots.txt route is served."""
+    response = client.get('/robots.txt')
+    assert response.status_code == 200
+
+def test_sitemap_xml(client):
+    """Test that sitemap.xml is served."""
+    response = client.get('/sitemap.xml')
+    assert response.status_code == 200
