@@ -1,4 +1,4 @@
-name: Deploy Vyamir to Render
+name: Deploy Vyamir
 
 on:
   push:
@@ -6,92 +6,29 @@ on:
       - main
 
 jobs:
-  lint-and-test:
-    name: Code Quality Check
+  code-quality:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install Dependencies
+      - uses: actions/checkout@v4
+      - name: Run Tests
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install flake8
+          pip install -r requirements.txt pytest flake8
+          pytest
 
-      - name: Lint with flake8
-        run: |
-          # Stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
-      - name: Install Test Dependencies
-        run: pip install pytest
-
-      - name: Run Tests with pytest
-        run: pytest
-
-      - name: Build Docker Image
-        run: docker build -t vyamir-app .
-
-  deploy:
-    name: Continuous Deployment
-    needs: lint-and-test
+  infrastructure:
+    needs: code-quality
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Render Deploy
-        run: |
-          KEY_OR_URL="${{ secrets.RENDER_API_KEY }}"
-          if [[ "$KEY_OR_URL" == http* ]]; then
-            echo "Triggering deployment via full hook URL."
-            curl -f -X POST "$KEY_OR_URL"
-          else
-            echo "Triggering deployment via service ID and key."
-            curl -f -X POST "https://api.render.com/deploy/srv-d59vfdmr433s7383maq0?key=$KEY_OR_URL"
-          fi
-
-  terraform:
-    name: Infrastructure as Code
-    needs: lint-and-test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_wrapper: false
-
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
       - name: Terraform Init
         run: terraform init
         working-directory: ./infra
-        continue-on-error: true
-
-      - name: Terraform Plan
-        run: terraform plan
-        working-directory: ./infra
-        continue-on-error: true
-        env:
-          TF_VAR_render_api_key: ${{ secrets.RENDER_API_KEY }}
-          TF_VAR_render_owner_id: ${{ secrets.RENDER_OWNER_ID || 'usr-d58o01ogjchc73a9oilg' }}
-          TF_VAR_pexels_api_key: ${{ secrets.PEXELS_API_KEY }}
-          TF_VAR_firebase_api_key: ${{ secrets.FIREBASE_API_KEY }}
-          TF_VAR_gmail_password: ${{ secrets.GMAIL_APP_PASSWORD }}
-
       - name: Terraform Apply
         run: terraform apply -auto-approve
         working-directory: ./infra
-        continue-on-error: true
         env:
           TF_VAR_render_api_key: ${{ secrets.RENDER_API_KEY }}
-          TF_VAR_render_owner_id: ${{ secrets.RENDER_OWNER_ID || 'usr-d58o01ogjchc73a9oilg' }}
           TF_VAR_pexels_api_key: ${{ secrets.PEXELS_API_KEY }}
           TF_VAR_firebase_api_key: ${{ secrets.FIREBASE_API_KEY }}
           TF_VAR_gmail_password: ${{ secrets.GMAIL_APP_PASSWORD }}

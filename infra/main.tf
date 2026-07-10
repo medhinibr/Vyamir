@@ -2,63 +2,36 @@ terraform {
   required_providers {
     render = {
       source  = "render-oss/render"
-      version = ">= 1.0.0"
+      version = "1.3.0"
     }
   }
 }
 
 provider "render" {
   api_key  = var.render_api_key
-  owner_id = var.render_owner_id
+  owner_id = "usr-d58o01ogjchc73a9oilg"
 }
 
 resource "render_web_service" "vyamir" {
-  name   = "vyamir-app"
-  plan   = "free"
-  region = "oregon"
+  name    = "vyamir-app"
+  plan    = "free"
+  runtime = "docker"
 
-  runtime_source = {
-    docker = {
-      repo_url = "https://github.com/medhinibr/Vyamir"
-      branch   = "main"
-    }
+  repo {
+    url    = "https://github.com/medhinibr/Vyamir"
+    branch = "main"
   }
+
+  docker_command = "gunicorn --bind 0.0.0.0:8080 app:app"
 
   env_vars = {
-    "PEXELS_API_KEY" = {
-      value = var.pexels_api_key
-    }
-    "FIREBASE_API_KEY" = {
-      value = var.firebase_api_key
-    }
-    "GMAIL_APP_PASSWORD" = {
-      value = var.gmail_password
-    }
+    "PEXELS_API_KEY"      = var.pexels_api_key
+    "FIREBASE_API_KEY"    = var.firebase_api_key
+    "GMAIL_APP_PASSWORD"  = var.gmail_password
   }
 }
 
-variable "render_api_key" {
-  type        = string
-  description = "Render API Key"
-}
-
-variable "render_owner_id" {
-  type        = string
-  description = "Render Owner ID (usr-... or tea-...)"
-  default     = "usr-d58o01ogjchc73a9oilg"
-}
-
-variable "pexels_api_key" {
-  type        = string
-  description = "Pexels media library API key"
-}
-
-variable "firebase_api_key" {
-  type        = string
-  description = "Firebase project credentials api key"
-}
-
-variable "gmail_password" {
-  type        = string
-  description = "App password for SMTP email transmission"
-}
+variable "render_api_key" { type = string }
+variable "pexels_api_key" { type = string }
+variable "firebase_api_key" { type = string }
+variable "gmail_password" { type = string }
