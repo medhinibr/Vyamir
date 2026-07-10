@@ -1,6 +1,6 @@
 # Vyamir
 
-Vyamir is a high-performance, containerized atmospheric intelligence dashboard. The project emphasizes automated deployment, infrastructure-as-code (IaC), and system reliability.
+Vyamir is a high-performance, containerized atmospheric intelligence dashboard. The project emphasizes automated deployment, declarative infrastructure, and system reliability.
 
 ## 1. Project Overview
 
@@ -14,7 +14,7 @@ The platform integrates an AI-inspired meteorological insight engine. Upon recei
 
 * Core: Python, Flask, Gunicorn
 * Containerization: Docker (Multi-stage builds)
-* Infrastructure: Terraform, Render Blueprints
+* Infrastructure: Render Blueprints
 * CI/CD: GitHub Actions
 * Database/Cache: Redis, Cloud Firestore, Firebase Auth
 
@@ -25,12 +25,8 @@ The project follows a rigorous DevOps lifecycle:
 * **Continuous Integration (CI)**:
   * Static analysis: Lint checks are managed automatically via flake8 on every commit to flag syntax errors and code styling anomalies.
   * Unit Testing: Integration tests are executed using pytest to verify that Flask routes, dynamic insights, and proxies resolve with correct response structures.
-  * Image Validation: GitHub Actions builds the Docker image locally to check for compile-time errors prior to deployment.
 * **Continuous Deployment (CD)**:
-  * Automated orchestration: A webhook deploy step triggers Render builds upon successful CI checks, supporting zero-downtime continuous deployment.
-* **Infrastructure as Code (IaC)**:
-  * Terraform configuration: Provider and resource declarations are stored in the `/infra` directory to provision the Render web service, Git repository triggers, and production environment variables.
-  * Render Blueprints: The environment configuration is declared in `render.yaml` to automate container parameters and deployment rules.
+  * Declarative Infrastructure: The environment and container structure are defined in `render.yaml` to automate orchestration on Render. Pushing updates to the main branch triggers builds automatically.
 * **Performance Optimization & Caching**:
   * Asset Caching Policy: Deployed response header injectors in the Flask layer to enforce Cache-Control rules. Static assets (CSS, JS, images, XML sitemaps) are cached globally for 1 year (`public, max-age=31536000, immutable`), while dynamic APIs have cache-prevention headers.
   * Non-blocking Execution: Bottom script imports are loaded with the `defer` attribute to optimize browser parsing speeds and core web vitals.
@@ -45,15 +41,12 @@ The project follows a rigorous DevOps lifecycle:
 .
 ├── .github/
 │   └── workflows/
-│       └── deploy.yml          # CI/CD lint, test, build, and deploy pipeline
+│       └── deploy.yml          # CI/CD lint and test workflow
 ├── backend/
 │   ├── cache.py               # Redis and local memory caching fallback layer
 │   ├── openmeteo.py           # Meteorological telemetry integration logic
 │   └── __init__.py
 ├── frontend/                  # React 19 Vite application client
-├── infra/
-│   ├── main.tf                # Terraform Render provider and resource definition
-│   └── terraform.tfvars       # Local secrets variables (Git-ignored)
 ├── public/                    # SEO static resources
 ├── static/                    # Dashboard UI styles and Leaflet map scripts
 ├── templates/                 # Core HTML and API Swagger documentation layouts
@@ -65,6 +58,7 @@ The project follows a rigorous DevOps lifecycle:
 ├── requirements.txt           # Python dependency manifests
 ├── test_app.py                # Route verification tests
 ├── app.py                     # WSGI application configuration
+├── CONTRIBUTING.md            # Guidelines and commit rules
 └── DEV_GUIDE.md               # Local development and validation guide
 ```
 
@@ -72,7 +66,6 @@ The project follows a rigorous DevOps lifecycle:
 
 ### Prerequisites
 * Docker Desktop & Docker Compose
-* Terraform v1.0+
 
 ### Local Execution
 1. Clone the repository:
@@ -91,25 +84,14 @@ The project follows a rigorous DevOps lifecycle:
    docker-compose up --build
    ```
 
-### Infrastructure Provisioning (Terraform)
-1. Navigate to the infra directory:
-   ```bash
-   cd infra
-   ```
-2. Configure credentials in your local `terraform.tfvars` file:
-   ```hcl
-   render_api_key   = "rnd_your_render_api_key_here"
-   render_owner_id  = "usr-your_owner_id_here"
-   pexels_api_key   = "your_pexels_api_key"
-   firebase_api_key = "your_firebase_api_key"
-   gmail_password   = "your_gmail_password"
-   ```
-3. Run the provisioning workflow:
-   ```bash
-   terraform init
-   terraform plan
-   terraform apply
-   ```
+### Production Setup
+1. Log into your Render dashboard.
+2. Navigate to **Blueprints** and click **Connect New Blueprint**.
+3. Select this repository.
+4. Once deployed, navigate to the web service **Environment** settings to configure the secrets:
+   * `FIREBASE_API_KEY`
+   * `PEXELS_API_KEY`
+   * `GMAIL_APP_PASSWORD`
 
 ## 6. Status
 
