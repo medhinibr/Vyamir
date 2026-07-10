@@ -14,21 +14,3 @@ jobs:
         run: |
           pip install -r requirements.txt pytest flake8
           pytest
-
-  infrastructure:
-    needs: code-quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ./infra
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
-        working-directory: ./infra
-        env:
-          TF_VAR_render_api_key: ${{ secrets.RENDER_API_KEY }}
-          TF_VAR_pexels_api_key: ${{ secrets.PEXELS_API_KEY }}
-          TF_VAR_firebase_api_key: ${{ secrets.FIREBASE_API_KEY }}
-          TF_VAR_gmail_password: ${{ secrets.GMAIL_APP_PASSWORD }}

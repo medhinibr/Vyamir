@@ -1,17 +1,13 @@
 services:
   - type: web
-    name: vyamir
-    env: python
-    buildCommand: bash build.sh
-    startCommand: gunicorn --bind 0.0.0.0:8080 app:app
+    name: vyamir-app
+    runtime: docker
+    plan: free
+    startCommand: "gunicorn --bind 0.0.0.0:8080 app:app"
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.10.12
-      - key: NODE_VERSION
-        value: 18.17.1
-      - key: FIREBASE_API_KEY
-        sync: false
       - key: PEXELS_API_KEY
+        sync: false
+      - key: FIREBASE_API_KEY
         sync: false
       - key: GMAIL_APP_PASSWORD
         sync: false
