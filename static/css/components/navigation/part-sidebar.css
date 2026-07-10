@@ -41,6 +41,7 @@
 
 .sidebar-item.active i {
     color: var(--accent-color);
+    text-shadow: 0 0 10px rgba(88, 166, 255, 0.6);
 }
 
 /* Adjust Container to make room for sidebar - More dynamic for 100% fit */

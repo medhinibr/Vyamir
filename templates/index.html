@@ -386,76 +386,7 @@
                     </div>
 
                     <!-- SkyPoints Vault Modal -->
-                    <div id="vault-modal" class="modal-overlay"
-                        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 7, 12, 0.95); z-index: 100000; backdrop-filter: blur(40px); justify-content: center; align-items: center; padding: 15px;">
-                        <div class="glass-panel"
-                            style="width: 100%; max-width: 600px; padding: 40px 25px; position: relative; border: 1px solid rgba(88, 166, 255, 0.25); display: flex; flex-direction: column; background: rgba(10, 15, 25, 0.9) !important; box-shadow: 0 50px 100px rgba(0,0,0,1); overflow-y: auto; max-height: 90%;">
-                            <div onclick="toggleVault()"
-                                style="position: absolute; right: 30px; top: 30px; cursor: pointer; font-size: 2rem; color: rgba(255,255,255,0.3); transition: 0.3s;"
-                                onmouseover="this.style.color='white'">&times;</div>
-
-                            <h2
-                                style="color: var(--accent-color); margin-bottom: 30px; font-weight: 700; font-size: 2rem; letter-spacing: -1px; display: flex; align-items: center; gap: 15px;">
-                                <i class="bi bi-shield-lock"></i> SkyPoints Vault
-                            </h2>
-
-                            <div
-                                style="display: flex; gap: 10px; margin-bottom: 30px; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 12px;">
-                                <button id="vault-tab-id" onclick="switchVaultTab('id')" class="vault-tab-active"
-                                    style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: var(--accent-color); color: white; font-weight: 600; cursor: pointer; transition: 0.3s;">Identity</button>
-                                <button id="vault-tab-transfer" onclick="switchVaultTab('transfer')"
-                                    style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: transparent; color: white; font-weight: 600; cursor: pointer; transition: 0.3s;">Transfer</button>
-                            </div>
-
-                            <div id="vault-id-content">
-                                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 20px;">Your
-                                    globally unique identity in the Vyamir ecosystem.</p>
-                                <div
-                                    style="background: rgba(255,255,255,0.05); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 25px;">
-                                    <div
-                                        style="font-size: 0.8rem; color: var(--accent-color); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
-                                        Active Nickname</div>
-                                    <div id="vault-current-nickname"
-                                        style="font-size: 1.5rem; font-weight: 300; color: white;">Loading...</div>
-                                    <div
-                                        style="font-size: 0.8rem; color: #81c784; margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
-                                        <span><i class="bi bi-coin"></i> <span id="vault-current-points">0</span>
-                                            SkyPoints</span>
-                                        <button onclick="copyReferralLink()"
-                                            style="background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; cursor: pointer; transition: 0.3s;"
-                                            onmouseover="this.style.background='var(--accent-color)'; this.style.color='white'">Share
-                                            Identity</button>
-                                    </div>
-                                </div>
-                                <div style="display: flex; gap: 10px;">
-                                    <input type="text" id="new-nickname-input" name="new-nickname"
-                                        placeholder="Enter new nickname..."
-                                        style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; color: white; outline: none; transition: 0.3s;"
-                                        onfocus="this.style.borderColor='var(--accent-color)'"
-                                        onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
-                                    <button
-                                        onclick="updateNickname(document.getElementById('new-nickname-input').value)"
-                                        style="background: var(--accent-color); border: none; color: white; padding: 0 25px; border-radius: 12px; font-weight: 600; cursor: pointer;">Update</button>
-                                </div>
-                            </div>
-
-                            <div id="vault-transfer-content" style="display: none;">
-                                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 20px;">
-                                    Transfer SkyPoints securely to any Vyamir node.</p>
-                                <div style="display: flex; flex-direction: column; gap: 15px;">
-                                    <input type="text" id="transfer-recipient"
-                                        placeholder="Recipient Nickname (e.g. Medhini)"
-                                        style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; color: white; outline: none;">
-                                    <input type="number" id="transfer-amount" placeholder="Amount (Tokens)"
-                                        style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; color: white; outline: none;">
-                                    <button
-                                        onclick="transferPoints(document.getElementById('transfer-recipient').value, parseInt(document.getElementById('transfer-amount').value))"
-                                        style="background: var(--accent-gradient); border: none; color: white; padding: 18px; border-radius: 12px; font-weight: 700; margin-top: 10px; cursor: pointer; box-shadow: 0 10px 20px rgba(88, 166, 255, 0.2);">EXECUTE
-                                        TRANSFER</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {% include 'components/safety/part_vault_modal.html' %}
 
                     <!-- Legal Pages Container -->
                     <div id="legal-pages-container" class="legal-container" style="display: none;">

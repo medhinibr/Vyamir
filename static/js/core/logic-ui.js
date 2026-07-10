@@ -366,6 +366,21 @@ function initSidebar() {
         });
     });
 
+    // Set correct active tab on page load based on current path
+    const path = window.location.pathname;
+    let initialSection = null;
+    if (path.includes('/maps')) initialSection = 'section-maps';
+    else if (path.includes('/news')) initialSection = 'section-video';
+    else if (path.includes('/monsoon')) initialSection = 'section-monsoon';
+    else if (path.includes('/agri')) initialSection = 'section-agri';
+
+    if (initialSection) {
+        document.querySelectorAll('.sidebar-item, .mobile-nav-item').forEach(i => {
+            if (i.getAttribute('data-section') === initialSection) i.classList.add('active');
+            else i.classList.remove('active');
+        });
+    }
+
     // Check for incoming scroll parameter on load
     const params = new URLSearchParams(window.location.search);
     const scrollToSection = params.get('scroll');
@@ -380,8 +395,11 @@ function initSidebar() {
         }, 500);
     }
 
-    // OBSERVER ENGINE: Update active state on scroll
+    // OBSERVER ENGINE: Update active state on scroll (Only on main landing/dashboard page)
     window.addEventListener('scroll', () => {
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/' && currentPath !== '/index.html' && currentPath !== '' && currentPath !== '/index') return;
+
         const sections = ['section-current', 'section-hourly', 'section-7day', 'section-maps', 'section-details', 'section-hazards', 'section-video', 'section-news'];
         let currentSection = "";
 
@@ -725,20 +743,82 @@ function updateHero(data) {
     setText('hero-humidity', humidity + '%');
     setText('hero-visibility', `${getDist(visibility).toFixed(1)} ${getUnit('dist')}`);
     setText('hero-pressure', Math.round(finalPressure) + ' hPa');
-    setText('history-text', data.history || 'Historical data unavailable.');
+    const historyTextEl = document.getElementById('history-text');
+    if (historyTextEl) {
+        const historyData = data.history || 'Historical data unavailable.';
+        if (historyData.includes("deferred to minimize IP load")) {
+            historyTextEl.innerHTML = `
+                <span class="history-tooltip-container" style="position: relative; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-info-circle" style="color: rgba(255, 255, 255, 0.4); font-size: 0.85rem; cursor: help;"></i>
+                    <span style="color: rgba(255, 255, 255, 0.5); font-size: 0.8rem; font-weight: 300;">Sync deferred</span>
+                    <span class="history-tooltip-text" style="visibility: hidden; width: 220px; background-color: rgba(15, 17, 26, 0.95); color: #fff; text-align: center; border-radius: 8px; padding: 10px; position: absolute; z-index: 1000; bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.1); line-height: 1.4; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); pointer-events: none;">
+                        Historical synchronization deferred to minimize IP load.
+                    </span>
+                </span>
+            `;
+            if (!document.getElementById('history-tooltip-styles')) {
+                const style = document.createElement('style');
+                style.id = 'history-tooltip-styles';
+                style.innerHTML = `
+                    .history-tooltip-container:hover .history-tooltip-text {
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        } else {
+            historyTextEl.textContent = historyData;
+        }
+    }
 
     // Dynamic Accuracy Note
     const accuracyNote = document.getElementById('accuracy-note') || document.createElement('div');
     accuracyNote.id = 'accuracy-note';
+    accuracyNote.style.cursor = 'help';
+    accuracyNote.style.position = 'relative';
+    accuracyNote.style.display = 'inline-flex';
+    accuracyNote.style.alignItems = 'center';
+    
+    let badgeText = "";
+    let tooltipText = "";
+    let badgeClass = "";
+    
     if (window.locationSource === 'gps') {
-        accuracyNote.innerHTML = '<i class="bi bi-geo-alt-fill"></i> Precise GPS Location Active';
-        accuracyNote.className = 'accuracy-badge gps';
+        badgeText = '<i class="bi bi-geo-alt-fill" style="margin-right: 4px;"></i> GPS Active';
+        tooltipText = "Precise location services activated via browser GPS telemetry.";
+        badgeClass = 'accuracy-badge gps';
     } else if (window.locationSource === 'manual') {
-        accuracyNote.innerHTML = '<i class="bi bi-exclamation-circle"></i> Manual Search Mode: Enable GPS for pinpoint local mapping';
-        accuracyNote.className = 'accuracy-badge manual';
+        badgeText = '<i class="bi bi-search" style="margin-right: 4px;"></i> Search Active';
+        tooltipText = "Manual search context. Enable GPS sensor permission for localized microclimate precision.";
+        badgeClass = 'accuracy-badge manual';
     } else {
-        accuracyNote.innerHTML = '<i class="bi bi-geo-off"></i> Precise tracking unavailable. Search for a city or enable GPS for live data.';
-        accuracyNote.className = 'accuracy-badge offline';
+        badgeText = '<i class="bi bi-geo-off" style="margin-right: 4px;"></i> Default Context';
+        tooltipText = "Default offline placeholder coordinates. Search for a city or authorize GPS permission.";
+        badgeClass = 'accuracy-badge offline';
+    }
+
+    accuracyNote.className = badgeClass;
+    accuracyNote.innerHTML = `
+        ${badgeText}
+        <span class="accuracy-tooltip-text" style="visibility: hidden; width: 220px; background-color: rgba(15, 17, 26, 0.95); color: #fff; text-align: center; border-radius: 8px; padding: 10px; position: absolute; z-index: 1000; bottom: 125%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.1); line-height: 1.4; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); pointer-events: none; font-weight: normal; text-transform: none; letter-spacing: normal;">
+            ${tooltipText}
+        </span>
+    `;
+
+    if (!document.getElementById('accuracy-tooltip-styles')) {
+        const style = document.createElement('style');
+        style.id = 'accuracy-tooltip-styles';
+        style.innerHTML = `
+            .accuracy-badge {
+                position: relative;
+            }
+            .accuracy-badge:hover .accuracy-tooltip-text {
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+        `;
+        document.head.appendChild(style);
     }
     const heroContent = document.querySelector('.hero-content');
     if (heroContent && !document.getElementById('accuracy-note')) {
@@ -1816,6 +1896,7 @@ async function initSkyPointsSystem() {
                 if (elements.headerPoints) elements.headerPoints.textContent = (data.points !== undefined) ? data.points : 0;
                 if (elements.vaultPoints) elements.vaultPoints.textContent = (data.points !== undefined) ? data.points : 0;
                 if (elements.vaultNickname) elements.vaultNickname.textContent = data.nickname || 'Node_Syncing';
+                if (window.updateVaultProgress) window.updateVaultProgress((data.points !== undefined) ? data.points : 0);
             };
 
             updateUI();
@@ -2036,14 +2117,66 @@ window.transferPoints = async function (recipientNicknameRaw, amount) {
     }
 };
 
+window.updateVaultProgress = function (points) {
+    const pts = parseInt(points) || 0;
+    const tierNameEl = document.getElementById('vault-tier-name');
+    const progressTextEl = document.getElementById('vault-tier-progress-text');
+    const progressBarEl = document.getElementById('vault-tier-progress-bar');
+    if (!tierNameEl || !progressTextEl || !progressBarEl) return;
+
+    let tier = "Bronze Tier";
+    let nextTier = "Silver Tier";
+    let tierColor = "#ffb74d";
+    let minPoints = 0;
+    let targetPoints = 50;
+
+    if (pts >= 500) {
+        tier = "Platinum Tier";
+        nextTier = "Max Tier";
+        tierColor = "#e5e9f0";
+        minPoints = 500;
+        targetPoints = 500;
+    } else if (pts >= 200) {
+        tier = "Gold Tier";
+        nextTier = "Platinum Tier";
+        tierColor = "#ffd700";
+        minPoints = 200;
+        targetPoints = 500;
+    } else if (pts >= 50) {
+        tier = "Silver Tier";
+        nextTier = "Gold Tier";
+        tierColor = "#b0bec5";
+        minPoints = 50;
+        targetPoints = 200;
+    }
+
+    tierNameEl.textContent = tier;
+    tierNameEl.style.color = tierColor;
+
+    if (tier === "Platinum Tier") {
+        progressTextEl.textContent = `${pts} points (Max Tier reached)`;
+        progressBarEl.style.width = "100%";
+        progressBarEl.style.background = tierColor;
+    } else {
+        const range = targetPoints - minPoints;
+        const progressInRange = pts - minPoints;
+        const percentage = Math.min(100, Math.max(0, (progressInRange / range) * 100));
+        progressTextEl.textContent = `${pts} / ${targetPoints} points to ${nextTier}`;
+        progressBarEl.style.width = percentage + "%";
+        progressBarEl.style.background = `linear-gradient(90deg, ${tierColor} 0%, #58a6ff 100%)`;
+    }
+};
+
 window.toggleVault = function () {
     const modal = document.getElementById('vault-modal');
     if (!modal) return;
     if (modal.style.display === 'flex') {
         modal.style.display = 'none';
     } else {
+        const pts = window.currentUserData ? window.currentUserData.points : 0;
         document.getElementById('vault-current-nickname').textContent = window.currentUserData ? window.currentUserData.nickname : 'Loading...';
-        document.getElementById('vault-current-points').textContent = window.currentUserData ? window.currentUserData.points : '0';
+        document.getElementById('vault-current-points').textContent = pts;
+        if (window.updateVaultProgress) window.updateVaultProgress(pts);
         modal.style.display = 'flex';
     }
 };
@@ -2389,23 +2522,58 @@ function initAgriPage() {
     let color = "#81c784"; // Green
 
     // Soil Telemetry (New Open-Meteo Vars)
-    // Note: data.hourly should have soil vars if fetched correctly. 
-    // Since we updated openmeteo.py, the client will receive them in the 'hourly' object under keys like 'soil_temperature_0cm'.
-    // We access the current hour index.
     const nowHour = new Date().getHours();
 
-    let soilMoisture = (data.hourly.soil_moisture_0_to_1cm && data.hourly.soil_moisture_0_to_1cm[nowHour])
-        ? data.hourly.soil_moisture_0_to_1cm[nowHour] : (precip > 0 ? 0.35 : 0.15); // Fallback mock
-    let soilTemp = (data.hourly.soil_temperature_0cm && data.hourly.soil_temperature_0cm[nowHour])
-        ? data.hourly.soil_temperature_0cm[nowHour] : temp; // Fallback to air temp
+    // 0-1cm Moisture
+    let soilMoisture0 = (data.hourly.soil_moisture_0_to_1cm && data.hourly.soil_moisture_0_to_1cm[nowHour])
+        ? data.hourly.soil_moisture_0_to_1cm[nowHour] : (precip > 0 ? 0.35 : 0.15);
+    // 1-3cm Moisture
+    let soilMoisture1 = (data.hourly.soil_moisture_1_to_3cm && data.hourly.soil_moisture_1_to_3cm[nowHour])
+        ? data.hourly.soil_moisture_1_to_3cm[nowHour] : (precip > 0 ? 0.38 : 0.18);
+    // 3-9cm Moisture
+    let soilMoisture3 = (data.hourly.soil_moisture_3_to_9cm && data.hourly.soil_moisture_3_to_9cm[nowHour])
+        ? data.hourly.soil_moisture_3_to_9cm[nowHour] : (precip > 0 ? 0.40 : 0.22);
 
-    // Convert moisture fraction to %
-    // Open-Meteo gives m/m. Typical range 0.0-0.5. 0.3 is wet.
-    let smPerc = Math.round(soilMoisture * 100);
-    if (smPerc > 100) smPerc = smPerc / 100; // If api changed unit
+    // 0cm Temperature
+    let soilTemp0 = (data.hourly.soil_temperature_0cm && data.hourly.soil_temperature_0cm[nowHour])
+        ? data.hourly.soil_temperature_0cm[nowHour] : temp;
+    // 6cm Temperature
+    let soilTemp6 = (data.hourly.soil_temperature_6cm && data.hourly.soil_temperature_6cm[nowHour])
+        ? data.hourly.soil_temperature_6cm[nowHour] : temp - 1.5;
 
-    document.getElementById('soil-moisture-val').textContent = smPerc + "%";
-    document.getElementById('soil-temp-val').textContent = Math.round(soilTemp) + "°C";
+    // Convert moisture to percentages (m3/m3 * 100)
+    let sm0Perc = Math.min(100, Math.max(0, Math.round(soilMoisture0 * 100)));
+    let sm1Perc = Math.min(100, Math.max(0, Math.round(soilMoisture1 * 100)));
+    let sm3Perc = Math.min(100, Math.max(0, Math.round(soilMoisture3 * 100)));
+
+    document.getElementById('soil-moisture-val').textContent = sm0Perc + "%";
+    const smMidEl = document.getElementById('soil-moisture-mid-val');
+    if (smMidEl) smMidEl.textContent = sm1Perc + "%";
+    const smDeepEl = document.getElementById('soil-moisture-deep-val');
+    if (smDeepEl) smDeepEl.textContent = sm3Perc + "%";
+
+    document.getElementById('soil-temp-val').textContent = Math.round(soilTemp0) + "°C";
+    const stDeepEl = document.getElementById('soil-temp-deep-val');
+    if (stDeepEl) stDeepEl.textContent = Math.round(soilTemp6) + "°C";
+
+    // Irrigation calculations (Water Balance)
+    const irrStatusEl = document.getElementById('irrigation-status');
+    const irrRecEl = document.getElementById('irrigation-rec');
+    if (irrStatusEl && irrRecEl) {
+        if (sm1Perc < 20) {
+            irrStatusEl.textContent = "Deficit (Dry)";
+            irrStatusEl.style.color = "#ff8a65";
+            irrRecEl.textContent = "4.5 mm/day";
+        } else if (sm1Perc > 45) {
+            irrStatusEl.textContent = "Surplus (Wet)";
+            irrStatusEl.style.color = "#4fc3f7";
+            irrRecEl.textContent = "0.0 mm/day (Drain)";
+        } else {
+            irrStatusEl.textContent = "Optimal";
+            irrStatusEl.style.color = "#69f0ae";
+            irrRecEl.textContent = "0.0 mm/day";
+        }
+    }
 
     // Logic Tree
     if (precip > 5) {
@@ -2467,13 +2635,50 @@ function initMonsoonPage() {
         maxZoom: 18
     }).addTo(map);
 
-    // RainViewer Radar Overlay
-    L.tileLayer('https://tilecache.rainviewer.com/v2/radar/nowcast_5m/{z}/{x}/{y}/2/1_1.png', {
+    // RainViewer Radar Overlay (Dynamic Timestamp Fetch)
+    const radarLayer = L.tileLayer('', {
         opacity: 0.8,
         maxNativeZoom: 7,
         maxZoom: 18,
         zIndex: 10
-    }).addTo(map);
+    });
+    radarLayer.addTo(map);
+
+    function showMapError(msg) {
+        const errorOverlay = document.createElement('div');
+        errorOverlay.className = 'map-error-overlay';
+        errorOverlay.style.position = 'absolute';
+        errorOverlay.style.top = '50%';
+        errorOverlay.style.left = '50%';
+        errorOverlay.style.transform = 'translate(-50%, -50%)';
+        errorOverlay.style.background = 'rgba(15, 17, 26, 0.95)';
+        errorOverlay.style.color = '#ff6b6b';
+        errorOverlay.style.padding = '15px 25px';
+        errorOverlay.style.borderRadius = '12px';
+        errorOverlay.style.border = '1px solid rgba(255, 107, 107, 0.3)';
+        errorOverlay.style.fontFamily = 'Outfit, sans-serif';
+        errorOverlay.style.fontSize = '0.9rem';
+        errorOverlay.style.zIndex = '1000';
+        errorOverlay.style.pointerEvents = 'none';
+        errorOverlay.style.textAlign = 'center';
+        errorOverlay.innerHTML = `<i class="bi bi-exclamation-triangle" style="margin-right: 8px;"></i> ${msg}`;
+        mapEl.appendChild(errorOverlay);
+    }
+
+    fetch('https://api.rainviewer.com/public/weather-maps.json')
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.radar && data.radar.past && data.radar.past.length > 0) {
+                const latestTs = data.radar.past[data.radar.past.length - 1].time;
+                radarLayer.setUrl(`https://tilecache.rainviewer.com/v2/radar/${latestTs}/256/{z}/{x}/{y}/2/1_1.png`);
+            } else {
+                showMapError("Satellite data currently unavailable for this region");
+            }
+        })
+        .catch(err => {
+            console.log("Vyamir Engine: Radar overlay sync failed.", err);
+            showMapError("Satellite data currently unavailable for this region");
+        });
 
     // Add simple marker for current location context if available
     const data = window.weatherData;
@@ -2485,17 +2690,6 @@ function initMonsoonPage() {
         }).addTo(map);
         marker.bindPopup("<b>You are here</b><br>").openPopup();
     }
-
-    // Animate map gently
-    let angle = 0;
-    /* 
-    // Optional: Subtle pan animation
-    setInterval(() => {
-        angle += 0.001;
-        const newLat = 20.5937 + Math.sin(angle) * 0.5;
-        map.panTo([newLat, 78.9629], {animate: true, duration: 1});
-    }, 100); 
-    */
 
     // Handle Resize
     setTimeout(() => map.invalidateSize(), 500);

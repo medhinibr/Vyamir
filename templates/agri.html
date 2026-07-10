@@ -155,35 +155,72 @@
 
             <div class="row" style="display: flex; gap: 20px; flex-wrap: wrap;">
                 <!-- Soil Health Card -->
-                <div class="glass-panel" style="flex: 1; min-width: 300px; padding: 25px;">
-                    <h4 style="margin: 0 0 15px 0; font-weight: 500;">Soil Telemetry (0-7cm)</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div
-                            style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Moisture</div>
-                            <div id="soil-moisture-val" style="font-size: 2rem; font-weight: 600; color: #4fc3f7;">--%
-                            </div>
+                <div class="glass-panel" style="flex: 1.5; min-width: 350px; padding: 25px;">
+                    <h4 style="margin: 0 0 15px 0; font-weight: 500; color: #81c784; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-moisture"></i> Soil Telemetry Profile
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px;">
+                        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 5px;">Moisture (0-1cm)</div>
+                            <div id="soil-moisture-val" style="font-size: 1.8rem; font-weight: 600; color: #4fc3f7;">--%</div>
+                            <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 5px;">Surface Layer</div>
                         </div>
-                        <div
-                            style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; text-align: center;">
-                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Temperature</div>
-                            <div id="soil-temp-val" style="font-size: 2rem; font-weight: 600; color: #ffb74d;">--°C
-                            </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 5px;">Moisture (1-3cm)</div>
+                            <div id="soil-moisture-mid-val" style="font-size: 1.8rem; font-weight: 600; color: #29b6f6;">--%</div>
+                            <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 5px;">Root Zone</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 5px;">Moisture (3-9cm)</div>
+                            <div id="soil-moisture-deep-val" style="font-size: 1.8rem; font-weight: 600; color: #0288d1;">--%</div>
+                            <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 5px;">Deep Zone</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 5px;">Temp (0cm)</div>
+                            <div id="soil-temp-val" style="font-size: 1.8rem; font-weight: 600; color: #ffb74d;">--°C</div>
+                            <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 5px;">Surface Temp</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 5px;">Temp (6cm)</div>
+                            <div id="soil-temp-deep-val" style="font-size: 1.8rem; font-weight: 600; color: #ffa726;">--°C</div>
+                            <div style="font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-top: 5px;">Sub-surface Temp</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Pest Forecast -->
-                <div class="glass-panel" style="flex: 1; min-width: 300px; padding: 25px;">
-                    <h4 style="margin: 0 0 15px 0; font-weight: 500; color: #ff8a65;">Pest Risk Index</h4>
-                    <div id="pest-risk-display" style="font-size: 1.1rem; font-weight: 300; line-height: 1.5;">
-                        Wait for weather data sync...
+                <!-- Irrigation & Pest -->
+                <div class="glass-panel" style="flex: 1; min-width: 300px; padding: 25px; display: flex; flex-direction: column; gap: 20px;">
+                    <div>
+                        <h4 style="margin: 0 0 15px 0; font-weight: 500; color: #29b6f6; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-droplet-half"></i> Water Balance
+                        </h4>
+                        <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem;">
+                                <span style="opacity: 0.7;">Irrigation Status</span>
+                                <span id="irrigation-status" style="font-weight: 600; color: #69f0ae;">Optimal</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                                <span style="opacity: 0.7;">Recommended Rate</span>
+                                <span id="irrigation-rec" style="font-weight: 600; color: #ffffff;">0.0 mm/day</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0 0 15px 0; font-weight: 500; color: #ff8a65; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-bug"></i> Pest Risk Index
+                        </h4>
+                        <div id="pest-risk-display" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem;">
+                            Wait for weather data sync...
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
     </div>
+
+    <!-- SkyPoints Vault Modal -->
+    {% include 'components/safety/part_vault_modal.html' %}
 
     <!-- Dashboard Footer -->
     <div class="dashboard-footer-anchor">

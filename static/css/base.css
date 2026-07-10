@@ -2402,3 +2402,10 @@ body.is-landing .mobile-nav {
     color: #ffffff;
     transform: translateX(-3px);
 }
+#monsoon-map {
+    background-color: #0b1120;
+}
+.map-error-overlay {
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}

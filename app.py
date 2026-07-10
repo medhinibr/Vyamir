@@ -173,8 +173,10 @@ def get_weather():
                 'windspeed_10m': hourly_raw.get('wind_speed_10m', hourly_raw.get('windspeed_10m')),
                 'uv_index': hourly_raw.get('uv_index'),
                 'soil_temperature_0cm': hourly_raw.get('soil_temperature_0cm'),
+                'soil_temperature_6cm': hourly_raw.get('soil_temperature_6cm'),
                 'soil_moisture_0_to_1cm': hourly_raw.get('soil_moisture_0_to_1cm'),
-                'soil_moisture_1_to_3cm': hourly_raw.get('soil_moisture_1_to_3cm')
+                'soil_moisture_1_to_3cm': hourly_raw.get('soil_moisture_1_to_3cm'),
+                'soil_moisture_3_to_9cm': hourly_raw.get('soil_moisture_3_to_9cm')
             }
 
             daily_raw = forecast.get('daily', {})
